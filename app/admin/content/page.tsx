@@ -76,6 +76,30 @@ export default function ContentPage() {
         </div>
       </div>
 
+      {/* Contact */}
+      <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1.25rem' }}>
+          פרטי יצירת קשר
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <F label="טלפון">
+            <input style={inp} value={content.phone || ''} onChange={e => set('phone', e.target.value)} placeholder="054-0000000" dir="ltr" />
+          </F>
+          <F label="WhatsApp">
+            <input style={inp} value={content.whatsapp || ''} onChange={e => set('whatsapp', e.target.value)} placeholder="054-0000000" dir="ltr" />
+          </F>
+          <F label="Email">
+            <input style={inp} value={content.email || ''} onChange={e => set('email', e.target.value)} placeholder="mail@example.com" dir="ltr" />
+          </F>
+          <F label="Instagram">
+            <input style={inp} value={content.instagram || ''} onChange={e => set('instagram', e.target.value)} placeholder="@username" dir="ltr" />
+          </F>
+          <F label="Facebook">
+            <input style={inp} value={content.facebook || ''} onChange={e => set('facebook', e.target.value)} placeholder="שם הדף או URL" dir="ltr" />
+          </F>
+        </div>
+      </div>
+
       {/* About */}
       <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem' }}>
         <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1.25rem' }}>

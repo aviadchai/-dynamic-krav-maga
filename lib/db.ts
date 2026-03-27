@@ -48,6 +48,11 @@ export type SiteContent = {
   heroSubEn: string
   aboutParaHe: string[]
   aboutParaEn: string[]
+  phone: string
+  email: string
+  instagram: string
+  facebook: string
+  whatsapp: string
 }
 
 const defaultContent: SiteContent = {
@@ -55,6 +60,11 @@ const defaultContent: SiteContent = {
   heroSubEn: 'Dynamic Krav Maga with Maor Levi — a practical system for every age and level.',
   aboutParaHe: ['מאור לוי הוא מדריך קרב מגע בכיר עם שנים של ניסיון אמיתי.'],
   aboutParaEn: ['Maor Levi is a senior Krav Maga instructor with years of real field experience.'],
+  phone: '054-4702762',
+  email: '',
+  instagram: '@dynamickravmaga',
+  facebook: '',
+  whatsapp: '054-4702762',
 }
 
 export const db = {

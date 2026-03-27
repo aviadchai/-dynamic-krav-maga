@@ -209,13 +209,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* TICKER */}
-      <div className="ticker">
-        <div className="ticker-inner">
-          {["KRAV MAGA","קרב מגע דינמי","SELF DEFENSE","הגנה עצמית","MAOR LEVI","מאור לוי","DYNAMIC","KRAV MAGA","קרב מגע דינמי","SELF DEFENSE","הגנה עצמית","MAOR LEVI","מאור לוי","DYNAMIC"].map((item, i) => (
-            <span key={i} className={i % 2 === 1 ? "ticker-dot" : "ticker-item"}>{i % 2 === 1 ? "◆" : item}</span>
-          ))}
-        </div>
+      {/* COLOR BREAK */}
+      <div className="color-break">
+        <div className="he-only">קרב מגע דינמי — לא ספורט. לא תחרות. חיים.</div>
+        <div className="en-only">DYNAMIC KRAV MAGA — NOT SPORT. NOT COMPETITION. REAL LIFE.</div>
       </div>
 
       {/* ABOUT */}
@@ -226,8 +223,8 @@ export default function Home() {
         <div className="about-body">
           <div className="sec-tag he-only">אודות</div>
           <div className="sec-tag en-only">About</div>
-          <div className="he-only"><div className="sec-h-he"><span className="lime">לחימה</span><br />שמגיעה<br />מהשטח</div></div>
-          <div className="en-only"><div className="sec-h"><span className="lime">FIGHTING</span><br />FROM THE<br />FIELD</div></div>
+          <div className="he-only"><div className="sec-h-he">לחימה<br />שמגיעה<br />מהשטח</div></div>
+          <div className="en-only"><div className="sec-h">FIGHTING<br />FROM THE<br />FIELD</div></div>
           <div className="accent-bar"></div>
           {content?.aboutParaHe.map((p, i) => <p key={i} className="he-only">{p}</p>)}
           {content?.aboutParaEn.map((p, i) => <p key={i} className="en-only">{p}</p>)}
@@ -246,8 +243,8 @@ export default function Home() {
           <div className="sec-head">
             <div className="sec-tag he-only">הצוות שלנו</div>
             <div className="sec-tag en-only">Our Team</div>
-            <div className="he-only"><div className="sec-h-he">ה<span className="lime">מאמנים</span></div></div>
-            <div className="en-only"><div className="sec-h">THE <span className="lime">INSTRUCTORS</span></div></div>
+            <div className="he-only"><div className="sec-h-he">המאמנים</div></div>
+            <div className="en-only"><div className="sec-h">THE INSTRUCTORS</div></div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem", maxWidth: 1000, margin: "0 auto" }}>
             {[...instructors].sort((a, b) => a.order - b.order).map(inst => (
@@ -285,8 +282,8 @@ export default function Home() {
         <div className="sec-head">
           <div className="sec-tag he-only">מה אנחנו מציעים</div>
           <div className="sec-tag en-only">What We Offer</div>
-          <div className="he-only"><div className="sec-h-he">ה<span className="lime">שירותים</span> שלנו</div></div>
-          <div className="en-only"><div className="sec-h">OUR <span className="lime">SERVICES</span></div></div>
+          <div className="he-only"><div className="sec-h-he">השירותים שלנו</div></div>
+          <div className="en-only"><div className="sec-h">OUR SERVICES</div></div>
         </div>
         <div className="srv-grid">
           {[
@@ -312,8 +309,8 @@ export default function Home() {
         <div style={{ textAlign: "center", marginBottom: "3rem" }}>
           <div className="sec-tag he-only">מה אומרים עלינו</div>
           <div className="sec-tag en-only">What They Say</div>
-          <div className="he-only"><div className="sec-h-he">ה<span className="lime">המלצות</span></div></div>
-          <div className="en-only"><div className="sec-h">STUDENT <span className="lime">REVIEWS</span></div></div>
+          <div className="he-only"><div className="sec-h-he">המלצות</div></div>
+          <div className="en-only"><div className="sec-h">STUDENT REVIEWS</div></div>
         </div>
         <div className="tgrid">
           {[
@@ -340,8 +337,8 @@ export default function Home() {
         <div className="sec-head">
           <div className="sec-tag he-only">תוכן</div>
           <div className="sec-tag en-only">Content</div>
-          <div className="he-only"><div className="sec-h-he">רי<span className="lime">לס</span></div></div>
-          <div className="en-only"><div className="sec-h">OUR <span className="lime">REELS</span></div></div>
+          <div className="he-only"><div className="sec-h-he">רילס</div></div>
+          <div className="en-only"><div className="sec-h">OUR REELS</div></div>
         </div>
         <div className="reels-grid">
           <div className="reel-wrap">
@@ -385,26 +382,7 @@ export default function Home() {
 
       {/* CONTACT */}
       <section className="contact" id="contact">
-        <div>
-          <div className="sec-tag he-only">בואו נדבר</div>
-          <div className="sec-tag en-only">Let&#39;s Talk</div>
-          <div className="he-only"><div className="sec-h-he"><span className="lime">צור</span><br />קשר</div></div>
-          <div className="en-only"><div className="sec-h"><span className="lime">GET</span><br />IN TOUCH</div></div>
-          <div className="accent-bar"></div>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: ".9rem" }} className="he-only">שאלה? רוצים לקבוע שיעור ראשון? פשוט כתבו.</p>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: ".9rem" }} className="en-only">Questions? Want to book a first class? Just write.</p>
-          <div className="c-items">
-            <div className="ci"><div className="ci-icon">📱</div><div className="ci-text"><strong className="he-only">טלפון</strong><strong className="en-only">Phone</strong><span>יעודכן בקרוב</span></div></div>
-            <div className="ci"><div className="ci-icon">✉️</div><div className="ci-text"><strong>Email</strong><span>יעודכן בקרוב</span></div></div>
-            <div className="ci"><div className="ci-icon">📸</div><div className="ci-text"><strong>Instagram</strong><span>@dynamickravmaga</span></div></div>
-            <div className="ci"><div className="ci-icon">👥</div><div className="ci-text"><strong>Facebook</strong><span>יעודכן בקרוב</span></div></div>
-          </div>
-          <div className="c-social">
-            <a className="soc-btn" href="#">IG</a>
-            <a className="soc-btn" href="#">FB</a>
-            <a className="soc-btn" href="#">WA</a>
-          </div>
-        </div>
+        {/* Form — left column */}
         <div className="c-form">
           <div className="f-head he-only">שלח הודעה</div>
           <div className="f-head en-only">Send a Message</div>
@@ -414,6 +392,48 @@ export default function Home() {
           <div className="fr"><textarea placeholder="הודעה / Message..."></textarea></div>
           <button className="f-sub he-only">שלח הודעה</button>
           <button className="f-sub en-only">Send Message</button>
+        </div>
+        {/* Info — right column */}
+        <div className="c-info">
+          <div className="sec-tag he-only">בואו נדבר</div>
+          <div className="sec-tag en-only">Let&#39;s Talk</div>
+          <div className="he-only"><div className="sec-h-he">צור<br />קשר</div></div>
+          <div className="en-only"><div className="sec-h">GET IN<br />TOUCH</div></div>
+          <div className="accent-bar"></div>
+          <p className="c-info-sub he-only">שאלה? רוצים לקבוע שיעור ראשון? פשוט כתבו.</p>
+          <p className="c-info-sub en-only">Questions? Want to book a first class? Just write.</p>
+          <div className="c-details">
+            {content?.phone && (
+              <div className="c-detail-row">
+                <span className="c-detail-lbl he-only">טלפון</span>
+                <span className="c-detail-lbl en-only">Phone</span>
+                <a href={`tel:${content.phone}`} className="c-detail-val">{content.phone}</a>
+              </div>
+            )}
+            {content?.email && (
+              <div className="c-detail-row">
+                <span className="c-detail-lbl">Email</span>
+                <a href={`mailto:${content.email}`} className="c-detail-val">{content.email}</a>
+              </div>
+            )}
+            {content?.instagram && (
+              <div className="c-detail-row">
+                <span className="c-detail-lbl">Instagram</span>
+                <span className="c-detail-val">{content.instagram}</span>
+              </div>
+            )}
+            {content?.facebook && (
+              <div className="c-detail-row">
+                <span className="c-detail-lbl">Facebook</span>
+                <span className="c-detail-val">{content.facebook}</span>
+              </div>
+            )}
+          </div>
+          <div className="c-social" style={{ marginTop: "2rem" }}>
+            {content?.instagram && <a className="soc-btn" href={`https://instagram.com/${content.instagram.replace('@','')}`} target="_blank" rel="noreferrer">IG</a>}
+            {content?.facebook && <a className="soc-btn" href="#" target="_blank" rel="noreferrer">FB</a>}
+            {content?.whatsapp && <a className="soc-btn" href={`https://wa.me/972${content.whatsapp.replace(/[-\s]/g,'').slice(1)}`} target="_blank" rel="noreferrer">WA</a>}
+          </div>
         </div>
       </section>
 
