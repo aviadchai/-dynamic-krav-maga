@@ -7,6 +7,7 @@ type Lang = "he" | "en";
 
 export default function Home() {
   const [lang, setLang] = useState<Lang>("he");
+  const [fading, setFading] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [content, setContent] = useState<SiteContent | null>(null);
@@ -27,10 +28,19 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  function switchLang(next: Lang) {
+    if (next === lang) return;
+    setFading(true);
+    setTimeout(() => {
+      setLang(next);
+      setTimeout(() => setFading(false), 180);
+    }, 180);
+  }
+
   const t = (he: string, en: string) => lang === "he" ? he : en;
 
   return (
-    <div className={`lang-${lang}`}>
+    <div className={`lang-${lang} lang-fade${fading ? " lang-fading" : ""}`}>
 
       {/* ARTICLE POPUP */}
       {popup && (
@@ -106,21 +116,26 @@ export default function Home() {
       )}
 
       {/* NAV */}
-      <nav style={{ direction: "ltr" }}>
+      <nav>
+        {/* Left: logo */}
         <div className="nav-logo">
           <img src="/images/logo.png" alt="Dynamic Krav Maga" />
         </div>
-        <ul className="nav-center">
-          <li><a href="#about"><span className="he-only">אודות</span><span className="en-only">About</span></a></li>
-          <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
-          {articles.length > 0 && <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>}
-          <li><a href="#testimonials"><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
-        </ul>
+
+        {/* Center: language toggle */}
+        <div className="lang-sw">
+          <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>עב</button>
+          <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>EN</button>
+        </div>
+
+        {/* Right: links + CTA */}
         <div className="nav-right">
-          <div className="lang-sw">
-            <button className={lang === "he" ? "on" : ""} onClick={() => setLang("he")}>עב</button>
-            <button className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>EN</button>
-          </div>
+          <ul className="nav-center">
+            <li><a href="#about"><span className="he-only">אודות</span><span className="en-only">About</span></a></li>
+            <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
+            {articles.length > 0 && <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>}
+            <li><a href="#testimonials"><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
+          </ul>
           <a href="#contact" className="cta-nav">
             <span className="he-only">צור קשר</span>
             <span className="en-only">Contact</span>
