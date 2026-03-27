@@ -1,0 +1,13 @@
+[
+  {
+    "id": "1",
+    "nameHe": "מאור לוי",
+    "nameEn": "Maor Levi",
+    "roleHe": "מייסד ומדריך ראשי",
+    "roleEn": "Founder & Head Instructor",
+    "bioHe": "מדריך קרב מגע בכיר עם 15+ שנות ניסיון. שירת ביחידות מובחרות וצבר ניסיון מבצעי רב. מאמין שהגנה עצמית היא זכות של כל אדם.",
+    "bioEn": "Senior Krav Maga instructor with 15+ years of experience. Served in elite units with extensive operational experience. Believes self-defense is everyone's right.",
+    "image": "/images/hero.jpg",
+    "order": 1
+  }
+]

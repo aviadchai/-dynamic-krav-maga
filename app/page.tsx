@@ -1,24 +1,119 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { Article, Instructor, SiteContent } from "@/lib/db";
 
 type Lang = "he" | "en";
 
 export default function Home() {
   const [lang, setLang] = useState<Lang>("he");
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [content, setContent] = useState<SiteContent | null>(null);
+  const [popup, setPopup] = useState<Article | null>(null);
+
+  useEffect(() => {
+    fetch("/api/articles").then(r => r.json()).then((data: Article[]) =>
+      setArticles(data.filter(a => a.published))
+    );
+    fetch("/api/instructors").then(r => r.json()).then(setInstructors);
+    fetch("/api/content").then(r => r.json()).then(setContent);
+  }, []);
+
+  // Close popup on ESC
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setPopup(null); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  const t = (he: string, en: string) => lang === "he" ? he : en;
 
   return (
     <div className={`lang-${lang}`}>
+
+      {/* ARTICLE POPUP */}
+      {popup && (
+        <div
+          onClick={() => setPopup(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "2rem",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "#141414", border: "1.5px solid rgba(255,255,255,0.08)",
+              borderRadius: 20, maxWidth: 720, width: "100%",
+              maxHeight: "85vh", overflow: "hidden",
+              display: "flex", flexDirection: "column",
+              direction: lang === "he" ? "rtl" : "ltr",
+            }}
+          >
+            {/* Popup header */}
+            <div style={{
+              padding: "1.5rem 2rem",
+              borderBottom: "1px solid rgba(255,255,255,0.07)",
+              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+            }}>
+              <div>
+                <span style={{
+                  display: "inline-block",
+                  background: "#EAFF00", color: "#0A0A0A",
+                  fontSize: 9, fontWeight: 800, letterSpacing: 2, textTransform: "uppercase",
+                  padding: "3px 10px", borderRadius: 50, marginBottom: 10,
+                }}>
+                  {t(popup.categoryHe, popup.categoryEn)}
+                </span>
+                <h2 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#fff", lineHeight: 1.2 }}>
+                  {t(popup.titleHe, popup.titleEn)}
+                </h2>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 6, letterSpacing: 1 }}>
+                  {popup.date}
+                </p>
+              </div>
+              <button
+                onClick={() => setPopup(null)}
+                style={{
+                  background: "rgba(255,255,255,0.06)", border: "none",
+                  color: "rgba(255,255,255,0.5)", width: 36, height: 36,
+                  borderRadius: "50%", cursor: "pointer", fontSize: 16,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >✕</button>
+            </div>
+            {/* Popup body */}
+            <div style={{ padding: "2rem", overflowY: "auto", flex: 1 }}>
+              {popup.image && (
+                <img
+                  src={popup.image} alt={t(popup.titleHe, popup.titleEn)}
+                  style={{ width: "100%", height: 200, objectFit: "cover", borderRadius: 12, marginBottom: "1.5rem" }}
+                />
+              )}
+              <div style={{
+                fontSize: 15, color: "rgba(255,255,255,0.7)", lineHeight: 1.9,
+                whiteSpace: "pre-wrap",
+              }}>
+                {t(popup.bodyHe, popup.bodyEn)}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* NAV */}
-      <nav>
+      <nav style={{ direction: "ltr" }}>
         <div className="nav-logo">
-          {/* place your logo at public/images/logo.png */}
           <img src="/images/logo.png" alt="Dynamic Krav Maga" />
         </div>
         <ul className="nav-center">
           <li><a href="#about"><span className="he-only">אודות</span><span className="en-only">About</span></a></li>
           <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
-          <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>
+          {articles.length > 0 && <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>}
           <li><a href="#testimonials"><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
         </ul>
         <div className="nav-right">
@@ -47,8 +142,8 @@ export default function Home() {
           <div className="en-only">
             <div className="h1-en">DEFEND<br /><span className="lime">YOUR</span><br />SELF</div>
           </div>
-          <p className="hero-sub he-only">קרב מגע דינמי עם מאור לוי — שיטה מעשית לכל גיל ורמה. לא ספורט, לא תחרות — כלים אמיתיים לחיים האמיתיים.</p>
-          <p className="hero-sub en-only">Dynamic Krav Maga with Maor Levi — a practical system for every age and level. Real tools for real life.</p>
+          <p className="hero-sub he-only">{content?.heroSubHe}</p>
+          <p className="hero-sub en-only">{content?.heroSubEn}</p>
           <div className="hero-btns">
             <a href="#contact" className="btn-fill he-only">התחל עכשיו</a>
             <a href="#contact" className="btn-fill en-only">Get Started</a>
@@ -62,40 +157,22 @@ export default function Home() {
           </div>
         </div>
         <div className="hero-right">
-          {/* place hero image at public/images/hero.jpg */}
           <img src="/images/hero.jpg" alt="Maor Levi" />
-          <div className="hero-img-overlay">
-            <div className="ov-num">★ 5.0</div>
-            <div className="ov-lbl he-only">דירוג תלמידים</div>
-            <div className="ov-lbl en-only">Student Rating</div>
-          </div>
         </div>
       </div>
 
       {/* TICKER */}
       <div className="ticker">
         <div className="ticker-inner">
-          <span className="ticker-item">KRAV MAGA</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">קרב מגע דינמי</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">SELF DEFENSE</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">הגנה עצמית</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">MAOR LEVI</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">מאור לוי</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">DYNAMIC</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">KRAV MAGA</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">קרב מגע דינמי</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">SELF DEFENSE</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">הגנה עצמית</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">MAOR LEVI</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">מאור לוי</span><span className="ticker-dot">◆</span>
-          <span className="ticker-item">DYNAMIC</span><span className="ticker-dot">◆</span>
+          {["KRAV MAGA","קרב מגע דינמי","SELF DEFENSE","הגנה עצמית","MAOR LEVI","מאור לוי","DYNAMIC","KRAV MAGA","קרב מגע דינמי","SELF DEFENSE","הגנה עצמית","MAOR LEVI","מאור לוי","DYNAMIC"].map((item, i) => (
+            <span key={i} className={i % 2 === 1 ? "ticker-dot" : "ticker-item"}>{i % 2 === 1 ? "◆" : item}</span>
+          ))}
         </div>
       </div>
 
       {/* ABOUT */}
       <section className="about" id="about">
         <div className="about-img">
-          {/* place about image at public/images/about.jpg */}
           <img src="/images/about.jpg" alt="Maor" />
         </div>
         <div className="about-body">
@@ -104,10 +181,8 @@ export default function Home() {
           <div className="he-only"><div className="sec-h-he"><span className="lime">לחימה</span><br />שמגיעה<br />מהשטח</div></div>
           <div className="en-only"><div className="sec-h"><span className="lime">FIGHTING</span><br />FROM THE<br />FIELD</div></div>
           <div className="accent-bar"></div>
-          <p className="he-only">מאור לוי הוא מדריך קרב מגע בכיר עם שנים של ניסיון אמיתי — בשטח ובהוראה. הגישה שלו מבוססת על יעילות מקסימלית: טכניקות פשוטות, ישירות, שעובדות בלחץ אמיתי.</p>
-          <p className="en-only">Maor Levi is a senior Krav Maga instructor with years of real field experience. His approach is built on maximum efficiency — simple, direct techniques that work under real pressure.</p>
-          <p className="he-only">מתאים לכולם — מתחילים, נשים, ילדים, מבוגרים ואנשי ביטחון. הגנה עצמית היא זכות של כל אדם.</p>
-          <p className="en-only">Suitable for everyone — beginners, women, children, adults and security professionals. Self-defense is everyone&#39;s right.</p>
+          {content?.aboutParaHe.map((p, i) => <p key={i} className="he-only">{p}</p>)}
+          {content?.aboutParaEn.map((p, i) => <p key={i} className="en-only">{p}</p>)}
           <div className="skill-chips">
             <span className="chip he-only">הגנה עצמית</span><span className="chip en-only">Self Defense</span>
             <span className="chip he-only">כל הגילאים</span><span className="chip en-only">All Ages</span>
@@ -116,6 +191,46 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* INSTRUCTORS */}
+      {instructors.length > 0 && (
+        <section style={{ background: "#0A0A0A", padding: "5rem 3rem" }}>
+          <div className="sec-head">
+            <div className="sec-tag he-only">הצוות שלנו</div>
+            <div className="sec-tag en-only">Our Team</div>
+            <div className="he-only"><div className="sec-h-he">ה<span className="lime">מאמנים</span></div></div>
+            <div className="en-only"><div className="sec-h">THE <span className="lime">INSTRUCTORS</span></div></div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem", maxWidth: 1000, margin: "0 auto" }}>
+            {[...instructors].sort((a, b) => a.order - b.order).map(inst => (
+              <div key={inst.id} style={{
+                background: "#141414", border: "1.5px solid rgba(255,255,255,0.06)",
+                borderRadius: 14, padding: "2rem", textAlign: "center",
+              }}>
+                <div style={{
+                  width: 80, height: 80, borderRadius: "50%", margin: "0 auto 1rem",
+                  background: "#1C1C1C",
+                  backgroundImage: inst.image ? `url(${inst.image})` : "none",
+                  backgroundSize: "cover", backgroundPosition: "center",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 32, border: "2px solid rgba(234,255,0,0.15)",
+                }}>
+                  {!inst.image && "👤"}
+                </div>
+                <div style={{ fontWeight: 900, fontSize: 16, color: "#fff", marginBottom: 4 }}>
+                  {t(inst.nameHe, inst.nameEn)}
+                </div>
+                <div style={{ fontSize: 11, color: "#EAFF00", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
+                  {t(inst.roleHe, inst.roleEn)}
+                </div>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.7 }}>
+                  {t(inst.bioHe, inst.bioEn)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* SERVICES */}
       <section className="services" id="services">
@@ -126,33 +241,21 @@ export default function Home() {
           <div className="en-only"><div className="sec-h">OUR <span className="lime">SERVICES</span></div></div>
         </div>
         <div className="srv-grid">
-          <div className="srv">
-            <div className="srv-n">01</div>
-            <div className="srv-line"></div>
-            <div className="he-only"><div className="srv-name-he">שיעורים פרטיים</div></div>
-            <div className="en-only"><div className="srv-name">PRIVATE LESSONS</div></div>
-            <p className="srv-desc he-only">תוכנית אישית שנבנית בדיוק עבורך. בקצב שלך, ברמה שלך, עם מיקוד על המטרות האישיות שלך.</p>
-            <p className="srv-desc en-only">A personal program built exactly for you. Your pace, your level, your goals.</p>
-            <div className="srv-link"><span className="he-only">פרטים נוספים</span><span className="en-only">Learn More</span> →</div>
-          </div>
-          <div className="srv">
-            <div className="srv-n">02</div>
-            <div className="srv-line"></div>
-            <div className="he-only"><div className="srv-name-he">שיעורי קבוצה</div></div>
-            <div className="en-only"><div className="srv-name">GROUP CLASSES</div></div>
-            <p className="srv-desc he-only">אימון קבוצתי אינטנסיבי ומהנה. ללמוד יחד, להתפתח יחד, באווירה שדוחפת אותך קדימה.</p>
-            <p className="srv-desc en-only">Intense and fun group training. Learn together, grow together in a motivating atmosphere.</p>
-            <div className="srv-link"><span className="he-only">פרטים נוספים</span><span className="en-only">Learn More</span> →</div>
-          </div>
-          <div className="srv">
-            <div className="srv-n">03</div>
-            <div className="srv-line"></div>
-            <div className="he-only"><div className="srv-name-he">סדנאות</div></div>
-            <div className="en-only"><div className="srv-name">WORKSHOPS</div></div>
-            <p className="srv-desc he-only">סדנאות ממוקדות לנשים, ילדים, ארגונים ומסגרות שונות. ניתן להתאים לכל קבוצה וצורך.</p>
-            <p className="srv-desc en-only">Focused workshops for women, children, organizations. Customized for any group and need.</p>
-            <div className="srv-link"><span className="he-only">פרטים נוספים</span><span className="en-only">Learn More</span> →</div>
-          </div>
+          {[
+            { n: "01", he: "שיעורים פרטיים", en: "PRIVATE LESSONS", dHe: "תוכנית אישית שנבנית בדיוק עבורך. בקצב שלך, ברמה שלך, עם מיקוד על המטרות האישיות שלך.", dEn: "A personal program built exactly for you. Your pace, your level, your goals." },
+            { n: "02", he: "שיעורי קבוצה", en: "GROUP CLASSES", dHe: "אימון קבוצתי אינטנסיבי ומהנה. ללמוד יחד, להתפתח יחד, באווירה שדוחפת אותך קדימה.", dEn: "Intense and fun group training. Learn together, grow together in a motivating atmosphere." },
+            { n: "03", he: "סדנאות", en: "WORKSHOPS", dHe: "סדנאות ממוקדות לנשים, ילדים, ארגונים ומסגרות שונות. ניתן להתאים לכל קבוצה וצורך.", dEn: "Focused workshops for women, children, organizations. Customized for any group and need." },
+          ].map(s => (
+            <div key={s.n} className="srv">
+              <div className="srv-n">{s.n}</div>
+              <div className="srv-line"></div>
+              <div className="he-only"><div className="srv-name-he">{s.he}</div></div>
+              <div className="en-only"><div className="srv-name">{s.en}</div></div>
+              <p className="srv-desc he-only">{s.dHe}</p>
+              <p className="srv-desc en-only">{s.dEn}</p>
+              <div className="srv-link"><span className="he-only">פרטים נוספים</span><span className="en-only">Learn More</span> →</div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -165,121 +268,61 @@ export default function Home() {
           <div className="en-only"><div className="sec-h">STUDENT <span className="lime">REVIEWS</span></div></div>
         </div>
         <div className="tgrid">
-          <div className="tc">
-            <div className="tc-stars">★★★★★</div>
-            <span className="qmark">&quot;</span>
-            <p className="tc-text he-only">&quot;מאור הוא מדריך יוצא דופן. בזכותו הרגשתי ביטחון עצמי שלא הכרתי. ממליצה בחום לכולם.&quot;</p>
-            <p className="tc-text en-only">&quot;Maor is an exceptional instructor. Thanks to him I found confidence I never had. Highly recommended.&quot;</p>
-            <div className="tc-sep"></div>
-            <div className="tc-name">שירה כ. / Shira K.</div>
-            <div className="tc-role he-only">תלמידה פרטית</div>
-            <div className="tc-role en-only">Private Student</div>
-          </div>
-          <div className="tc">
-            <div className="tc-stars">★★★★★</div>
-            <span className="qmark">&quot;</span>
-            <p className="tc-text he-only">&quot;הסדנה לצוות שלנו הייתה חוויה בלתי נשכחת. מקצועי, מרתק ומעשי לגמרי. נחזור בטח.&quot;</p>
-            <p className="tc-text en-only">&quot;The workshop for our team was unforgettable. Professional, engaging, completely practical.&quot;</p>
-            <div className="tc-sep"></div>
-            <div className="tc-name">דניאל מ. / Daniel M.</div>
-            <div className="tc-role he-only">מנהל HR</div>
-            <div className="tc-role en-only">HR Manager</div>
-          </div>
-          <div className="tc">
-            <div className="tc-stars">★★★★★</div>
-            <span className="qmark">&quot;</span>
-            <p className="tc-text he-only">&quot;שלחתי את בני למאור. אחרי חודש רואים שינוי אדיר — הרבה יותר בטוח ומרוכז בכל דבר.&quot;</p>
-            <p className="tc-text en-only">&quot;Sent my son to Maor. After a month the change is huge — so much more confident and focused.&quot;</p>
-            <div className="tc-sep"></div>
-            <div className="tc-name">רחל א. / Rachel A.</div>
-            <div className="tc-role he-only">אמא לתלמיד</div>
-            <div className="tc-role en-only">Parent</div>
-          </div>
-        </div>
-        <div className="vids">
-          <div className="vid">
-            <div className="play-c">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A0A0A"><polygon points="7,3 21,12 7,21" /></svg>
+          {[
+            { name: "שירה כ. / Shira K.", roleHe: "תלמידה פרטית", roleEn: "Private Student", he: "מאור הוא מדריך יוצא דופן. בזכותו הרגשתי ביטחון עצמי שלא הכרתי. ממליצה בחום לכולם.", en: "Maor is an exceptional instructor. Thanks to him I found confidence I never had. Highly recommended." },
+            { name: "דניאל מ. / Daniel M.", roleHe: "מנהל HR", roleEn: "HR Manager", he: "הסדנה לצוות שלנו הייתה חוויה בלתי נשכחת. מקצועי, מרתק ומעשי לגמרי. נחזור בטח.", en: "The workshop for our team was unforgettable. Professional, engaging, completely practical." },
+            { name: "רחל א. / Rachel A.", roleHe: "אמא לתלמיד", roleEn: "Parent", he: "שלחתי את בני למאור. אחרי חודש רואים שינוי אדיר — הרבה יותר בטוח ומרוכז בכל דבר.", en: "Sent my son to Maor. After a month the change is huge — so much more confident and focused." },
+          ].map(tc => (
+            <div key={tc.name} className="tc">
+              <div className="tc-stars">★★★★★</div>
+              <span className="qmark">&quot;</span>
+              <p className="tc-text he-only">&quot;{tc.he}&quot;</p>
+              <p className="tc-text en-only">&quot;{tc.en}&quot;</p>
+              <div className="tc-sep"></div>
+              <div className="tc-name">{tc.name}</div>
+              <div className="tc-role he-only">{tc.roleHe}</div>
+              <div className="tc-role en-only">{tc.roleEn}</div>
             </div>
-            <div className="vid-lbl he-only">המלצת וידיאו — שירה</div>
-            <div className="vid-lbl en-only">Video Review — Shira</div>
-          </div>
-          <div className="vid">
-            <div className="play-c">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A0A0A"><polygon points="7,3 21,12 7,21" /></svg>
-            </div>
-            <div className="vid-lbl he-only">המלצת וידיאו — דניאל</div>
-            <div className="vid-lbl en-only">Video Review — Daniel</div>
-          </div>
+          ))}
         </div>
       </section>
 
       {/* ARTICLES */}
-      <section className="articles" id="articles">
-        <div className="art-head">
-          <div>
-            <div className="sec-tag he-only">ידע וכלים</div>
-            <div className="sec-tag en-only">Knowledge &amp; Tools</div>
-            <div className="he-only"><div className="sec-h-he">מאמרים ו<span className="lime">תוכן</span></div></div>
-            <div className="en-only"><div className="sec-h">ARTICLES &amp; <span className="lime">CONTENT</span></div></div>
-          </div>
-          <a href="#" className="btn-ghost he-only" style={{ alignSelf: "flex-end" }}>כל המאמרים →</a>
-          <a href="#" className="btn-ghost en-only" style={{ alignSelf: "flex-end" }}>All Articles →</a>
-        </div>
-        <div className="agrid">
-          <div className="ac">
-            <div className="ac-thumb">
-              {/* place at public/images/article1.jpg */}
-              <img className="ac-thumb-img" src="/images/article1.jpg" alt="" />
-              <div className="ac-cat he-only">הגנה עצמית</div>
-              <div className="ac-cat en-only">Self Defense</div>
-            </div>
-            <div className="ac-body">
-              <div className="ac-date he-only">ינואר 2025</div>
-              <div className="ac-date en-only">January 2025</div>
-              <div className="he-only"><div className="ac-title-he">5 טכניקות שכל אחד חייב לדעת</div></div>
-              <div className="en-only"><div className="ac-title">5 TECHNIQUES EVERYONE MUST KNOW</div></div>
-              <p className="ac-ex he-only">קרב מגע אמיתי לא מצריך שנים. הנה הטכניקות הבסיסיות שיכולות להציל חיים.</p>
-              <p className="ac-ex en-only">Real Krav Maga doesn&#39;t require years. Here are the basic techniques that can save lives.</p>
-              <div className="ac-more"><span className="he-only">קרא עוד</span><span className="en-only">Read More</span> →</div>
+      {articles.length > 0 && (
+        <section className="articles" id="articles">
+          <div className="art-head">
+            <div>
+              <div className="sec-tag he-only">ידע וכלים</div>
+              <div className="sec-tag en-only">Knowledge &amp; Tools</div>
+              <div className="he-only"><div className="sec-h-he">מאמרים ו<span className="lime">תוכן</span></div></div>
+              <div className="en-only"><div className="sec-h">ARTICLES &amp; <span className="lime">CONTENT</span></div></div>
             </div>
           </div>
-          <div className="ac">
-            <div className="ac-thumb">
-              {/* place at public/images/article2.jpg */}
-              <img className="ac-thumb-img" src="/images/article2.jpg" alt="" />
-              <div className="ac-cat he-only">מנטליות</div>
-              <div className="ac-cat en-only">Mindset</div>
-            </div>
-            <div className="ac-body">
-              <div className="ac-date he-only">פברואר 2025</div>
-              <div className="ac-date en-only">February 2025</div>
-              <div className="he-only"><div className="ac-title-he">להיות מוכן פיזית ומנטלית</div></div>
-              <div className="en-only"><div className="ac-title">PHYSICAL &amp; MENTAL READINESS</div></div>
-              <p className="ac-ex he-only">הגנה עצמית מתחילה בראש. פתח ביטחון שמרתיע תוקפים לפני כל מגע.</p>
-              <p className="ac-ex en-only">Self-defense starts in the mind. Build the confidence that deters attackers before any contact.</p>
-              <div className="ac-more"><span className="he-only">קרא עוד</span><span className="en-only">Read More</span> →</div>
-            </div>
+          <div className="agrid">
+            {articles.map(a => (
+              <div key={a.id} className="ac" onClick={() => setPopup(a)}>
+                <div className="ac-thumb">
+                  {a.image && <img className="ac-thumb-img" src={a.image} alt="" />}
+                  <div className="ac-cat he-only">{a.categoryHe}</div>
+                  <div className="ac-cat en-only">{a.categoryEn}</div>
+                </div>
+                <div className="ac-body">
+                  <div className="ac-date he-only">{a.date}</div>
+                  <div className="ac-date en-only">{a.date}</div>
+                  <div className="he-only"><div className="ac-title-he">{a.titleHe}</div></div>
+                  <div className="en-only"><div className="ac-title">{a.titleEn}</div></div>
+                  <p className="ac-ex he-only">{a.excerptHe}</p>
+                  <p className="ac-ex en-only">{a.excerptEn}</p>
+                  <div className="ac-more">
+                    <span className="he-only">קרא עוד</span>
+                    <span className="en-only">Read More</span> →
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="ac">
-            <div className="ac-thumb">
-              {/* place at public/images/article3.jpg */}
-              <img className="ac-thumb-img" src="/images/article3.jpg" alt="" />
-              <div className="ac-cat he-only">לילדים</div>
-              <div className="ac-cat en-only">For Kids</div>
-            </div>
-            <div className="ac-body">
-              <div className="ac-date he-only">מרץ 2025</div>
-              <div className="ac-date en-only">March 2025</div>
-              <div className="he-only"><div className="ac-title-he">למה ילדים צריכים ללמוד קרב מגע</div></div>
-              <div className="en-only"><div className="ac-title">WHY KIDS SHOULD LEARN KRAV MAGA</div></div>
-              <p className="ac-ex he-only">מעבר להגנה — קרב מגע מפתח ריכוז, משמעת ודימוי עצמי חיובי בגיל קריטי.</p>
-              <p className="ac-ex en-only">Beyond defense — Krav Maga builds focus, discipline and positive self-image at a critical age.</p>
-              <div className="ac-more"><span className="he-only">קרא עוד</span><span className="en-only">Read More</span> →</div>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* CONTACT */}
       <section className="contact" id="contact">
@@ -292,10 +335,10 @@ export default function Home() {
           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: ".9rem" }} className="he-only">שאלה? רוצים לקבוע שיעור ראשון? פשוט כתבו.</p>
           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: ".9rem" }} className="en-only">Questions? Want to book a first class? Just write.</p>
           <div className="c-items">
-            <div className="ci"><div className="ci-icon">📱</div><div className="ci-text"><strong className="he-only">טלפון</strong><strong className="en-only">Phone</strong><span className="he-only">יעודכן בקרוב</span><span className="en-only">Coming soon</span></div></div>
+            <div className="ci"><div className="ci-icon">📱</div><div className="ci-text"><strong className="he-only">טלפון</strong><strong className="en-only">Phone</strong><span>יעודכן בקרוב</span></div></div>
             <div className="ci"><div className="ci-icon">✉️</div><div className="ci-text"><strong>Email</strong><span>יעודכן בקרוב</span></div></div>
             <div className="ci"><div className="ci-icon">📸</div><div className="ci-text"><strong>Instagram</strong><span>@dynamickravmaga</span></div></div>
-            <div className="ci"><div className="ci-icon">👥</div><div className="ci-text"><strong>Facebook</strong><span className="he-only">יעודכן בקרוב</span><span className="en-only">Coming soon</span></div></div>
+            <div className="ci"><div className="ci-icon">👥</div><div className="ci-text"><strong>Facebook</strong><span>יעודכן בקרוב</span></div></div>
           </div>
           <div className="c-social">
             <a className="soc-btn" href="#">IG</a>
