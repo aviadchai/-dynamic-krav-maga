@@ -32,6 +32,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         borderLeft: '1px solid rgba(255,255,255,0.06)',
         display: 'flex', flexDirection: 'column',
         position: 'fixed', top: 0, right: 0, bottom: 0,
+        zIndex: 200,
       }}>
         {/* Logo */}
         <div style={{

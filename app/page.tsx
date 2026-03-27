@@ -40,80 +40,113 @@ export default function Home() {
   const t = (he: string, en: string) => lang === "he" ? he : en;
 
   return (
-    <div className={`lang-${lang} lang-fade${fading ? " lang-fading" : ""}`}>
-
-      {/* ARTICLE POPUP */}
+    <>
+      {/* ARTICLE POPUP — outside fade wrapper so opacity doesn't affect it */}
       {popup && (
         <div
           onClick={() => setPopup(null)}
           style={{
             position: "fixed", inset: 0, zIndex: 9999,
-            background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)",
+            background: "rgba(8,8,8,0.82)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            padding: "2rem",
+            padding: "3vw",
+            animation: "popupIn 0.22s ease",
           }}
         >
+          <style>{`
+            @keyframes popupIn {
+              from { opacity: 0; transform: scale(0.97); }
+              to   { opacity: 1; transform: scale(1); }
+            }
+            .popup-scroll::-webkit-scrollbar { width: 4px; }
+            .popup-scroll::-webkit-scrollbar-track { background: transparent; }
+            .popup-scroll::-webkit-scrollbar-thumb { background: rgba(234,255,0,0.25); border-radius: 4px; }
+            .popup-scroll::-webkit-scrollbar-thumb:hover { background: rgba(234,255,0,0.5); }
+          `}</style>
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              background: "#141414", border: "1.5px solid rgba(255,255,255,0.08)",
-              borderRadius: 20, maxWidth: 720, width: "100%",
-              maxHeight: "85vh", overflow: "hidden",
+              background: "#131313",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: 22,
+              width: "100%", maxWidth: 780,
+              maxHeight: "88vh",
               display: "flex", flexDirection: "column",
-              direction: lang === "he" ? "rtl" : "ltr",
+              direction: "rtl",
+              overflow: "hidden",
+              boxShadow: "0 40px 80px rgba(0,0,0,0.6)",
             }}
           >
-            {/* Popup header */}
+            {/* Header */}
             <div style={{
-              padding: "1.5rem 2rem",
-              borderBottom: "1px solid rgba(255,255,255,0.07)",
+              padding: "1.6rem 2rem",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
               display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+              gap: "1rem",
             }}>
               <div>
                 <span style={{
                   display: "inline-block",
                   background: "#EAFF00", color: "#0A0A0A",
-                  fontSize: 9, fontWeight: 800, letterSpacing: 2, textTransform: "uppercase",
-                  padding: "3px 10px", borderRadius: 50, marginBottom: 10,
+                  fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
+                  padding: "3px 12px", borderRadius: 50, marginBottom: 10,
                 }}>
-                  {t(popup.categoryHe, popup.categoryEn)}
+                  {popup.categoryHe}
                 </span>
-                <h2 style={{ fontSize: "1.4rem", fontWeight: 900, color: "#fff", lineHeight: 1.2 }}>
-                  {t(popup.titleHe, popup.titleEn)}
+                <h2 style={{
+                  fontFamily: "var(--font-heebo), sans-serif",
+                  fontSize: "clamp(1.3rem, 3vw, 1.75rem)", fontWeight: 900,
+                  color: "#fff", lineHeight: 1.2, margin: 0,
+                }}>
+                  {popup.titleHe}
                 </h2>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 6, letterSpacing: 1 }}>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", marginTop: 8, letterSpacing: 1 }}>
                   {popup.date}
                 </p>
               </div>
               <button
                 onClick={() => setPopup(null)}
                 style={{
-                  background: "rgba(255,255,255,0.06)", border: "none",
-                  color: "rgba(255,255,255,0.5)", width: 36, height: 36,
-                  borderRadius: "50%", cursor: "pointer", fontSize: 16,
+                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.45)", width: 38, height: 38,
+                  borderRadius: "50%", cursor: "pointer", fontSize: 17, flexShrink: 0,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
+                  transition: "all .15s",
                 }}
               >✕</button>
             </div>
-            {/* Popup body */}
-            <div style={{ padding: "2rem", overflowY: "auto", flex: 1 }}>
+
+            {/* Scrollable body */}
+            <div className="popup-scroll" style={{ overflowY: "auto", flex: 1 }}>
               {popup.image && (
                 <img
-                  src={popup.image} alt={t(popup.titleHe, popup.titleEn)}
-                  style={{ width: "100%", height: 200, objectFit: "cover", borderRadius: 12, marginBottom: "1.5rem" }}
+                  src={popup.image} alt={popup.titleHe}
+                  style={{ width: "100%", height: 240, objectFit: "cover", display: "block" }}
                 />
               )}
-              <div style={{
-                fontSize: 15, color: "rgba(255,255,255,0.7)", lineHeight: 1.9,
-                whiteSpace: "pre-wrap",
-              }}>
-                {t(popup.bodyHe, popup.bodyEn)}
+              <div style={{ padding: "2rem" }}>
+                <p style={{
+                  fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8,
+                  marginBottom: "1.5rem", fontStyle: "italic",
+                  borderRight: "3px solid #EAFF00", paddingRight: "1rem",
+                }}>
+                  {popup.excerptHe}
+                </p>
+                <div style={{
+                  fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95,
+                  whiteSpace: "pre-wrap", textAlign: "right",
+                }}>
+                  {popup.bodyHe}
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
+
+    <div className={`lang-${lang} lang-fade${fading ? " lang-fading" : ""}`}>
 
       {/* NAV */}
       <nav>
@@ -302,36 +335,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ARTICLES */}
-      {articles.length > 0 && (
+      {/* REELS — Instagram embeds */}
+      <section className="reels-section">
+        <div className="sec-head">
+          <div className="sec-tag he-only">תוכן</div>
+          <div className="sec-tag en-only">Content</div>
+          <div className="he-only"><div className="sec-h-he">רי<span className="lime">לס</span></div></div>
+          <div className="en-only"><div className="sec-h">OUR <span className="lime">REELS</span></div></div>
+        </div>
+        <div className="reels-grid">
+          <div className="reel-wrap">
+            <iframe
+              src="https://www.instagram.com/reel/DTiFg_OlJFk/embed/"
+              allowFullScreen
+              scrolling="no"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ARTICLES — Hebrew only */}
+      {articles.length > 0 && lang === "he" && (
         <section className="articles" id="articles">
           <div className="art-head">
             <div>
-              <div className="sec-tag he-only">ידע וכלים</div>
-              <div className="sec-tag en-only">Knowledge &amp; Tools</div>
-              <div className="he-only"><div className="sec-h-he">מאמרים ו<span className="lime">תוכן</span></div></div>
-              <div className="en-only"><div className="sec-h">ARTICLES &amp; <span className="lime">CONTENT</span></div></div>
+              <div className="sec-tag">ידע וכלים</div>
+              <div className="sec-h-he">מאמרים ו<span className="lime">תוכן</span></div>
             </div>
           </div>
           <div className="agrid">
             {articles.map(a => (
-              <div key={a.id} className="ac" onClick={() => setPopup(a)}>
+              <div key={a.id} className="ac" onClick={() => setPopup(a)} style={{ cursor: "pointer" }}>
                 <div className="ac-thumb">
                   {a.image && <img className="ac-thumb-img" src={a.image} alt="" />}
-                  <div className="ac-cat he-only">{a.categoryHe}</div>
-                  <div className="ac-cat en-only">{a.categoryEn}</div>
+                  <div className="ac-cat">{a.categoryHe}</div>
                 </div>
                 <div className="ac-body">
-                  <div className="ac-date he-only">{a.date}</div>
-                  <div className="ac-date en-only">{a.date}</div>
-                  <div className="he-only"><div className="ac-title-he">{a.titleHe}</div></div>
-                  <div className="en-only"><div className="ac-title">{a.titleEn}</div></div>
-                  <p className="ac-ex he-only">{a.excerptHe}</p>
-                  <p className="ac-ex en-only">{a.excerptEn}</p>
-                  <div className="ac-more">
-                    <span className="he-only">קרא עוד</span>
-                    <span className="en-only">Read More</span> →
-                  </div>
+                  <div className="ac-date">{a.date}</div>
+                  <div className="ac-title-he">{a.titleHe}</div>
+                  <p className="ac-ex">{a.excerptHe}</p>
+                  <div className="ac-more">קרא עוד →</div>
                 </div>
               </div>
             ))}
@@ -384,5 +428,6 @@ export default function Home() {
         <div className="fcopy">© 2025 Dynamic Krav Maga — Maor Levi</div>
       </footer>
     </div>
+    </>
   );
 }
