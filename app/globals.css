@@ -279,11 +279,13 @@ nav.site-nav {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 0; align-items: stretch;
   min-height: 70vh;
+  background: #EEECEA;
 }
 .about-img {
   position: relative; overflow: visible; min-height: 500px;
   display: flex; align-items: stretch;
   padding: 3rem 2rem;
+  background: #EEECEA;
 }
 /* Floating parallelogram inside about-img */
 .about-img-inner {

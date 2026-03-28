@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { Article, Instructor, SiteContent, Testimonial, Reel } from "@/lib/db";
+import type { Article, Instructor, SiteContent, Testimonial, Reel, TimelineEntry } from "@/lib/db";
 
 type Lang = "he" | "en";
 
@@ -18,6 +18,11 @@ export default function Home() {
 
   type Service = { n: string; he: string; en: string; dHe: string; dEn: string; bodyHe: string; bodyEn: string; image?: string }
   const [servicePopup, setServicePopup] = useState<Service | null>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [aboutClosing, setAboutClosing] = useState(false);
+
+  function openAbout() { setAboutOpen(true); }
+  function closeAbout() { setAboutClosing(true); setTimeout(() => { setAboutOpen(false); setAboutClosing(false); }, 200); }
   const reelsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,7 +46,7 @@ export default function Home() {
 
   // Close popups on ESC
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { closePopup(); setServicePopup(null); setMobileMenu(false); } };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { closePopup(); closeAbout(); setServicePopup(null); setMobileMenu(false); } };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
@@ -246,6 +251,132 @@ export default function Home() {
                   </a>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ABOUT TIMELINE POPUP */}
+      {(aboutOpen || aboutClosing) && (
+        <div
+          onClick={closeAbout}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            background: "rgba(8,8,8,0.82)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "3vw",
+            animation: aboutClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "#131313",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: 18,
+              width: "calc(100vw - 4rem)",
+              maxWidth: 860,
+              height: "calc(100vh - 4rem)",
+              display: "flex", flexDirection: "column",
+              direction: "rtl",
+              overflow: "hidden",
+              boxShadow: "0 40px 80px rgba(0,0,0,0.7)",
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              padding: "1.6rem 2rem",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}>
+              <div>
+                <span style={{
+                  display: "inline-block",
+                  background: "#EAFF00", color: "#0A0A0A",
+                  fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
+                  padding: "3px 12px", borderRadius: 50, marginBottom: 10,
+                }}>
+                  {lang === 'he' ? 'ההיסטוריה שלנו' : 'Our History'}
+                </span>
+                <h2 style={{
+                  fontFamily: "var(--font-heebo), sans-serif",
+                  fontSize: "clamp(1.3rem, 3vw, 1.75rem)", fontWeight: 900,
+                  color: "#fff", lineHeight: 1.2, margin: 0,
+                }}>
+                  {lang === 'he' ? 'קרב מגע דינמי' : 'Dynamic Krav Maga'}
+                </h2>
+              </div>
+              <button
+                onClick={closeAbout}
+                style={{
+                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.45)", width: 38, height: 38,
+                  borderRadius: "50%", cursor: "pointer", fontSize: 17, flexShrink: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}
+              >✕</button>
+            </div>
+
+            {/* Timeline body */}
+            <div className="popup-scroll" style={{ overflowY: "auto", flex: 1, padding: "2rem" }}>
+              {(!content?.aboutTimeline || content.aboutTimeline.length === 0) ? (
+                <p style={{ color: "rgba(255,255,255,0.3)", textAlign: "center", marginTop: "3rem" }}>
+                  {lang === 'he' ? 'אין תוכן עדיין' : 'No content yet'}
+                </p>
+              ) : (
+                <div style={{ position: "relative" }}>
+                  {/* Vertical line */}
+                  <div style={{
+                    position: "absolute", top: 0, bottom: 0, right: 71,
+                    width: 2, background: "rgba(255,255,255,0.07)",
+                    borderRadius: 2,
+                  }} />
+                  {[...content.aboutTimeline]
+                    .sort((a, b) => a.order - b.order)
+                    .map((entry: TimelineEntry, i: number) => (
+                    <div key={entry.id} style={{
+                      display: "flex", gap: "1.5rem", marginBottom: "2.5rem",
+                      position: "relative",
+                    }}>
+                      {/* Year badge */}
+                      <div style={{
+                        flexShrink: 0, width: 60, textAlign: "center",
+                        paddingTop: 4,
+                      }}>
+                        <div style={{
+                          background: "#EAFF00", color: "#0A0A0A",
+                          fontSize: 11, fontWeight: 900, padding: "4px 0",
+                          borderRadius: 8, letterSpacing: 1,
+                        }}>
+                          {entry.year}
+                        </div>
+                        {/* dot on line */}
+                        <div style={{
+                          width: 10, height: 10, background: "#EAFF00",
+                          borderRadius: "50%", margin: "8px auto 0",
+                          position: "relative", zIndex: 1,
+                        }} />
+                      </div>
+                      {/* Content */}
+                      <div style={{ flex: 1, paddingBottom: i < content.aboutTimeline.length - 1 ? 0 : 0 }}>
+                        <div style={{ fontWeight: 800, color: "#fff", fontSize: 16, marginBottom: 6 }}>
+                          {lang === 'he' ? entry.titleHe : entry.titleEn}
+                        </div>
+                        <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 14, lineHeight: 1.8, margin: 0, marginBottom: entry.image ? "1rem" : 0 }}>
+                          {lang === 'he' ? entry.textHe : entry.textEn}
+                        </p>
+                        {entry.image && (
+                          <div style={{ transform: "skewX(-7deg)", borderRadius: 16, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", maxWidth: 480, marginTop: "1rem" }}>
+                            <img src={entry.image} alt={entry.titleHe} style={{ width: "110%", height: 220, objectFit: "cover", display: "block", transform: "skewX(7deg)", marginLeft: "-5%" }} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -530,6 +661,21 @@ export default function Home() {
             </div>
           </div>
           <div className="about-bar"></div>
+          <button
+            onClick={openAbout}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              background: '#111', color: '#fff', border: '2px solid #111',
+              padding: '11px 26px', borderRadius: 50, cursor: 'pointer',
+              fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 14,
+              marginBottom: '1.5rem', transition: 'all .2s',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = '#111'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#111'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+          >
+            {t('קרא אודותינו', 'Read About Us')}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
           {content?.aboutExcerptHe && <p className="he-only about-excerpt">{content.aboutExcerptHe}</p>}
           {content?.aboutExcerptEn && <p className="en-only about-excerpt">{content.aboutExcerptEn}</p>}
           {content?.aboutParaHe.map((p, i) => <p key={i} className="he-only about-p">{p}</p>)}

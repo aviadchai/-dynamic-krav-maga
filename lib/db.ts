@@ -60,6 +60,17 @@ export type ServiceItem = {
   image?: string
 }
 
+export type TimelineEntry = {
+  id: string
+  year: string
+  titleHe: string
+  titleEn: string
+  textHe: string
+  textEn: string
+  image?: string
+  order: number
+}
+
 export type SiteContent = {
   // Hero
   heroTitleHe: string
@@ -102,6 +113,8 @@ export type SiteContent = {
   whatsapp: string
   // Services
   services: ServiceItem[]
+  // About timeline
+  aboutTimeline: TimelineEntry[]
   // Brand
   brandColor: string
   brandColorSecondary: string
@@ -175,6 +188,7 @@ const defaultContent: SiteContent = {
       image: '',
     },
   ],
+  aboutTimeline: [],
   phone: '',
   email: '',
   instagram: '',
