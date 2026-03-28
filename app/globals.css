@@ -49,12 +49,12 @@ body {
 .lang-he footer,
 .lang-he .c-detail-row { text-align: unset; }
 
-/* ── NAV ── links always left, logo always right */
+/* ── NAV ── toggle left | links+logo right */
 nav {
   position: sticky; top: 0; z-index: 999;
   height: 68px;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: auto 1fr;
   align-items: center;
   padding: 0 2rem;
   background: rgba(10,10,10,0.96);
@@ -63,8 +63,12 @@ nav {
   direction: ltr;
   gap: 1rem;
 }
-.nav-left { display: flex; align-items: center; gap: 10px; }
-.nav-logo { display: flex; align-items: center; justify-content: flex-end; }
+/* Right group: links + CTA + logo */
+.nav-right-group {
+  display: flex; align-items: center; gap: 6px;
+  justify-content: flex-end;
+}
+.nav-logo { display: flex; align-items: center; margin-right: 6px; }
 .nav-logo img { height: 36px; width: auto; display: block; }
 .nav-center { display: flex; gap: 0; list-style: none; }
 .nav-center a {
@@ -146,6 +150,7 @@ nav {
   border: 1.5px solid rgba(234,255,0,0.25);
   border-radius: 50px; padding: 5px 16px 5px 10px;
   margin-bottom: 1.5rem;
+  align-self: flex-start; width: fit-content;
 }
 .dot-live { width: 7px; height: 7px; background: var(--lime); border-radius: 50%; animation: bl 2s infinite; }
 @keyframes bl { 0%,100% { opacity: 1 } 50% { opacity: .15 } }

@@ -175,9 +175,13 @@ export default function Home() {
 
     <div className={`lang-${lang} lang-fade${fading ? " lang-fading" : ""}`}>
 
-      {/* NAV — links always left, logo always right */}
+      {/* NAV — toggle left | links+CTA+logo right */}
       <nav>
-        <div className="nav-left">
+        <div className="lang-sw">
+          <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>עברית</button>
+          <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>English</button>
+        </div>
+        <div className="nav-right-group">
           <ul className="nav-center">
             <li><a href="#about"><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
             <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
@@ -188,13 +192,9 @@ export default function Home() {
             <span className="he-only">צור קשר</span>
             <span className="en-only">Contact</span>
           </a>
-        </div>
-        <div className="lang-sw">
-          <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>עב</button>
-          <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>EN</button>
-        </div>
-        <div className="nav-logo">
-          <img src={logoSrc} alt="Dynamic Krav Maga" />
+          <div className="nav-logo">
+            <img src={logoSrc} alt="Dynamic Krav Maga" />
+          </div>
         </div>
       </nav>
 
