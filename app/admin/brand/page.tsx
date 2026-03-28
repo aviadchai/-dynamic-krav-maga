@@ -24,12 +24,27 @@ export default function BrandPage() {
   const [saved, setSaved] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadingLight, setUploadingLight] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const fileLightRef = useRef<HTMLInputElement>(null)
+  const savedRef = useRef<SiteContent | null>(null)
+
+  const isDirty = isEditing && content && savedRef.current &&
+    JSON.stringify(content) !== JSON.stringify(savedRef.current)
 
   useEffect(() => {
-    fetch('/api/content').then(r => r.json()).then(setContent)
+    fetch('/api/content').then(r => r.json()).then((d: SiteContent) => {
+      setContent(d)
+      savedRef.current = d
+    })
   }, [])
+
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
 
   function set(key: keyof SiteContent, value: string) {
     setContent(c => c ? { ...c, [key]: value } : c)
@@ -59,6 +74,12 @@ export default function BrandPage() {
     setUploadingLight(false)
   }
 
+  function cancelEdit() {
+    if (isDirty && !confirm('לבטל את השינויים?')) return
+    setContent(savedRef.current)
+    setIsEditing(false)
+  }
+
   async function save() {
     if (!content) return
     setSaving(true)
@@ -76,6 +97,8 @@ export default function BrandPage() {
         badgePillEn: content.badgePillEn,
       }),
     })
+    savedRef.current = content
+    setIsEditing(false)
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -102,19 +125,39 @@ export default function BrandPage() {
         </div>
       </div>
 
+      {isDirty && (
+        <div style={{ position: 'fixed', top: 0, left: 240, right: 0, zIndex: 500, background: 'rgba(234,255,0,0.1)', borderBottom: '1.5px solid rgba(234,255,0,0.3)', padding: '10px 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backdropFilter: 'blur(8px)' }}>
+          <span style={{ fontSize: 13, color: '#EAFF00', fontWeight: 700 }}>⚠ יש שינויים שלא נשמרו</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={cancelEdit} style={{ background: 'none', border: '1.5px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', padding: '6px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>בטל שינויים</button>
+            <button onClick={save} disabled={saving} style={{ background: '#EAFF00', color: '#0A0A0A', border: 'none', padding: '6px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-heebo), sans-serif' }}>{saving ? 'שומר...' : 'שמור עכשיו'}</button>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>מיתוג</h1>
-        <button onClick={save} disabled={saving} style={{
-          background: saved ? 'rgba(234,255,0,0.8)' : '#EAFF00', color: '#0A0A0A', border: 'none',
-          padding: '11px 28px', borderRadius: 50, cursor: 'pointer',
-          fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 13,
-          opacity: saving ? 0.7 : 1,
-        }}>
-          {saving ? 'שומר...' : saved ? '✓ נשמר' : 'שמור שינויים'}
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {isEditing ? (
+            <>
+              <button onClick={cancelEdit} style={{ background: 'none', border: '1.5px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', padding: '9px 20px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-heebo), sans-serif' }}>ביטול</button>
+              <button onClick={save} disabled={saving} style={{ background: saved ? 'rgba(234,255,0,0.8)' : '#EAFF00', color: '#0A0A0A', border: 'none', padding: '9px 24px', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 13, opacity: saving ? 0.7 : 1 }}>
+                {saving ? 'שומר...' : saved ? '✓ נשמר' : 'שמור שינויים'}
+              </button>
+            </>
+          ) : (
+            <button onClick={() => setIsEditing(true)} style={{ background: 'rgba(234,255,0,0.1)', border: '1.5px solid rgba(234,255,0,0.3)', color: '#EAFF00', padding: '9px 24px', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 700, fontSize: 13 }}>✏ עריכה</button>
+          )}
+        </div>
       </div>
+      {!isEditing && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 16px', marginBottom: '1.5rem', fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+          <span style={{ fontSize: 16 }}>🔒</span>
+          <span>מצב תצוגה — לחץ <strong style={{ color: 'rgba(234,255,0,0.8)' }}>עריכה</strong> לעריכת השדות</span>
+        </div>
+      )}
 
       {/* Logos */}
+      <div style={{ pointerEvents: isEditing ? 'auto' : 'none', opacity: isEditing ? 1 : 0.65, transition: 'opacity .2s' }}>
       <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
         <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1.25rem' }}>לוגו</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
@@ -174,6 +217,7 @@ export default function BrandPage() {
           <span style={{ color: content.brandColorText || '#fff', fontSize: 13 }}>טקסט</span>
         </div>
       </div>
+      </div>{/* end lock wrapper */}
 
     </div>
   )

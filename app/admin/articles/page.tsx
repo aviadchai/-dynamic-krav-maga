@@ -63,22 +63,24 @@ export default function ArticlesPage() {
           {articles.map((a, i) => (
             <div key={a.id} style={{
               display: 'flex', alignItems: 'center', gap: '1rem',
-              padding: '16px 20px',
+              padding: '12px 20px',
               borderBottom: i < articles.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
             }}>
-              {/* Status dot */}
+              {/* Thumbnail */}
               <div style={{
-                width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                background: a.published ? '#EAFF00' : 'rgba(255,255,255,0.2)',
+                width: 64, height: 44, borderRadius: 8, flexShrink: 0,
+                background: '#1C1C1C', backgroundImage: a.image ? `url(${a.image})` : 'none',
+                backgroundSize: 'cover', backgroundPosition: 'center',
+                border: '1px solid rgba(255,255,255,0.06)',
               }} />
 
               {/* Info */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 2 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {a.titleHe}
                 </div>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
-                  {a.categoryHe} · {a.date}
+                  {a.categoryHe} · {a.date}{a.author ? ` · ${a.author}` : ''}
                 </div>
               </div>
 

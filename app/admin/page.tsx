@@ -91,21 +91,28 @@ export default function AdminDashboard() {
           <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, overflow: 'hidden' }}>
             {articles.slice(0, 5).map((a, i) => (
               <Link key={a.id} href={`/admin/articles/${a.id}`} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '14px 20px', textDecoration: 'none',
+                display: 'flex', alignItems: 'center', gap: '1rem',
+                padding: '12px 20px', textDecoration: 'none',
                 borderBottom: i < Math.min(articles.length, 5) - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                 transition: 'background .15s',
               }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{a.titleHe}</div>
+                {/* Thumbnail */}
+                <div style={{
+                  width: 56, height: 38, borderRadius: 6, flexShrink: 0,
+                  background: '#1C1C1C', backgroundImage: a.image ? `url(${a.image})` : 'none',
+                  backgroundSize: 'cover', backgroundPosition: 'center',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.titleHe}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>{a.date}{a.author ? ` · ${a.author}` : ''}</div>
                 </div>
                 <span style={{
                   fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase',
-                  padding: '3px 10px', borderRadius: 50,
+                  padding: '3px 10px', borderRadius: 50, whiteSpace: 'nowrap',
                   background: a.published ? 'rgba(234,255,0,0.1)' : 'rgba(255,255,255,0.05)',
                   color: a.published ? '#EAFF00' : 'rgba(255,255,255,0.35)',
                 }}>

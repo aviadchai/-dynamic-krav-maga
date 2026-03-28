@@ -371,30 +371,29 @@ nav.site-nav {
 /* ── INSTRUCTORS ── */
 .inst-section { background: var(--black); padding: 6rem 3rem; }
 .inst-grid { display: grid; gap: 1.25rem; }
+/* Instructor card — parallelogram (brand style) horizontal layout */
 .inst-card {
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: row;
   background: var(--mid);
-  border-radius: var(--r); overflow: visible;
+  border-radius: var(--r); overflow: hidden;
+  transform: skewX(-10deg);
   transition: transform .3s, box-shadow .3s;
+  min-height: 220px;
   position: relative;
 }
 .inst-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 48px rgba(234,255,0,0.08);
+  transform: skewX(-10deg) translateY(-5px);
+  box-shadow: 0 22px 52px rgba(234,255,0,0.09);
 }
-/* Image — parallelogram shape with diagonal bottom */
+/* Image — left side, fills the parallelogram naturally */
 .inst-card-img {
-  flex: 0 0 auto;
+  flex: 0 0 40%;
   position: relative; overflow: hidden;
-  border-radius: var(--r) var(--r) 0 0;
   background: linear-gradient(90deg, #131313 25%, #1a1a1a 50%, #131313 75%);
   background-size: 600px 100%;
   animation: shimmer 1.8s ease-in-out infinite;
-  aspect-ratio: 3/2;
-  /* Diagonal bottom-right cut — brand parallelogram style */
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 0px) 100%, 0 calc(100% - 0px));
 }
-.inst-card-main .inst-card-img { aspect-ratio: 4/3; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 36px), 0 100%); }
+.inst-card-main .inst-card-img { flex: 0 0 44%; }
 .inst-card-img.loaded { animation: none; background: none; }
 .inst-card-img img {
   width: 100%; height: 100%;
@@ -402,18 +401,16 @@ nav.site-nav {
   display: block;
 }
 .inst-card-placeholder {
-  width: 100%; height: 100%; min-height: 180px;
+  width: 100%; height: 100%; min-height: 220px;
   display: flex; align-items: center; justify-content: center;
   font-size: 4rem; background: var(--light);
 }
-/* Card body — sits below the image, overlapping the diagonal cut slightly */
+/* Card body — counter-skewed so text appears straight */
 .inst-card-body {
-  background: var(--mid);
-  border-radius: 0 0 var(--r) var(--r);
-  padding: 1.5rem 1.75rem 1.75rem;
-  display: flex; flex-direction: column; justify-content: flex-start;
+  flex: 1; padding: 1.75rem;
+  display: flex; flex-direction: column; justify-content: center;
   direction: rtl;
-  margin-top: -16px; position: relative; z-index: 1;
+  transform: skewX(10deg);
 }
 .inst-card-role {
   font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
@@ -432,6 +429,7 @@ nav.site-nav {
   font-size: .82rem; color: rgba(255,255,255,0.45); line-height: 1.7;
 }
 /* Main instructor card */
+.inst-card-main { min-height: 280px; }
 .inst-card-main .inst-card-name { font-size: 1.9rem; }
 .inst-card-main .inst-card-bio { font-size: .87rem; color: rgba(255,255,255,0.52); }
 
@@ -826,8 +824,8 @@ footer {
     -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .inst-grid::-webkit-scrollbar { display: none; }
-  .inst-card { flex: 0 0 78vw; scroll-snap-align: center; }
-  .inst-card-main { flex: 0 0 84vw; }
+  .inst-card { flex: 0 0 82vw; scroll-snap-align: center; min-height: 160px; }
+  .inst-card-main { flex: 0 0 88vw; min-height: 190px; }
 
   /* Contact */
   .contact { padding: 3rem 1.25rem; gap: 2rem; grid-template-columns: 1fr; }

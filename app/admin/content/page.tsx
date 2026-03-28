@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { SiteContent, Testimonial } from '@/lib/db'
 
 const F = ({ label, children }: { label: string, children: React.ReactNode }) => (
@@ -18,28 +18,35 @@ const inp: React.CSSProperties = {
   fontFamily: 'var(--font-heebo), sans-serif', fontSize: 14, outline: 'none',
 }
 
-function Section({ id, title, open, onToggle, children }: { id: string, title: string, open: boolean, onToggle: () => void, children: React.ReactNode }) {
+function Section({ title, open, onToggle, children, locked }: {
+  title: string, open: boolean, onToggle: () => void, children: React.ReactNode, locked: boolean
+}) {
   return (
     <div style={{ background: '#141414', border: `1.5px solid ${open ? 'rgba(234,255,0,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, marginBottom: '1rem', overflow: 'hidden', transition: 'border-color .2s' }}>
       <button
         onClick={onToggle}
-        style={{
-          width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '1.1rem 1.5rem', background: 'none', border: 'none', cursor: 'pointer',
-          fontFamily: 'var(--font-heebo), sans-serif',
-        }}
+        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.1rem 1.5rem', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif' }}
       >
         <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: open ? '#EAFF00' : 'rgba(255,255,255,0.55)', textTransform: 'uppercase', transition: 'color .2s' }}>{title}</span>
         <span style={{ color: open ? '#EAFF00' : 'rgba(255,255,255,0.3)', fontSize: 18, transition: 'transform .25s, color .2s', display: 'block', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>⌃</span>
       </button>
-      {open && <div style={{ padding: '0 1.5rem 1.5rem' }}>{children}</div>}
+      {open && (
+        <div style={{
+          padding: '0 1.5rem 1.5rem',
+          pointerEvents: locked ? 'none' : 'auto',
+          opacity: locked ? 0.62 : 1,
+          transition: 'opacity .2s',
+        }}>
+          {children}
+        </div>
+      )}
     </div>
   )
 }
 
 const twoCol: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }
 
-function UploadInput({ value, onChange, placeholder }: { value: string, onChange: (v: string) => void, placeholder?: string }) {
+function UploadInput({ value, onChange }: { value: string, onChange: (v: string) => void }) {
   const [uploading, setUploading] = useState(false)
   const ref = useRef<HTMLInputElement>(null)
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -57,9 +64,23 @@ function UploadInput({ value, onChange, placeholder }: { value: string, onChange
       <button type="button" onClick={() => ref.current?.click()} disabled={uploading} style={{ background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.2)', color: '#EAFF00', padding: '8px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12, fontWeight: 700, flexShrink: 0, whiteSpace: 'nowrap' }}>
         {uploading ? 'מעלה...' : '⬆ העלה'}
       </button>
-      <input style={{ ...inp, flex: 1, fontSize: 12 }} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder || 'URL...'} dir="ltr" />
+      <input style={{ ...inp, flex: 1, fontSize: 12 }} value={value} onChange={e => onChange(e.target.value)} placeholder="URL..." dir="ltr" />
     </div>
   )
+}
+
+const HISTORY_KEY = 'site_content_history'
+type HistoryEntry = { data: Partial<SiteContent>, at: string }
+function pushHistory(data: Partial<SiteContent>) {
+  try {
+    const h: HistoryEntry[] = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')
+    h.unshift({ data, at: new Date().toISOString() })
+    h.splice(20)
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h))
+  } catch {}
+}
+function getHistory(): HistoryEntry[] {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]') } catch { return [] }
 }
 
 export default function ContentPage() {
@@ -67,6 +88,13 @@ export default function ContentPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [open, setOpen] = useState<Set<string>>(new Set(['hero']))
+  const [isEditing, setIsEditing] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const [history, setHistory] = useState<HistoryEntry[]>([])
+  const savedRef = useRef<SiteContent | null>(null)
+
+  const isDirty = isEditing && content && savedRef.current &&
+    JSON.stringify(content) !== JSON.stringify(savedRef.current)
 
   function toggle(id: string) {
     setOpen(prev => {
@@ -77,8 +105,19 @@ export default function ContentPage() {
   }
 
   useEffect(() => {
-    fetch('/api/content').then(r => r.json()).then(setContent)
+    fetch('/api/content').then(r => r.json()).then((d: SiteContent) => {
+      setContent(d)
+      savedRef.current = d
+    })
   }, [])
+
+  // Warn before tab close/refresh when dirty
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
 
   function set<K extends keyof SiteContent>(key: K, value: SiteContent[K]) {
     setContent(c => c ? { ...c, [key]: value } : c)
@@ -101,36 +140,98 @@ export default function ContentPage() {
     setContent(c => c ? { ...c, testimonials: c.testimonials.filter((_, idx) => idx !== i) } : c)
   }
 
+  function startEdit() {
+    setIsEditing(true)
+  }
+
+  function cancelEdit() {
+    if (isDirty && !confirm('לבטל את השינויים?')) return
+    setContent(savedRef.current)
+    setIsEditing(false)
+  }
+
   async function save() {
     if (!content) return
     setSaving(true)
-    // Only send fields managed by this page — NOT reels or brand fields
-    // (those are saved by their own admin pages and must not be overwritten here)
+    // Save snapshot to history before overwriting
+    pushHistory(content)
     const { reels: _r, brandColor: _bc, brandColorSecondary: _bcs, brandColorText: _bct,
       brandBg: _bb, brandLogoUrl: _blu, brandLogoLight: _bll,
       badgePillHe: _bph, badgePillEn: _bpe, ...contentFields } = content
     await fetch('/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(contentFields) })
-    setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 2000)
+    savedRef.current = content
+    setIsEditing(false)
+    setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 2500)
+  }
+
+  function openHistory() {
+    setHistory(getHistory())
+    setShowHistory(true)
+  }
+
+  function restoreVersion(entry: HistoryEntry) {
+    if (!confirm('לשחזר גרסה זו? השינויים הנוכחיים יימחקו.')) return
+    setContent(c => c ? { ...c, ...entry.data } : c)
+    setIsEditing(true)
+    setShowHistory(false)
   }
 
   if (!content) return <div style={{ padding: '2.5rem', color: 'rgba(255,255,255,0.3)' }}>טוען...</div>
 
+  const locked = !isEditing
+
   return (
     <div style={{ padding: '2.5rem', direction: 'rtl', maxWidth: 1000 }}>
+
+      {/* Unsaved changes bar */}
+      {isDirty && (
+        <div style={{
+          position: 'fixed', top: 0, left: 240, right: 0, zIndex: 500,
+          background: 'rgba(234,255,0,0.1)', borderBottom: '1.5px solid rgba(234,255,0,0.3)',
+          padding: '10px 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          backdropFilter: 'blur(8px)',
+        }}>
+          <span style={{ fontSize: 13, color: '#EAFF00', fontWeight: 700 }}>⚠ יש שינויים שלא נשמרו</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={cancelEdit} style={{ background: 'none', border: '1.5px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', padding: '6px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>בטל שינויים</button>
+            <button onClick={save} disabled={saving} style={{ background: '#EAFF00', color: '#0A0A0A', border: 'none', padding: '6px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-heebo), sans-serif' }}>{saving ? 'שומר...' : 'שמור עכשיו'}</button>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>תוכן האתר</h1>
-        <button onClick={save} disabled={saving} style={{
-          background: saved ? 'rgba(234,255,0,0.8)' : '#EAFF00', color: '#0A0A0A', border: 'none',
-          padding: '11px 28px', borderRadius: 50, cursor: 'pointer',
-          fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 13,
-          opacity: saving ? 0.7 : 1, transition: 'all .2s',
-        }}>
-          {saving ? 'שומר...' : saved ? '✓ נשמר' : 'שמור שינויים'}
-        </button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* History button */}
+          <button onClick={openHistory} style={{ background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', padding: '9px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>
+            🕐 גרסאות
+          </button>
+          {isEditing ? (
+            <>
+              <button onClick={cancelEdit} style={{ background: 'none', border: '1.5px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)', padding: '9px 20px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-heebo), sans-serif' }}>ביטול</button>
+              <button onClick={save} disabled={saving} style={{ background: saved ? 'rgba(234,255,0,0.8)' : '#EAFF00', color: '#0A0A0A', border: 'none', padding: '9px 24px', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 13, opacity: saving ? 0.7 : 1, transition: 'all .2s' }}>
+                {saving ? 'שומר...' : saved ? '✓ נשמר' : 'שמור שינויים'}
+              </button>
+            </>
+          ) : (
+            <button onClick={startEdit} style={{ background: 'rgba(234,255,0,0.1)', border: '1.5px solid rgba(234,255,0,0.3)', color: '#EAFF00', padding: '9px 24px', borderRadius: 10, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 700, fontSize: 13 }}>
+              ✏ עריכה
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* Lock notice */}
+      {locked && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 16px', marginBottom: '1.5rem', fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+          <span style={{ fontSize: 16 }}>🔒</span>
+          <span>מצב תצוגה — לחץ <strong style={{ color: 'rgba(234,255,0,0.8)' }}>עריכה</strong> לעריכת השדות</span>
+        </div>
+      )}
+
       {/* ── HERO ── */}
-      <Section id="hero" title="Hero — סקשן ראשי" open={open.has('hero')} onToggle={() => toggle('hero')}>
+      <Section title="Hero — סקשן ראשי" open={open.has('hero')} onToggle={() => toggle('hero')} locked={locked}>
         <div style={twoCol}>
           <F label='תג Hero — עברית'>
             <input style={inp} value={content.badgePillHe || ''} onChange={e => set('badgePillHe', e.target.value)} placeholder="מדריך מוסמך קרב מגע" />
@@ -144,13 +245,11 @@ export default function ContentPage() {
             <textarea style={{ ...inp, resize: 'vertical', minHeight: 90, lineHeight: 1.7 }}
               value={content.heroTitleHe} onChange={e => set('heroTitleHe', e.target.value)}
               placeholder={'הגן על\nעצמך\nבאמת'} />
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>שורה חדשה = שבירת שורה. השורה האמצעית תודגש בצבע מותג.</div>
           </F>
           <F label="Main Title — English">
             <textarea style={{ ...inp, resize: 'vertical', minHeight: 90, lineHeight: 1.7, direction: 'ltr' }}
               value={content.heroTitleEn} onChange={e => set('heroTitleEn', e.target.value)}
               placeholder={'DEFEND\nYOUR\nSELF'} />
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>New line = line break. Middle line will be highlighted.</div>
           </F>
         </div>
         <div style={twoCol}>
@@ -162,21 +261,13 @@ export default function ContentPage() {
           </F>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1rem' }}>
-          <F label="כפתור ראשי — עברית">
-            <input style={inp} value={content.heroBtnPrimaryHe} onChange={e => set('heroBtnPrimaryHe', e.target.value)} />
-          </F>
-          <F label="Primary Btn — English">
-            <input style={{ ...inp, direction: 'ltr' }} value={content.heroBtnPrimaryEn} onChange={e => set('heroBtnPrimaryEn', e.target.value)} />
-          </F>
-          <F label="כפתור משני — עברית">
-            <input style={inp} value={content.heroBtnSecondaryHe} onChange={e => set('heroBtnSecondaryHe', e.target.value)} />
-          </F>
-          <F label="Secondary Btn — English">
-            <input style={{ ...inp, direction: 'ltr' }} value={content.heroBtnSecondaryEn} onChange={e => set('heroBtnSecondaryEn', e.target.value)} />
-          </F>
+          <F label="כפתור ראשי — עברית"><input style={inp} value={content.heroBtnPrimaryHe} onChange={e => set('heroBtnPrimaryHe', e.target.value)} /></F>
+          <F label="Primary Btn — English"><input style={{ ...inp, direction: 'ltr' }} value={content.heroBtnPrimaryEn} onChange={e => set('heroBtnPrimaryEn', e.target.value)} /></F>
+          <F label="כפתור משני — עברית"><input style={inp} value={content.heroBtnSecondaryHe} onChange={e => set('heroBtnSecondaryHe', e.target.value)} /></F>
+          <F label="Secondary Btn — English"><input style={{ ...inp, direction: 'ltr' }} value={content.heroBtnSecondaryEn} onChange={e => set('heroBtnSecondaryEn', e.target.value)} /></F>
         </div>
         <F label="תמונת הירו">
-          <UploadInput value={content.heroImage} onChange={v => set('heroImage', v)} placeholder="/images/hero.jpg" />
+          <UploadInput value={content.heroImage} onChange={v => set('heroImage', v)} />
         </F>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.25rem', marginTop: '.25rem' }}>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: '1rem' }}>STATS</div>
@@ -197,36 +288,28 @@ export default function ContentPage() {
       </Section>
 
       {/* ── ABOUT ── */}
-      <Section id="about" title="עלינו — About" open={open.has('about')} onToggle={() => toggle('about')}>
+      <Section title="עלינו — About" open={open.has('about')} onToggle={() => toggle('about')} locked={locked}>
         <div style={twoCol}>
           <F label="כותרת — עברית">
-            <textarea style={{ ...inp, resize: 'vertical', minHeight: 80, lineHeight: 1.7 }}
-              value={content.aboutTitleHe} onChange={e => set('aboutTitleHe', e.target.value)}
-              placeholder={'לחימה\nשמגיעה\nמהשטח'} />
+            <textarea style={{ ...inp, resize: 'vertical', minHeight: 80, lineHeight: 1.7 }} value={content.aboutTitleHe} onChange={e => set('aboutTitleHe', e.target.value)} placeholder={'לחימה\nשמגיעה\nמהשטח'} />
           </F>
           <F label="Title — English">
-            <textarea style={{ ...inp, resize: 'vertical', minHeight: 80, lineHeight: 1.7, direction: 'ltr' }}
-              value={content.aboutTitleEn} onChange={e => set('aboutTitleEn', e.target.value)}
-              placeholder={'FIGHTING\nFROM THE\nFIELD'} />
+            <textarea style={{ ...inp, resize: 'vertical', minHeight: 80, lineHeight: 1.7, direction: 'ltr' }} value={content.aboutTitleEn} onChange={e => set('aboutTitleEn', e.target.value)} placeholder={'FIGHTING\nFROM THE\nFIELD'} />
           </F>
         </div>
         <div style={twoCol}>
-          <F label='תג ("עלינו")'>
-            <input style={inp} value={content.aboutTagHe} onChange={e => set('aboutTagHe', e.target.value)} placeholder="עלינו" />
-          </F>
-          <F label='Tag ("About Us")'>
-            <input style={{ ...inp, direction: 'ltr' }} value={content.aboutTagEn} onChange={e => set('aboutTagEn', e.target.value)} placeholder="About Us" />
-          </F>
+          <F label='תג ("עלינו")'><input style={inp} value={content.aboutTagHe} onChange={e => set('aboutTagHe', e.target.value)} placeholder="עלינו" /></F>
+          <F label='Tag ("About Us")'><input style={{ ...inp, direction: 'ltr' }} value={content.aboutTagEn} onChange={e => set('aboutTagEn', e.target.value)} placeholder="About Us" /></F>
         </div>
         <F label="תמונת סקשן עלינו">
-          <UploadInput value={content.aboutImage} onChange={v => set('aboutImage', v)} placeholder="/images/about.jpg" />
+          <UploadInput value={content.aboutImage} onChange={v => set('aboutImage', v)} />
         </F>
         <div style={twoCol}>
           <F label="פסקת תקציר — עברית">
-            <textarea style={{ ...inp, resize: 'vertical', minHeight: 70 }} value={content.aboutExcerptHe || ''} onChange={e => set('aboutExcerptHe', e.target.value)} placeholder="משפט פותח קצר ובולט שמסכם את הגישה שלכם..." />
+            <textarea style={{ ...inp, resize: 'vertical', minHeight: 70 }} value={content.aboutExcerptHe || ''} onChange={e => set('aboutExcerptHe', e.target.value)} />
           </F>
           <F label="Excerpt — English">
-            <textarea style={{ ...inp, resize: 'vertical', minHeight: 70, direction: 'ltr' }} value={content.aboutExcerptEn || ''} onChange={e => set('aboutExcerptEn', e.target.value)} placeholder="A short bold opening sentence..." />
+            <textarea style={{ ...inp, resize: 'vertical', minHeight: 70, direction: 'ltr' }} value={content.aboutExcerptEn || ''} onChange={e => set('aboutExcerptEn', e.target.value)} />
           </F>
         </div>
         <div style={twoCol}>
@@ -235,44 +318,33 @@ export default function ContentPage() {
             {content.aboutParaHe.map((p, i) => (
               <F key={i} label={`פסקה ${i + 1}`}>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <textarea style={{ ...inp, resize: 'vertical', minHeight: 70, flex: 1 }} value={p}
-                    onChange={e => { const arr = [...content.aboutParaHe]; arr[i] = e.target.value; set('aboutParaHe', arr) }} />
-                  <button onClick={() => { const arr = content.aboutParaHe.filter((_, j) => j !== i); set('aboutParaHe', arr) }}
-                    style={{ background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.6)', width: 30, borderRadius: 8, cursor: 'pointer', flexShrink: 0 }}>✕</button>
+                  <textarea style={{ ...inp, resize: 'vertical', minHeight: 70, flex: 1 }} value={p} onChange={e => { const arr = [...content.aboutParaHe]; arr[i] = e.target.value; set('aboutParaHe', arr) }} />
+                  <button onClick={() => set('aboutParaHe', content.aboutParaHe.filter((_, j) => j !== i))} style={{ background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.6)', width: 30, borderRadius: 8, cursor: 'pointer', flexShrink: 0 }}>✕</button>
                 </div>
               </F>
             ))}
-            <button onClick={() => set('aboutParaHe', [...content.aboutParaHe, ''])}
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.4)', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>
-              + הוסף פסקה
-            </button>
+            <button onClick={() => set('aboutParaHe', [...content.aboutParaHe, ''])} style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.4)', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>+ הוסף פסקה</button>
           </div>
           <div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: '1rem', letterSpacing: 1 }}>English</div>
             {content.aboutParaEn.map((p, i) => (
               <F key={i} label={`Paragraph ${i + 1}`}>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <textarea style={{ ...inp, resize: 'vertical', minHeight: 70, flex: 1, direction: 'ltr' }} value={p}
-                    onChange={e => { const arr = [...content.aboutParaEn]; arr[i] = e.target.value; set('aboutParaEn', arr) }} />
-                  <button onClick={() => { const arr = content.aboutParaEn.filter((_, j) => j !== i); set('aboutParaEn', arr) }}
-                    style={{ background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.6)', width: 30, borderRadius: 8, cursor: 'pointer', flexShrink: 0 }}>✕</button>
+                  <textarea style={{ ...inp, resize: 'vertical', minHeight: 70, flex: 1, direction: 'ltr' }} value={p} onChange={e => { const arr = [...content.aboutParaEn]; arr[i] = e.target.value; set('aboutParaEn', arr) }} />
+                  <button onClick={() => set('aboutParaEn', content.aboutParaEn.filter((_, j) => j !== i))} style={{ background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.6)', width: 30, borderRadius: 8, cursor: 'pointer', flexShrink: 0 }}>✕</button>
                 </div>
               </F>
             ))}
-            <button onClick={() => set('aboutParaEn', [...content.aboutParaEn, ''])}
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.4)', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>
-              + Add paragraph
-            </button>
+            <button onClick={() => set('aboutParaEn', [...content.aboutParaEn, ''])} style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.4)', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>+ Add paragraph</button>
           </div>
         </div>
       </Section>
 
       {/* ── TESTIMONIALS ── */}
-      <Section id="testimonials" title="המלצות — Testimonials" open={open.has('testimonials')} onToggle={() => toggle('testimonials')}>
+      <Section title="המלצות — Testimonials" open={open.has('testimonials')} onToggle={() => toggle('testimonials')} locked={locked}>
         {content.testimonials.map((tc, i) => (
           <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '1.25rem', marginBottom: '1rem', position: 'relative' }}>
-            <button onClick={() => removeTestimonial(i)}
-              style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.6)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>✕</button>
+            <button onClick={() => removeTestimonial(i)} style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.6)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>✕</button>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginBottom: '1rem', letterSpacing: 1 }}>המלצה {i + 1}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
               <F label="שם"><input style={inp} value={tc.name} onChange={e => setTestimonial(i, 'name', e.target.value)} placeholder="שם הממליץ" /></F>
@@ -282,23 +354,16 @@ export default function ContentPage() {
               </div>
             </div>
             <div style={twoCol}>
-              <F label="טקסט — עברית">
-                <textarea style={{ ...inp, resize: 'vertical', minHeight: 80 }} value={tc.textHe} onChange={e => setTestimonial(i, 'textHe', e.target.value)} />
-              </F>
-              <F label="Text — English">
-                <textarea style={{ ...inp, resize: 'vertical', minHeight: 80, direction: 'ltr' }} value={tc.textEn} onChange={e => setTestimonial(i, 'textEn', e.target.value)} />
-              </F>
+              <F label="טקסט — עברית"><textarea style={{ ...inp, resize: 'vertical', minHeight: 80 }} value={tc.textHe} onChange={e => setTestimonial(i, 'textHe', e.target.value)} /></F>
+              <F label="Text — English"><textarea style={{ ...inp, resize: 'vertical', minHeight: 80, direction: 'ltr' }} value={tc.textEn} onChange={e => setTestimonial(i, 'textEn', e.target.value)} /></F>
             </div>
           </div>
         ))}
-        <button onClick={addTestimonial}
-          style={{ background: 'rgba(234,255,0,0.06)', border: '1.5px dashed rgba(234,255,0,0.2)', color: '#EAFF00', padding: '10px 20px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 700 }}>
-          + הוסף המלצה
-        </button>
+        <button onClick={addTestimonial} style={{ background: 'rgba(234,255,0,0.06)', border: '1.5px dashed rgba(234,255,0,0.2)', color: '#EAFF00', padding: '10px 20px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 700 }}>+ הוסף המלצה</button>
       </Section>
 
       {/* ── CONTACT ── */}
-      <Section id="contact" title="פרטי יצירת קשר" open={open.has('contact')} onToggle={() => toggle('contact')}>
+      <Section title="פרטי יצירת קשר" open={open.has('contact')} onToggle={() => toggle('contact')} locked={locked}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <F label="טלפון"><input style={inp} value={content.phone || ''} onChange={e => set('phone', e.target.value)} placeholder="054-0000000" dir="ltr" /></F>
           <F label="WhatsApp"><input style={inp} value={content.whatsapp || ''} onChange={e => set('whatsapp', e.target.value)} placeholder="054-0000000" dir="ltr" /></F>
@@ -307,6 +372,40 @@ export default function ContentPage() {
           <F label="Facebook"><input style={inp} value={content.facebook || ''} onChange={e => set('facebook', e.target.value)} placeholder="שם הדף או URL" dir="ltr" /></F>
         </div>
       </Section>
+
+      {/* History modal */}
+      {showHistory && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 16, width: 480, maxHeight: '80vh', display: 'flex', flexDirection: 'column', direction: 'rtl' }}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontWeight: 800, color: '#fff', fontSize: 16 }}>היסטוריית שמירות</div>
+              <button onClick={() => setShowHistory(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 20 }}>✕</button>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1, padding: '1rem 1.5rem' }}>
+              {history.length === 0 ? (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, textAlign: 'center', padding: '2rem 0' }}>אין גרסאות שמורות עדיין</p>
+              ) : history.map((entry, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div>
+                    <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>
+                      גרסה {history.length - i}
+                    </div>
+                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 2 }}>
+                      {new Date(entry.at).toLocaleString('he-IL')}
+                    </div>
+                  </div>
+                  <button onClick={() => restoreVersion(entry)} style={{ background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.2)', color: '#EAFF00', padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-heebo), sans-serif' }}>
+                    שחזר
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>* הגרסאות נשמרות בדפדפן זה. שחזור ידרוש שמירה ידנית לאחר מכן.</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
