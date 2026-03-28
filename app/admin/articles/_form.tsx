@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react'
 import Link from 'next/link'
 import type { Article } from '@/lib/db'
+import { compressImage } from '@/lib/compress'
 
 const F = ({ label, children }: { label: string, children: React.ReactNode }) => (
   <div style={{ marginBottom: '1rem' }}>
@@ -18,6 +19,10 @@ const inp: React.CSSProperties = {
   color: '#fff', padding: '11px 14px', borderRadius: 10,
   fontFamily: 'var(--font-heebo), sans-serif', fontSize: 14,
   outline: 'none', direction: 'rtl',
+}
+
+const sel: React.CSSProperties = {
+  ...inp, background: '#1C1C1C', cursor: 'pointer',
 }
 
 const ta: React.CSSProperties = {
@@ -40,12 +45,16 @@ export function ArticleForm({ initialData, onSave, saving }: Props) {
     bodyHe: '', bodyEn: '',
     categoryHe: 'הגנה עצמית', categoryEn: 'Self Defense',
     image: '',
+    bodyImage: '',
     date: new Date().toISOString().slice(0, 10),
     published: false,
+    author: '',
     ...(initialData || {}),
   })
   const [uploading, setUploading] = useState(false)
+  const [uploadingBody, setUploadingBody] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const fileBodyRef = useRef<HTMLInputElement>(null)
 
   function set(key: string, value: string | boolean) {
     setData(d => ({ ...d, [key]: value }))
@@ -61,12 +70,26 @@ export function ArticleForm({ initialData, onSave, saving }: Props) {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
+    const compressed = await compressImage(file)
     const fd = new FormData()
-    fd.append('file', file)
+    fd.append('file', compressed)
     const res = await fetch('/api/upload', { method: 'POST', body: fd })
     const { url } = await res.json()
     set('image', url)
     setUploading(false)
+  }
+
+  async function handleBodyImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingBody(true)
+    const compressed = await compressImage(file)
+    const fd = new FormData()
+    fd.append('file', compressed)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const { url } = await res.json()
+    set('bodyImage', url)
+    setUploadingBody(false)
   }
 
   return (
@@ -130,10 +153,47 @@ export function ArticleForm({ initialData, onSave, saving }: Props) {
         </div>
       </div>
 
+      {/* Body image */}
+      <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1rem' }}>תמונה נוספת במאמר (אופציונלי)</div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+          <div style={{
+            width: 120, height: 68, borderRadius: 10, flexShrink: 0,
+            background: '#1C1C1C', border: '1.5px solid rgba(255,255,255,0.08)',
+            backgroundImage: (data as { bodyImage?: string }).bodyImage ? `url(${(data as { bodyImage?: string }).bodyImage})` : 'none',
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'rgba(255,255,255,0.2)', fontSize: 24,
+          }}>
+            {!(data as { bodyImage?: string }).bodyImage && '🖼'}
+          </div>
+          <div style={{ flex: 1 }}>
+            <input ref={fileBodyRef} type="file" accept="image/*" onChange={handleBodyImageUpload} style={{ display: 'none' }} />
+            <button type="button" onClick={() => fileBodyRef.current?.click()} disabled={uploadingBody} style={{
+              background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.2)',
+              color: '#EAFF00', padding: '9px 20px', borderRadius: 8,
+              cursor: uploadingBody ? 'not-allowed' : 'pointer',
+              fontFamily: 'var(--font-heebo), sans-serif', fontSize: 13, fontWeight: 700,
+              display: 'block', marginBottom: 8,
+            }}>
+              {uploadingBody ? 'מעלה...' : '⬆ העלה תמונה'}
+            </button>
+            <input style={{ ...inp, fontSize: 12, padding: '8px 12px' }} value={(data as { bodyImage?: string }).bodyImage || ''} onChange={e => set('bodyImage', e.target.value)} placeholder="או הכנס URL ישירות..." />
+          </div>
+        </div>
+      </div>
+
+      {/* Author */}
+      <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <F label="כותב המאמר">
+          <input style={inp} value={data.author} onChange={e => set('author', e.target.value)} placeholder="שם הכותב" />
+        </F>
+      </div>
+
       {/* Meta */}
       <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
         <F label="קטגוריה">
-          <select style={{ ...inp, cursor: 'pointer' }} value={data.categoryHe} onChange={e => handleCat(e.target.value)}>
+          <select style={sel} value={data.categoryHe} onChange={e => handleCat(e.target.value)}>
             {CATS_HE.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </F>

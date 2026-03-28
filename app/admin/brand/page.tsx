@@ -23,7 +23,9 @@ export default function BrandPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadingLight, setUploadingLight] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const fileLightRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch('/api/content').then(r => r.json()).then(setContent)
@@ -45,13 +47,34 @@ export default function BrandPage() {
     setUploading(false)
   }
 
+  async function handleLogoLightUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingLight(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const { url } = await res.json()
+    set('brandLogoLight', url)
+    setUploadingLight(false)
+  }
+
   async function save() {
     if (!content) return
     setSaving(true)
     await fetch('/api/content', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(content),
+      body: JSON.stringify({
+        brandColor: content.brandColor,
+        brandColorSecondary: content.brandColorSecondary,
+        brandColorText: content.brandColorText,
+        brandBg: content.brandBg,
+        brandLogoUrl: content.brandLogoUrl,
+        brandLogoLight: content.brandLogoLight,
+        badgePillHe: content.badgePillHe,
+        badgePillEn: content.badgePillEn,
+      }),
     })
     setSaving(false)
     setSaved(true)
@@ -65,6 +88,20 @@ export default function BrandPage() {
 
   return (
     <div style={{ padding: '2.5rem', direction: 'rtl' }}>
+
+      {/* Warning banner */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        background: 'rgba(234,255,0,0.07)', border: '1.5px solid rgba(234,255,0,0.25)',
+        borderRadius: 12, padding: '12px 18px', marginBottom: '1.75rem',
+      }}>
+        <span style={{ fontSize: 20, flexShrink: 0 }}>⚠️</span>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#EAFF00', marginBottom: 2 }}>שים לב — הנך עורך את עיצוב האתר</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>שינויים כאן ישפיעו על המראה הכללי של האתר. שמור רק לאחר בדיקה.</div>
+        </div>
+      </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>מיתוג</h1>
         <button onClick={save} disabled={saving} style={{
@@ -101,6 +138,10 @@ export default function BrandPage() {
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: 10 }}>
               <div style={{ width: 100, height: 52, borderRadius: 8, background: '#EEECEA', border: '1.5px solid rgba(0,0,0,0.08)', backgroundImage: `url(${logoLightSrc})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
+                <input ref={fileLightRef} type="file" accept="image/*" onChange={handleLogoLightUpload} style={{ display: 'none' }} />
+                <button type="button" onClick={() => fileLightRef.current?.click()} disabled={uploadingLight} style={{ background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.2)', color: '#EAFF00', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 6 }}>
+                  {uploadingLight ? 'מעלה...' : '⬆ העלה'}
+                </button>
                 <input style={{ ...inp, fontSize: 11, padding: '6px 10px' }} value={content.brandLogoLight || ''} onChange={e => set('brandLogoLight', e.target.value)} placeholder="URL..." dir="ltr" />
               </div>
             </div>
@@ -134,18 +175,6 @@ export default function BrandPage() {
         </div>
       </div>
 
-      {/* Badge pill */}
-      <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1.25rem' }}>תג Hero</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          <F label="עברית">
-            <input style={inp} value={content.badgePillHe || ''} onChange={e => set('badgePillHe', e.target.value)} placeholder="מדריך מוסמך קרב מגע" />
-          </F>
-          <F label="English">
-            <input style={inp} value={content.badgePillEn || ''} onChange={e => set('badgePillEn', e.target.value)} placeholder="Certified Krav Maga Instructor" dir="ltr" />
-          </F>
-        </div>
-      </div>
     </div>
   )
 }

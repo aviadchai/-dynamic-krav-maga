@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const { password } = await request.json()
+  const { username, password } = await request.json()
+  const adminUser = process.env.ADMIN_USERNAME || 'admin'
   const adminPass = process.env.ADMIN_PASSWORD || 'admin123'
 
-  if (password !== adminPass) {
-    return NextResponse.json({ error: 'סיסמה שגויה' }, { status: 401 })
+  if (username !== adminUser || password !== adminPass) {
+    return NextResponse.json({ error: 'שם משתמש או סיסמה שגויים' }, { status: 401 })
   }
 
   const res = NextResponse.json({ ok: true })

@@ -1,6 +1,7 @@
 "use client"
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { Instructor } from '@/lib/db'
+import { compressImage } from '@/lib/compress'
 
 const F = ({ label, children }: { label: string, children: React.ReactNode }) => (
   <div style={{ marginBottom: '1rem' }}>
@@ -28,6 +29,8 @@ export default function InstructorsPage() {
   const [editing, setEditing] = useState<Instructor | null>(null)
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   async function load() {
     const data = await fetch('/api/instructors').then(r => r.json())
@@ -71,9 +74,32 @@ export default function InstructorsPage() {
     load()
   }
 
+  async function handleImgUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; if (!file) return
+    setUploading(true)
+    const compressed = await compressImage(file)
+    const fd = new FormData(); fd.append('file', compressed)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const { url } = await res.json()
+    set('image', url); setUploading(false)
+  }
+
   async function del(id: string) {
     if (!confirm('למחוק את המאמן?')) return
     await fetch(`/api/instructors/${id}`, { method: 'DELETE' })
+    load()
+  }
+
+  async function moveOrder(id: string, direction: 'up' | 'down') {
+    const sorted = [...instructors].sort((a, b) => a.order - b.order)
+    const idx = sorted.findIndex(i => i.id === id)
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= sorted.length) return
+    const a = sorted[idx], b = sorted[swapIdx]
+    await Promise.all([
+      fetch(`/api/instructors/${a.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...a, order: b.order }) }),
+      fetch(`/api/instructors/${b.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...b, order: a.order }) }),
+    ])
     load()
   }
 
@@ -92,7 +118,7 @@ export default function InstructorsPage() {
 
       {/* Instructor cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        {instructors.map(inst => (
+        {[...instructors].sort((a, b) => a.order - b.order).map((inst, idx, arr) => (
           <div key={inst.id} style={{
             background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)',
             borderRadius: 14, padding: '1.5rem',
@@ -108,9 +134,14 @@ export default function InstructorsPage() {
               }}>
                 {!inst.image && '👤'}
               </div>
-              <div>
+              <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 800, color: '#fff', fontSize: 15 }}>{inst.nameHe}</div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{inst.roleHe}</div>
+              </div>
+              {/* Order controls */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <button onClick={() => moveOrder(inst.id, 'up')} disabled={idx === 0} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: idx === 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)', width: 28, height: 28, borderRadius: 6, cursor: idx === 0 ? 'default' : 'pointer', fontSize: 13 }}>↑</button>
+                <button onClick={() => moveOrder(inst.id, 'down')} disabled={idx === arr.length - 1} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: idx === arr.length - 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)', width: 28, height: 28, borderRadius: 6, cursor: idx === arr.length - 1 ? 'default' : 'pointer', fontSize: 13 }}>↓</button>
               </div>
             </div>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginBottom: '1rem' }}>
@@ -151,7 +182,16 @@ export default function InstructorsPage() {
             <F label="Bio"><textarea style={{ ...inp, resize: 'vertical', minHeight: 100, lineHeight: 1.7, direction: 'ltr' }} value={form.bioEn} onChange={e => set('bioEn', e.target.value)} placeholder="A bit about me..." /></F>
           </div>
         </div>
-        <F label="תמונה (URL)"><input style={inp} value={form.image} onChange={e => set('image', e.target.value)} placeholder="/images/instructor.jpg" /></F>
+        <F label="תמונה">
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {form.image && <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#1C1C1C', backgroundImage: `url(${form.image})`, backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0, border: '1.5px solid rgba(255,255,255,0.08)' }} />}
+            <input ref={fileRef} type="file" accept="image/*" onChange={handleImgUpload} style={{ display: 'none' }} />
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{ background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.2)', color: '#EAFF00', padding: '8px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12, fontWeight: 700, flexShrink: 0, whiteSpace: 'nowrap' }}>
+              {uploading ? 'מעלה...' : '⬆ העלה'}
+            </button>
+            <input style={{ ...inp, flex: 1, fontSize: 12 }} value={form.image} onChange={e => set('image', e.target.value)} placeholder="או URL..." dir="ltr" />
+          </div>
+        </F>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
           {editing && (
             <button onClick={() => { setEditing(null); setForm(empty) }} style={{

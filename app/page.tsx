@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Article, Instructor, SiteContent, Testimonial, Reel } from "@/lib/db";
 
 type Lang = "he" | "en";
@@ -16,6 +16,7 @@ export default function Home() {
 
   type Service = { n: string; he: string; en: string; dHe: string; dEn: string; bodyHe: string; bodyEn: string; image?: string }
   const [servicePopup, setServicePopup] = useState<Service | null>(null);
+  const reelsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const nc = { cache: 'no-store' as const }
@@ -656,60 +657,71 @@ export default function Home() {
             <div className="he-only"><div className="sec-h-he">רילס</div></div>
             <div className="en-only"><div className="sec-h">OUR REELS</div></div>
           </div>
-          <div className="reels-grid">
-            {content!.reels.map(reel => {
-              const isYt = reel.platform === 'youtube'
-              const isFbPost = reel.platform === 'facebook' && !reel.url.includes('/videos/') && !reel.url.includes('fb.watch')
-              const embedUrl = (() => {
-                const { url, platform } = reel
-                if (platform === 'instagram') {
-                  const m = url.match(/\/(reel|p)\/([A-Za-z0-9_-]+)/)
-                  if (m) return `https://www.instagram.com/${m[1]}/${m[2]}/embed/`
-                }
-                if (platform === 'youtube') {
-                  let id = ''
-                  if (url.includes('watch?v=')) id = url.split('watch?v=')[1].split('&')[0]
-                  else if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split('?')[0]
-                  else if (url.includes('/shorts/')) id = url.split('/shorts/')[1].split('?')[0]
-                  if (id) return `https://www.youtube.com/embed/${id}`
-                }
-                if (platform === 'tiktok') {
-                  const m = url.match(/\/video\/(\d+)/)
-                  if (m) return `https://www.tiktok.com/embed/v2/${m[1]}`
-                }
-                if (platform === 'facebook' && (url.includes('/videos/') || url.includes('fb.watch'))) {
-                  return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=320`
-                }
-                return url
-              })()
-              if (isFbPost) return (
-                <div key={reel.id} className={`reel-item${isYt ? ' reel-item-wide' : ''}`}>
-                  <a href={reel.url} target="_blank" rel="noreferrer" className="reel-fb-card" style={{ flex: 1 }}>
-                    <div className="fb-card-inner">
-                      <div className="fb-card-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          <div className="reels-outer">
+            <button
+              className="reel-nav-btn reel-nav-prev"
+              onClick={() => { reelsRef.current?.scrollBy({ left: -340, behavior: 'smooth' }) }}
+              aria-label="Previous"
+            >‹</button>
+            <div className="reels-grid" ref={reelsRef}>
+              {[...content!.reels].reverse().map(reel => {
+                const isFbPost = reel.platform === 'facebook' && !reel.url.includes('/videos/') && !reel.url.includes('fb.watch')
+                const embedUrl = (() => {
+                  const { url, platform } = reel
+                  if (platform === 'instagram') {
+                    const m = url.match(/\/(reel|p)\/([A-Za-z0-9_-]+)/)
+                    if (m) return `https://www.instagram.com/${m[1]}/${m[2]}/embed/`
+                  }
+                  if (platform === 'youtube') {
+                    let id = ''
+                    if (url.includes('watch?v=')) id = url.split('watch?v=')[1].split('&')[0]
+                    else if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split('?')[0]
+                    else if (url.includes('/shorts/')) id = url.split('/shorts/')[1].split('?')[0]
+                    if (id) return `https://www.youtube.com/embed/${id}`
+                  }
+                  if (platform === 'tiktok') {
+                    const m = url.match(/\/video\/(\d+)/)
+                    if (m) return `https://www.tiktok.com/embed/v2/${m[1]}`
+                  }
+                  if (platform === 'facebook' && (url.includes('/videos/') || url.includes('fb.watch'))) {
+                    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=320`
+                  }
+                  return url
+                })()
+                if (isFbPost) return (
+                  <div key={reel.id} className="reel-item">
+                    <a href={reel.url} target="_blank" rel="noreferrer" className="reel-fb-card" style={{ flex: 1 }}>
+                      <div className="fb-card-inner">
+                        <div className="fb-card-icon">
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                        </div>
+                        <div className="fb-card-label">{reel.title || 'פוסט פייסבוק'}</div>
+                        <div className="fb-card-btn">צפה בפייסבוק ↗</div>
                       </div>
-                      <div className="fb-card-label">{reel.title || 'פוסט פייסבוק'}</div>
-                      <div className="fb-card-btn">צפה בפייסבוק ↗</div>
-                    </div>
-                  </a>
-                  {reel.title && <div className="reel-title">{reel.title}</div>}
-                </div>
-              )
-              return (
-                <div key={reel.id} className={`reel-item${isYt ? ' reel-item-wide' : ''}`}>
-                  <div className={`reel-wrap${isYt ? ' reel-wide' : ''}`}>
-                    <iframe
-                      src={embedUrl}
-                      allowFullScreen
-                      scrolling="no"
-                      allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                    />
+                    </a>
+                    {reel.title && <div className="reel-title">{reel.title}</div>}
                   </div>
-                  {reel.title && <div className="reel-title">{reel.title}</div>}
-                </div>
-              )
-            })}
+                )
+                return (
+                  <div key={reel.id} className="reel-item">
+                    <div className="reel-wrap">
+                      <iframe
+                        src={embedUrl}
+                        allowFullScreen
+                        scrolling="no"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                      />
+                    </div>
+                    {reel.title && <div className="reel-title">{reel.title}</div>}
+                  </div>
+                )
+              })}
+            </div>
+            <button
+              className="reel-nav-btn reel-nav-next"
+              onClick={() => { reelsRef.current?.scrollBy({ left: 340, behavior: 'smooth' }) }}
+              aria-label="Next"
+            >›</button>
           </div>
         </section>
       )}

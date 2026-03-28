@@ -16,8 +16,10 @@ export type Article = {
   categoryHe: string
   categoryEn: string
   image: string
+  bodyImage?: string
   date: string
   published: boolean
+  author: string
 }
 
 export type Instructor = {
@@ -32,16 +34,62 @@ export type Instructor = {
   order: number
 }
 
+export type Reel = {
+  id: string
+  url: string
+  platform: string
+  title: string
+}
+
+export type Testimonial = {
+  name: string
+  roleHe: string
+  roleEn: string
+  textHe: string
+  textEn: string
+}
+
 export type SiteContent = {
+  // Hero
+  heroTitleHe: string
+  heroTitleEn: string
   heroSubHe: string
   heroSubEn: string
+  heroBtnPrimaryHe: string
+  heroBtnPrimaryEn: string
+  heroBtnSecondaryHe: string
+  heroBtnSecondaryEn: string
+  heroImage: string
+  heroNum1Val: string
+  heroNum1LblHe: string
+  heroNum1LblEn: string
+  heroNum2Val: string
+  heroNum2LblHe: string
+  heroNum2LblEn: string
+  heroNum3Val: string
+  heroNum3LblHe: string
+  heroNum3LblEn: string
+  // About
+  aboutTitleHe: string
+  aboutTitleEn: string
+  aboutTagHe: string
+  aboutTagEn: string
+  aboutExcerptHe: string
+  aboutExcerptEn: string
   aboutParaHe: string[]
   aboutParaEn: string[]
+  aboutImage: string
+  // Testimonials
+  testimonials: Testimonial[]
+  // Reels
+  reels: Reel[]
+  // Contact
   phone: string
   email: string
   instagram: string
   facebook: string
   whatsapp: string
+  // Brand
   brandColor: string
   brandColorSecondary: string
   brandColorText: string
@@ -53,10 +101,41 @@ export type SiteContent = {
 }
 
 const defaultContent: SiteContent = {
+  heroTitleHe: 'הגן על\nעצמך\nבאמת',
+  heroTitleEn: 'DEFEND\nYOUR\nSELF',
   heroSubHe: '',
   heroSubEn: '',
+  heroBtnPrimaryHe: 'התחל עכשיו',
+  heroBtnPrimaryEn: 'Get Started',
+  heroBtnSecondaryHe: 'גלה עוד',
+  heroBtnSecondaryEn: 'Learn More',
+  heroImage: '/images/hero.jpg',
+  heroNum1Val: '15+',
+  heroNum1LblHe: 'שנות ניסיון',
+  heroNum1LblEn: 'Years Exp.',
+  heroNum2Val: '500+',
+  heroNum2LblHe: 'תלמידים',
+  heroNum2LblEn: 'Students',
+  heroNum3Val: '100%',
+  heroNum3LblHe: 'מעשי',
+  heroNum3LblEn: 'Practical',
+  aboutTitleHe: 'לחימה\nשמגיעה\nמהשטח',
+  aboutTitleEn: 'FIGHTING\nFROM THE\nFIELD',
+  aboutTagHe: 'עלינו',
+  aboutTagEn: 'About Us',
+  aboutExcerptHe: '',
+  aboutExcerptEn: '',
   aboutParaHe: [],
   aboutParaEn: [],
+  aboutImage: '/images/about.jpg',
+  testimonials: [
+    { name: 'שירה כ. / Shira K.', roleHe: 'תלמידה פרטית', roleEn: 'Private Student', textHe: 'מאור הוא מדריך יוצא דופן. בזכותו הרגשתי ביטחון עצמי שלא הכרתי. ממליצה בחום לכולם.', textEn: 'Maor is an exceptional instructor. Thanks to him I found confidence I never had. Highly recommended.' },
+    { name: 'דניאל מ. / Daniel M.', roleHe: 'מנהל HR', roleEn: 'HR Manager', textHe: 'הסדנה לצוות שלנו הייתה חוויה בלתי נשכחת. מקצועי, מרתק ומעשי לגמרי. נחזור בטח.', textEn: 'The workshop for our team was unforgettable. Professional, engaging, completely practical.' },
+    { name: 'רחל א. / Rachel A.', roleHe: 'אמא לתלמיד', roleEn: 'Parent', textHe: 'שלחתי את בני למאור. אחרי חודש רואים שינוי אדיר — הרבה יותר בטוח ומרוכז בכל דבר.', textEn: 'Sent my son to Maor. After a month the change is huge — so much more confident and focused.' },
+  ],
+  reels: [
+    { id: '1', url: 'https://www.instagram.com/reel/DTiFg_OlJFk/', platform: 'instagram', title: '' },
+  ],
   phone: '',
   email: '',
   instagram: '',
@@ -153,18 +232,24 @@ export const db = {
     get: async (): Promise<SiteContent> => {
       const { data } = await supabase
         .from('site_content')
-        .select('*')
+        .select('content_data')
         .eq('id', 1)
         .single()
-      return (data as SiteContent) || defaultContent
+      const stored = (data as { content_data?: Partial<SiteContent> } | null)?.content_data || {}
+      return { ...defaultContent, ...stored }
     },
-    update: async (data: Partial<SiteContent>): Promise<SiteContent> => {
-      const { data: updated } = await supabase
+    update: async (newData: Partial<SiteContent>): Promise<SiteContent> => {
+      const { data: existing } = await supabase
         .from('site_content')
-        .upsert({ id: 1, ...data })
-        .select()
+        .select('content_data')
+        .eq('id', 1)
         .single()
-      return updated as SiteContent
+      const stored = (existing as { content_data?: Partial<SiteContent> } | null)?.content_data || {}
+      const merged: SiteContent = { ...defaultContent, ...stored, ...newData }
+      await supabase
+        .from('site_content')
+        .upsert({ id: 1, content_data: merged })
+      return merged
     },
   },
 }
