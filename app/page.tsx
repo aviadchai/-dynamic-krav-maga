@@ -14,11 +14,12 @@ export default function Home() {
   const [popup, setPopup] = useState<Article | null>(null);
 
   useEffect(() => {
-    fetch("/api/articles").then(r => r.json()).then((data: Article[]) =>
+    const nc = { cache: 'no-store' as const }
+    fetch("/api/articles", nc).then(r => r.json()).then((data: Article[]) =>
       setArticles(data.filter(a => a.published))
     );
-    fetch("/api/instructors").then(r => r.json()).then(setInstructors);
-    fetch("/api/content").then(r => r.json()).then(setContent);
+    fetch("/api/instructors", nc).then(r => r.json()).then(setInstructors);
+    fetch("/api/content", nc).then(r => r.json()).then(setContent);
   }, []);
 
   // Close popup on ESC
@@ -176,7 +177,7 @@ export default function Home() {
     <div className={`lang-${lang} lang-fade${fading ? " lang-fading" : ""}`}>
 
       {/* NAV — toggle left | links+CTA+logo right */}
-      <nav>
+      <nav className="site-nav">
         <div className="lang-sw">
           <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>עברית</button>
           <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>English</button>

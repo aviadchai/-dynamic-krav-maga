@@ -50,7 +50,7 @@ body {
 .lang-he .c-detail-row { text-align: unset; }
 
 /* ── NAV ── toggle left | links+logo right */
-nav {
+nav.site-nav {
   position: sticky; top: 0; z-index: 999;
   height: 68px;
   display: grid;
