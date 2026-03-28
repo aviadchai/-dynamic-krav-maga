@@ -42,6 +42,11 @@ export type SiteContent = {
   instagram: string
   facebook: string
   whatsapp: string
+  brandColor: string
+  brandBg: string
+  brandLogoUrl: string
+  badgePillHe: string
+  badgePillEn: string
 }
 
 const defaultContent: SiteContent = {
@@ -54,6 +59,11 @@ const defaultContent: SiteContent = {
   instagram: '',
   facebook: '',
   whatsapp: '',
+  brandColor: '#EAFF00',
+  brandBg: '#0A0A0A',
+  brandLogoUrl: '',
+  badgePillHe: 'מדריך מוסמך קרב מגע',
+  badgePillEn: 'Certified Krav Maga Instructor',
 }
 
 export const db = {

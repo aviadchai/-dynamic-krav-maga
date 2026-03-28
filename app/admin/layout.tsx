@@ -7,6 +7,7 @@ const NAV = [
   { href: '/admin/articles', label: 'מאמרים', icon: '✍' },
   { href: '/admin/instructors', label: 'מאמנים', icon: '👤' },
   { href: '/admin/content', label: 'תוכן האתר', icon: '✏' },
+  { href: '/admin/brand', label: 'מיתוג', icon: '🎨' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

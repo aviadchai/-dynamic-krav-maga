@@ -39,8 +39,15 @@ export default function Home() {
 
   const t = (he: string, en: string) => lang === "he" ? he : en;
 
+  const brandColor = content?.brandColor || '#EAFF00'
+  const brandBg = content?.brandBg || '#0A0A0A'
+  const logoSrc = content?.brandLogoUrl || '/images/logo.png'
+
   return (
     <>
+      {/* Dynamic brand colors */}
+      <style>{`:root { --lime: ${brandColor}; --black: ${brandBg}; }`}</style>
+
       {/* ARTICLE POPUP — outside fade wrapper so opacity doesn't affect it */}
       {popup && (
         <div
@@ -168,21 +175,9 @@ export default function Home() {
 
     <div className={`lang-${lang} lang-fade${fading ? " lang-fading" : ""}`}>
 
-      {/* NAV */}
+      {/* NAV — links always left, logo always right */}
       <nav>
-        {/* Left: logo */}
-        <div className="nav-logo">
-          <img src="/images/logo.png" alt="Dynamic Krav Maga" />
-        </div>
-
-        {/* Center: language toggle */}
-        <div className="lang-sw">
-          <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>עב</button>
-          <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>EN</button>
-        </div>
-
-        {/* Right: links + CTA */}
-        <div className="nav-right">
+        <div className="nav-left">
           <ul className="nav-center">
             <li><a href="#about"><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
             <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
@@ -194,6 +189,13 @@ export default function Home() {
             <span className="en-only">Contact</span>
           </a>
         </div>
+        <div className="lang-sw">
+          <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>עב</button>
+          <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>EN</button>
+        </div>
+        <div className="nav-logo">
+          <img src={logoSrc} alt="Dynamic Krav Maga" />
+        </div>
       </nav>
 
       {/* HERO */}
@@ -201,8 +203,8 @@ export default function Home() {
         <div className="hero-left">
           <div className="badge-pill">
             <span className="dot-live"></span>
-            <span className="pill-txt he-only">מדריך מוסמך קרב מגע</span>
-            <span className="pill-txt en-only">Certified Krav Maga Instructor</span>
+            <span className="pill-txt he-only">{content?.badgePillHe || 'מדריך מוסמך קרב מגע'}</span>
+            <span className="pill-txt en-only">{content?.badgePillEn || 'Certified Krav Maga Instructor'}</span>
           </div>
           <div className="he-only">
             <div className="h1-he">הגן על<br /><span className="lime">עצמך</span><br />באמת</div>
@@ -229,31 +231,19 @@ export default function Home() {
         </div>
       </div>
 
-      {/* COLOR BREAK */}
-      <div className="color-break">
-        <div className="he-only">קרב מגע דינמי — לא ספורט. לא תחרות. חיים.</div>
-        <div className="en-only">DYNAMIC KRAV MAGA — NOT SPORT. NOT COMPETITION. REAL LIFE.</div>
-      </div>
-
       {/* ABOUT */}
       <section className="about" id="about">
         <div className="about-img">
           <img src="/images/about.jpg" alt="Maor" />
         </div>
         <div className="about-body">
-          <div className="sec-tag he-only">עלינו</div>
-          <div className="sec-tag en-only">About Us</div>
-          <div className="he-only"><div className="sec-h-he">לחימה<br />שמגיעה<br />מהשטח</div></div>
-          <div className="en-only"><div className="sec-h">FIGHTING<br />FROM THE<br />FIELD</div></div>
-          <div className="accent-bar"></div>
-          {content?.aboutParaHe.map((p, i) => <p key={i} className="he-only">{p}</p>)}
-          {content?.aboutParaEn.map((p, i) => <p key={i} className="en-only">{p}</p>)}
-          <div className="skill-chips">
-            <span className="chip he-only">הגנה עצמית</span><span className="chip en-only">Self Defense</span>
-            <span className="chip he-only">כל הגילאים</span><span className="chip en-only">All Ages</span>
-            <span className="chip he-only">מוסמך</span><span className="chip en-only">Certified</span>
-            <span className="chip he-only">מעשי 100%</span><span className="chip en-only">100% Practical</span>
-          </div>
+          <div className="about-tag he-only">עלינו</div>
+          <div className="about-tag en-only">About Us</div>
+          <div className="he-only"><div className="about-h">לחימה<br />שמגיעה<br />מהשטח</div></div>
+          <div className="en-only"><div className="about-h">FIGHTING<br />FROM THE<br />FIELD</div></div>
+          <div className="about-bar"></div>
+          {content?.aboutParaHe.map((p, i) => <p key={i} className="he-only about-p">{p}</p>)}
+          {content?.aboutParaEn.map((p, i) => <p key={i} className="en-only about-p">{p}</p>)}
         </div>
       </section>
 
