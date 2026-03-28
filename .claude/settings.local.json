@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(npm run:*)",
+      "Bash(vercel:*)",
+      "Bash(npm list:*)",
+      "Bash(npx vercel:*)",
+      "Bash(gh --version)",
+      "Bash(gh auth:*)",
+      "Bash(cd:*)",
+      "Bash(npm install:*)"
+    ]
+  }
+}

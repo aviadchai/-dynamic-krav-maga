@@ -71,8 +71,8 @@ export default function Home() {
               background: "#131313",
               border: "1px solid rgba(255,255,255,0.09)",
               borderRadius: 22,
-              width: "100%", maxWidth: 780,
-              maxHeight: "88vh",
+              width: "100%", maxWidth: 1100,
+              maxHeight: "92vh",
               display: "flex", flexDirection: "column",
               direction: "rtl",
               overflow: "hidden",
@@ -140,6 +140,26 @@ export default function Home() {
                 }}>
                   {popup.bodyHe}
                 </div>
+
+                {/* Share buttons */}
+                <div style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 10, alignItems: "center" }}>
+                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 2, textTransform: "uppercase", marginLeft: 8 }}>שתף</span>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(popup.titleHe + " " + window.location.href)}`}
+                    target="_blank" rel="noreferrer"
+                    style={{ background: "#25D366", color: "#fff", padding: "8px 18px", borderRadius: 50, fontSize: 12, fontWeight: 700, textDecoration: "none" }}
+                  >WhatsApp</a>
+                  <a
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                    target="_blank" rel="noreferrer"
+                    style={{ background: "#1877F2", color: "#fff", padding: "8px 18px", borderRadius: 50, fontSize: 12, fontWeight: 700, textDecoration: "none" }}
+                  >Facebook</a>
+                  <a
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(popup.titleHe)}&url=${encodeURIComponent(window.location.href)}`}
+                    target="_blank" rel="noreferrer"
+                    style={{ background: "#000", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", padding: "8px 18px", borderRadius: 50, fontSize: 12, fontWeight: 700, textDecoration: "none" }}
+                  >X</a>
+                </div>
               </div>
             </div>
           </div>
@@ -164,10 +184,10 @@ export default function Home() {
         {/* Right: links + CTA */}
         <div className="nav-right">
           <ul className="nav-center">
-            <li><a href="#about"><span className="he-only">אודות</span><span className="en-only">About</span></a></li>
+            <li><a href="#about"><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
             <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
-            {articles.length > 0 && <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>}
             <li><a href="#testimonials"><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
+            {articles.length > 0 && <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>}
           </ul>
           <a href="#contact" className="cta-nav">
             <span className="he-only">צור קשר</span>
@@ -221,8 +241,8 @@ export default function Home() {
           <img src="/images/about.jpg" alt="Maor" />
         </div>
         <div className="about-body">
-          <div className="sec-tag he-only">אודות</div>
-          <div className="sec-tag en-only">About</div>
+          <div className="sec-tag he-only">עלינו</div>
+          <div className="sec-tag en-only">About Us</div>
           <div className="he-only"><div className="sec-h-he">לחימה<br />שמגיעה<br />מהשטח</div></div>
           <div className="en-only"><div className="sec-h">FIGHTING<br />FROM THE<br />FIELD</div></div>
           <div className="accent-bar"></div>

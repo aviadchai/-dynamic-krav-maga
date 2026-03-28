@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const article = db.articles.get(id)
+  const article = await db.articles.get(id)
   if (!article) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json(article)
 }
@@ -19,7 +19,7 @@ export async function PUT(
 ) {
   const { id } = await params
   const data = await request.json()
-  const article = db.articles.update(id, data)
+  const article = await db.articles.update(id, data)
   if (!article) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json(article)
 }
@@ -29,7 +29,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const ok = db.articles.delete(id)
+  const ok = await db.articles.delete(id)
   if (!ok) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json({ ok: true })
 }

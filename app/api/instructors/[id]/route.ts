@@ -9,7 +9,7 @@ export async function PUT(
 ) {
   const { id } = await params
   const data = await request.json()
-  const instructor = db.instructors.update(id, data)
+  const instructor = await db.instructors.update(id, data)
   if (!instructor) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json(instructor)
 }
@@ -19,7 +19,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const ok = db.instructors.delete(id)
+  const ok = await db.instructors.delete(id)
   if (!ok) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json({ ok: true })
 }

@@ -1,20 +1,9 @@
-import fs from 'fs'
-import path from 'path'
+import { createClient } from '@supabase/supabase-js'
 
-const DATA = path.join(process.cwd(), 'data')
-
-function read<T>(file: string, def: T): T {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(DATA, file), 'utf8'))
-  } catch {
-    return def
-  }
-}
-
-function write<T>(file: string, data: T) {
-  fs.mkdirSync(DATA, { recursive: true })
-  fs.writeFileSync(path.join(DATA, file), JSON.stringify(data, null, 2))
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export type Article = {
   id: string
@@ -56,77 +45,110 @@ export type SiteContent = {
 }
 
 const defaultContent: SiteContent = {
-  heroSubHe: 'קרב מגע דינמי עם מאור לוי — שיטה מעשית לכל גיל ורמה.',
-  heroSubEn: 'Dynamic Krav Maga with Maor Levi — a practical system for every age and level.',
-  aboutParaHe: ['מאור לוי הוא מדריך קרב מגע בכיר עם שנים של ניסיון אמיתי.'],
-  aboutParaEn: ['Maor Levi is a senior Krav Maga instructor with years of real field experience.'],
-  phone: '054-4702762',
+  heroSubHe: '',
+  heroSubEn: '',
+  aboutParaHe: [],
+  aboutParaEn: [],
+  phone: '',
   email: '',
-  instagram: '@dynamickravmaga',
+  instagram: '',
   facebook: '',
-  whatsapp: '054-4702762',
+  whatsapp: '',
 }
 
 export const db = {
   articles: {
-    list: (): Article[] => read<Article[]>('articles.json', []),
-    get: (id: string): Article | undefined =>
-      read<Article[]>('articles.json', []).find(a => a.id === id),
-    create: (data: Omit<Article, 'id'>): Article => {
-      const articles = read<Article[]>('articles.json', [])
-      const article: Article = { ...data, id: Date.now().toString() }
-      write('articles.json', [...articles, article])
-      return article
+    list: async (): Promise<Article[]> => {
+      const { data } = await supabase
+        .from('articles')
+        .select('*')
+        .order('created_at', { ascending: false })
+      return (data || []) as Article[]
     },
-    update: (id: string, data: Partial<Article>): Article | null => {
-      const articles = read<Article[]>('articles.json', [])
-      const idx = articles.findIndex(a => a.id === id)
-      if (idx === -1) return null
-      articles[idx] = { ...articles[idx], ...data }
-      write('articles.json', articles)
-      return articles[idx]
+    get: async (id: string): Promise<Article | undefined> => {
+      const { data } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('id', id)
+        .single()
+      return data as Article | undefined
     },
-    delete: (id: string): boolean => {
-      const articles = read<Article[]>('articles.json', [])
-      const filtered = articles.filter(a => a.id !== id)
-      if (filtered.length === articles.length) return false
-      write('articles.json', filtered)
-      return true
+    create: async (data: Omit<Article, 'id'>): Promise<Article> => {
+      const { data: article } = await supabase
+        .from('articles')
+        .insert(data)
+        .select()
+        .single()
+      return article as Article
+    },
+    update: async (id: string, data: Partial<Article>): Promise<Article | null> => {
+      const { data: article } = await supabase
+        .from('articles')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single()
+      return article as Article | null
+    },
+    delete: async (id: string): Promise<boolean> => {
+      const { error } = await supabase.from('articles').delete().eq('id', id)
+      return !error
     },
   },
   instructors: {
-    list: (): Instructor[] => read<Instructor[]>('instructors.json', []),
-    get: (id: string): Instructor | undefined =>
-      read<Instructor[]>('instructors.json', []).find(i => i.id === id),
-    create: (data: Omit<Instructor, 'id'>): Instructor => {
-      const instructors = read<Instructor[]>('instructors.json', [])
-      const instructor: Instructor = { ...data, id: Date.now().toString() }
-      write('instructors.json', [...instructors, instructor])
-      return instructor
+    list: async (): Promise<Instructor[]> => {
+      const { data } = await supabase
+        .from('instructors')
+        .select('*')
+        .order('order')
+      return (data || []) as Instructor[]
     },
-    update: (id: string, data: Partial<Instructor>): Instructor | null => {
-      const instructors = read<Instructor[]>('instructors.json', [])
-      const idx = instructors.findIndex(i => i.id === id)
-      if (idx === -1) return null
-      instructors[idx] = { ...instructors[idx], ...data }
-      write('instructors.json', instructors)
-      return instructors[idx]
+    get: async (id: string): Promise<Instructor | undefined> => {
+      const { data } = await supabase
+        .from('instructors')
+        .select('*')
+        .eq('id', id)
+        .single()
+      return data as Instructor | undefined
     },
-    delete: (id: string): boolean => {
-      const instructors = read<Instructor[]>('instructors.json', [])
-      const filtered = instructors.filter(i => i.id !== id)
-      if (filtered.length === instructors.length) return false
-      write('instructors.json', filtered)
-      return true
+    create: async (data: Omit<Instructor, 'id'>): Promise<Instructor> => {
+      const { data: instructor } = await supabase
+        .from('instructors')
+        .insert(data)
+        .select()
+        .single()
+      return instructor as Instructor
+    },
+    update: async (id: string, data: Partial<Instructor>): Promise<Instructor | null> => {
+      const { data: instructor } = await supabase
+        .from('instructors')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single()
+      return instructor as Instructor | null
+    },
+    delete: async (id: string): Promise<boolean> => {
+      const { error } = await supabase.from('instructors').delete().eq('id', id)
+      return !error
     },
   },
   content: {
-    get: (): SiteContent => read<SiteContent>('content.json', defaultContent),
-    update: (data: Partial<SiteContent>): SiteContent => {
-      const current = read<SiteContent>('content.json', defaultContent)
-      const updated = { ...current, ...data }
-      write('content.json', updated)
-      return updated
+    get: async (): Promise<SiteContent> => {
+      const { data } = await supabase
+        .from('site_content')
+        .select('*')
+        .eq('id', 1)
+        .single()
+      return (data as SiteContent) || defaultContent
+    },
+    update: async (data: Partial<SiteContent>): Promise<SiteContent> => {
+      const { data: updated } = await supabase
+        .from('site_content')
+        .upsert({ id: 1, ...data })
+        .select()
+        .single()
+      return updated as SiteContent
     },
   },
 }

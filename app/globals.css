@@ -331,9 +331,9 @@ nav {
 .vid-lbl { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 2px; text-transform: uppercase; }
 
 /* ── ARTICLES ── */
-.articles { background: var(--black); padding: 5rem 1.5rem; }
-.art-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; padding: 0 1rem; }
-.agrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.articles { background: var(--black); padding: 5rem 3rem; }
+.art-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; }
+.agrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
 .ac {
   background: var(--mid);
   border: 1.5px solid rgba(255,255,255,0.06);
