@@ -60,7 +60,8 @@ export default function BrandPage() {
 
   if (!content) return <div style={{ padding: '2.5rem', color: 'rgba(255,255,255,0.3)' }}>טוען...</div>
 
-  const logoSrc = content.brandLogoUrl || '/images/logo.png'
+  const logoDark = content.brandLogoUrl || '/images/logo.png'
+  const logoLightSrc = content.brandLogoLight || logoDark
 
   return (
     <div style={{ padding: '2.5rem', direction: 'rtl' }}>
@@ -76,28 +77,33 @@ export default function BrandPage() {
         </button>
       </div>
 
-      {/* Logo */}
+      {/* Logos */}
       <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
         <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1.25rem' }}>לוגו</div>
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <div style={{
-            width: 120, height: 60, borderRadius: 10, flexShrink: 0,
-            background: '#1C1C1C', border: '1.5px solid rgba(255,255,255,0.08)',
-            backgroundImage: `url(${logoSrc})`,
-            backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
-          }} />
-          <div style={{ flex: 1 }}>
-            <input ref={fileRef} type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
-            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{
-              background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.2)',
-              color: '#EAFF00', padding: '9px 20px', borderRadius: 8,
-              cursor: uploading ? 'not-allowed' : 'pointer',
-              fontFamily: 'var(--font-heebo), sans-serif', fontSize: 13, fontWeight: 700,
-              display: 'block', marginBottom: 8,
-            }}>
-              {uploading ? 'מעלה...' : '⬆ העלה לוגו'}
-            </button>
-            <input style={{ ...inp, fontSize: 12, padding: '8px 12px' }} value={content.brandLogoUrl || ''} onChange={e => set('brandLogoUrl', e.target.value)} placeholder="או URL ישיר..." dir="ltr" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          {/* Dark bg logo */}
+          <div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 10, letterSpacing: 1 }}>גרסה לרקע כהה</div>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ width: 100, height: 52, borderRadius: 8, background: '#0A0A0A', border: '1.5px solid rgba(255,255,255,0.08)', backgroundImage: `url(${logoDark})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <input ref={fileRef} type="file" accept="image/*" onChange={handleLogoUpload} style={{ display: 'none' }} />
+                <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{ background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.2)', color: '#EAFF00', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 6 }}>
+                  {uploading ? 'מעלה...' : '⬆ העלה'}
+                </button>
+                <input style={{ ...inp, fontSize: 11, padding: '6px 10px' }} value={content.brandLogoUrl || ''} onChange={e => set('brandLogoUrl', e.target.value)} placeholder="URL..." dir="ltr" />
+              </div>
+            </div>
+          </div>
+          {/* Light bg logo */}
+          <div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 10, letterSpacing: 1 }}>גרסה לרקע בהיר</div>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ width: 100, height: 52, borderRadius: 8, background: '#EEECEA', border: '1.5px solid rgba(0,0,0,0.08)', backgroundImage: `url(${logoLightSrc})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <input style={{ ...inp, fontSize: 11, padding: '6px 10px' }} value={content.brandLogoLight || ''} onChange={e => set('brandLogoLight', e.target.value)} placeholder="URL..." dir="ltr" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -105,25 +111,26 @@ export default function BrandPage() {
       {/* Colors */}
       <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
         <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1.25rem' }}>צבעי מותג</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          <F label="צבע ראשי (Accent)">
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <input type="color" value={content.brandColor || '#EAFF00'} onChange={e => set('brandColor', e.target.value)}
-                style={{ width: 48, height: 48, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'none', padding: 0 }} />
-              <input style={{ ...inp, flex: 1 }} value={content.brandColor || '#EAFF00'} onChange={e => set('brandColor', e.target.value)} dir="ltr" />
-            </div>
-          </F>
-          <F label="צבע רקע (Background)">
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <input type="color" value={content.brandBg || '#0A0A0A'} onChange={e => set('brandBg', e.target.value)}
-                style={{ width: 48, height: 48, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'none', padding: 0 }} />
-              <input style={{ ...inp, flex: 1 }} value={content.brandBg || '#0A0A0A'} onChange={e => set('brandBg', e.target.value)} dir="ltr" />
-            </div>
-          </F>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.25rem' }}>
+          {([
+            { key: 'brandColor', label: 'צבע ראשי', def: '#EAFF00' },
+            { key: 'brandColorSecondary', label: 'צבע משני', def: '#EAFF00' },
+            { key: 'brandColorText', label: 'צבע טקסט', def: '#FFFFFF' },
+            { key: 'brandBg', label: 'רקע', def: '#0A0A0A' },
+          ] as { key: keyof typeof content, label: string, def: string }[]).map(({ key, label, def }) => (
+            <F key={key} label={label}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="color" value={(content[key] as string) || def} onChange={e => set(key, e.target.value)}
+                  style={{ width: 44, height: 44, borderRadius: 8, border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }} />
+                <input style={{ ...inp, flex: 1, fontSize: 12 }} value={(content[key] as string) || def} onChange={e => set(key, e.target.value)} dir="ltr" />
+              </div>
+            </F>
+          ))}
         </div>
-        <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: 10, background: content.brandBg || '#0A0A0A', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ color: content.brandColor || '#EAFF00', fontWeight: 900, fontSize: 14 }}>תצוגה מקדימה</span>
-          <span style={{ color: '#fff', fontSize: 13, opacity: 0.5 }}>Dynamic Krav Maga</span>
+        <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: 10, background: content.brandBg || '#0A0A0A', display: 'flex', alignItems: 'center', gap: 16 }}>
+          <span style={{ color: content.brandColor || '#EAFF00', fontWeight: 900, fontSize: 14 }}>צבע ראשי</span>
+          <span style={{ color: content.brandColorSecondary || content.brandColor || '#EAFF00', fontWeight: 700, fontSize: 14 }}>צבע משני</span>
+          <span style={{ color: content.brandColorText || '#fff', fontSize: 13 }}>טקסט</span>
         </div>
       </div>
 

@@ -43,8 +43,11 @@ export type SiteContent = {
   facebook: string
   whatsapp: string
   brandColor: string
+  brandColorSecondary: string
+  brandColorText: string
   brandBg: string
   brandLogoUrl: string
+  brandLogoLight: string
   badgePillHe: string
   badgePillEn: string
 }
@@ -60,8 +63,11 @@ const defaultContent: SiteContent = {
   facebook: '',
   whatsapp: '',
   brandColor: '#EAFF00',
+  brandColorSecondary: '',
+  brandColorText: '#FFFFFF',
   brandBg: '#0A0A0A',
   brandLogoUrl: '',
+  brandLogoLight: '',
   badgePillHe: 'מדריך מוסמך קרב מגע',
   badgePillEn: 'Certified Krav Maga Instructor',
 }

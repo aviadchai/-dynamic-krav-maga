@@ -69,7 +69,7 @@ nav.site-nav {
   justify-content: flex-end;
 }
 .nav-logo { display: flex; align-items: center; margin-right: 6px; }
-.nav-logo img { height: 36px; width: auto; display: block; }
+.nav-logo img { height: 48px; width: auto; display: block; }
 .nav-center { display: flex; gap: 0; list-style: none; }
 .nav-center a {
   color: rgba(255,255,255,0.5);

@@ -41,13 +41,16 @@ export default function Home() {
   const t = (he: string, en: string) => lang === "he" ? he : en;
 
   const brandColor = content?.brandColor || '#EAFF00'
+  const brandColorSecondary = content?.brandColorSecondary || brandColor
+  const brandColorText = content?.brandColorText || '#FFFFFF'
   const brandBg = content?.brandBg || '#0A0A0A'
-  const logoSrc = content?.brandLogoUrl || '/images/logo.png'
+  const logoDark = content?.brandLogoUrl || '/images/logo.png'
+  const logoLight = content?.brandLogoLight || logoDark
 
   return (
     <>
       {/* Dynamic brand colors */}
-      <style>{`:root { --lime: ${brandColor}; --black: ${brandBg}; }`}</style>
+      <style>{`:root { --lime: ${brandColor}; --black: ${brandBg}; --white: ${brandColorText}; --brand2: ${brandColorSecondary}; }`}</style>
 
       {/* ARTICLE POPUP — outside fade wrapper so opacity doesn't affect it */}
       {popup && (
@@ -195,7 +198,7 @@ export default function Home() {
             <span className="en-only">Contact</span>
           </a>
           <div className="nav-logo">
-            <img src={logoSrc} alt="Dynamic Krav Maga" />
+            <img src={logoDark} alt="Dynamic Krav Maga" />
           </div>
         </div>
       </nav>
@@ -451,7 +454,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer>
-        <img className="fl" src="/images/logo.png" alt="Dynamic Krav Maga" />
+        <img className="fl" src={logoDark} alt="Dynamic Krav Maga" />
         <div style={{ display: "flex", gap: "10px" }}>
           <a className="soc-btn" href="#">IG</a>
           <a className="soc-btn" href="#">FB</a>
