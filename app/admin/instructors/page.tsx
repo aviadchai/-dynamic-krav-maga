@@ -121,12 +121,6 @@ export default function InstructorsPage() {
 
   return (
     <div style={{ padding: '2.5rem', direction: 'rtl' }}>
-      <style>{`
-        .inst-admin-card { position: relative; }
-        .inst-admin-card .card-actions { opacity: 0; transition: opacity 0.15s; }
-        .inst-admin-card:hover .card-actions { opacity: 1; }
-      `}</style>
-
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
           <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>מאמנים</h1>
@@ -177,8 +171,7 @@ export default function InstructorsPage() {
                 <div style={{ fontWeight: 800, color: '#fff', fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inst.nameHe}</div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{inst.roleHe}</div>
               </div>
-              {/* Hover-reveal actions */}
-              <div className="card-actions" style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                 <button onClick={() => startEdit(inst)} style={{
                   background: 'rgba(255,255,255,0.08)', border: 'none',
                   color: 'rgba(255,255,255,0.7)', padding: '6px 12px',

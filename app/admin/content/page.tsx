@@ -184,6 +184,20 @@ export default function ContentPage() {
   return (
     <div style={{ padding: '2.5rem', direction: 'rtl', maxWidth: 1000 }}>
 
+      {/* Floating action button — always accessible */}
+      <div style={{ position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 1000, display: 'flex', gap: 8, flexDirection: 'column', alignItems: 'flex-end' }}>
+        {isEditing && isDirty && (
+          <button onClick={cancelEdit} style={{ background: 'rgba(30,30,30,0.95)', border: '1.5px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', padding: '10px 18px', borderRadius: 50, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-heebo), sans-serif', backdropFilter: 'blur(8px)', whiteSpace: 'nowrap' }}>ביטול</button>
+        )}
+        <button
+          onClick={isEditing ? save : startEdit}
+          disabled={saving}
+          style={{ background: isEditing ? (saved ? 'rgba(234,255,0,0.85)' : '#EAFF00') : 'rgba(234,255,0,0.12)', color: isEditing ? '#0A0A0A' : '#EAFF00', border: isEditing ? 'none' : '1.5px solid rgba(234,255,0,0.35)', padding: '12px 24px', borderRadius: 50, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 14, backdropFilter: 'blur(8px)', whiteSpace: 'nowrap', boxShadow: isEditing ? '0 4px 20px rgba(234,255,0,0.3)' : '0 4px 16px rgba(0,0,0,0.4)' }}
+        >
+          {saving ? 'שומר...' : saved ? '✓ נשמר' : isEditing ? 'שמור שינויים' : '✏ עריכה'}
+        </button>
+      </div>
+
       {/* Unsaved changes bar */}
       {isDirty && (
         <div style={{
