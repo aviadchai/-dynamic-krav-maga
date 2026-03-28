@@ -507,7 +507,10 @@ export default function Home() {
           </div>
         </div>
         <div className="hero-right">
-          <img className="site-img" src={content?.heroImage || '/images/hero.jpg'} alt="Maor Levi" />
+          <div className="hero-img-inner">
+            <img className="site-img" src={content?.heroImage || '/images/hero.jpg'} alt="Maor Levi"
+              onLoad={e => e.currentTarget.closest('.hero-img-inner')?.classList.add('loaded')} />
+          </div>
         </div>
       </div>
 
