@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
+import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export async function POST(request: Request) {
   const formData = await request.formData()
@@ -17,15 +21,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'File type not allowed' }, { status: 400 })
   }
 
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
 
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-  const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const uploadsDir = path.join(process.cwd(), 'public', 'images', 'uploads')
+  const { error } = await supabase.storage
+    .from('uploads')
+    .upload(name, buffer, { contentType: file.type, upsert: false })
 
-  await mkdir(uploadsDir, { recursive: true })
-  await writeFile(path.join(uploadsDir, name), buffer)
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 
-  return NextResponse.json({ url: `/images/uploads/${name}` })
+  const { data } = supabase.storage.from('uploads').getPublicUrl(name)
+
+  return NextResponse.json({ url: data.publicUrl })
 }

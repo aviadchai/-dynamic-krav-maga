@@ -78,13 +78,14 @@ export default function Home() {
             style={{
               background: "#131313",
               border: "1px solid rgba(255,255,255,0.09)",
-              borderRadius: 22,
-              width: "100%", maxWidth: 1100,
-              maxHeight: "92vh",
+              borderRadius: 18,
+              width: "calc(100vw - 4rem)",
+              maxWidth: 1400,
+              height: "calc(100vh - 4rem)",
               display: "flex", flexDirection: "column",
               direction: "rtl",
               overflow: "hidden",
-              boxShadow: "0 40px 80px rgba(0,0,0,0.6)",
+              boxShadow: "0 40px 80px rgba(0,0,0,0.7)",
             }}
           >
             {/* Header */}
