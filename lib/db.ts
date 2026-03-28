@@ -49,6 +49,17 @@ export type Testimonial = {
   textEn: string
 }
 
+export type ServiceItem = {
+  n: string
+  he: string
+  en: string
+  dHe: string
+  dEn: string
+  bodyHe: string
+  bodyEn: string
+  image?: string
+}
+
 export type SiteContent = {
   // Hero
   heroTitleHe: string
@@ -89,6 +100,8 @@ export type SiteContent = {
   instagram: string
   facebook: string
   whatsapp: string
+  // Services
+  services: ServiceItem[]
   // Brand
   brandColor: string
   brandColorSecondary: string
@@ -135,6 +148,32 @@ const defaultContent: SiteContent = {
   ],
   reels: [
     { id: '1', url: 'https://www.instagram.com/reel/DTiFg_OlJFk/', platform: 'instagram', title: '' },
+  ],
+  services: [
+    {
+      n: '01', he: 'שיעורים פרטיים', en: 'Private Lessons',
+      dHe: 'תוכנית אישית שנבנית בדיוק עבורך. בקצב שלך, ברמה שלך, עם מיקוד על המטרות האישיות שלך.',
+      dEn: 'A personal program built exactly for you. Your pace, your level, your goals.',
+      bodyHe: 'שיעורים פרטיים בקרב מגע הם הדרך המהירה והאפקטיבית ביותר להתקדם.\n\nכל שיעור מותאם אישית לפי הרמה הנוכחית שלך, המטרות שלך, והקצב שמתאים לך.',
+      bodyEn: 'Private Krav Maga lessons are the fastest and most effective path to progress.\n\nEach lesson is customized to your current level, goals, and pace.',
+      image: '',
+    },
+    {
+      n: '02', he: 'שיעורי קבוצה', en: 'Group Classes',
+      dHe: 'אימון קבוצתי אינטנסיבי ומהנה. ללמוד יחד, להתפתח יחד, באווירה שדוחפת אותך קדימה.',
+      dEn: 'Intense and fun group training. Learn together, grow together in a motivating atmosphere.',
+      bodyHe: 'שיעורי הקבוצה שלנו משלבים אימון גופני אינטנסיבי עם לימוד טכניקות קרב מגע.\n\nהאווירה הקבוצתית יוצרת מוטיבציה גבוהה.',
+      bodyEn: 'Our group classes combine intense physical training with Krav Maga technique instruction.\n\nThe group atmosphere creates high motivation.',
+      image: '',
+    },
+    {
+      n: '03', he: 'סדנאות', en: 'Workshops',
+      dHe: 'סדנאות ממוקדות לנשים, ילדים, ארגונים ומסגרות שונות. ניתן להתאים לכל קבוצה וצורך.',
+      dEn: 'Focused workshops for women, children, organizations. Customized for any group and need.',
+      bodyHe: 'הסדנאות שלנו מותאמות לקבוצות ומסגרות מגוונות — ניתן לקיים אותן בכל מקום ובכל פורמט.',
+      bodyEn: 'Our workshops are tailored for diverse groups and settings — they can be held anywhere.',
+      image: '',
+    },
   ],
   phone: '',
   email: '',

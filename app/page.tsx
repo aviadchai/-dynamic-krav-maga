@@ -12,6 +12,8 @@ export default function Home() {
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [content, setContent] = useState<SiteContent | null>(null);
   const [popup, setPopup] = useState<Article | null>(null);
+  const [popupClosing, setPopupClosing] = useState(false);
+  const lastPopupRef = useRef<Article | null>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
 
   type Service = { n: string; he: string; en: string; dHe: string; dEn: string; bodyHe: string; bodyEn: string; image?: string }
@@ -27,9 +29,19 @@ export default function Home() {
     fetch("/api/content", nc).then(r => r.json()).then(setContent);
   }, []);
 
+  function openPopup(article: Article) {
+    lastPopupRef.current = article;
+    setPopup(article);
+  }
+
+  function closePopup() {
+    setPopupClosing(true);
+    setTimeout(() => { setPopup(null); setPopupClosing(false); }, 200);
+  }
+
   // Close popups on ESC
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { setPopup(null); setServicePopup(null); setMobileMenu(false); } };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { closePopup(); setServicePopup(null); setMobileMenu(false); } };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
@@ -91,9 +103,9 @@ export default function Home() {
       <style>{`:root { --lime: ${brandColor}; --black: ${brandBg}; --white: ${brandColorText}; --brand2: ${brandColorSecondary}; }`}</style>
 
       {/* ARTICLE POPUP — outside fade wrapper so opacity doesn't affect it */}
-      {popup && (
+      {(popup || popupClosing) && (
         <div
-          onClick={() => setPopup(null)}
+          onClick={closePopup}
           style={{
             position: "fixed", inset: 0, zIndex: 9999,
             background: "rgba(8,8,8,0.82)",
@@ -101,13 +113,17 @@ export default function Home() {
             WebkitBackdropFilter: "blur(16px)",
             display: "flex", alignItems: "center", justifyContent: "center",
             padding: "3vw",
-            animation: "popupIn 0.22s ease",
+            animation: popupClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease",
           }}
         >
           <style>{`
             @keyframes popupIn {
               from { opacity: 0; transform: scale(0.97); }
               to   { opacity: 1; transform: scale(1); }
+            }
+            @keyframes popupOut {
+              from { opacity: 1; transform: scale(1); }
+              to   { opacity: 0; transform: scale(0.97); }
             }
             .popup-scroll::-webkit-scrollbar { width: 4px; }
             .popup-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -143,18 +159,18 @@ export default function Home() {
                   fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
                   padding: "3px 12px", borderRadius: 50, marginBottom: 10,
                 }}>
-                  {popup.categoryHe}
+                  {popup?.categoryHe}
                 </span>
                 <h2 style={{
                   fontFamily: "var(--font-heebo), sans-serif",
                   fontSize: "clamp(1.3rem, 3vw, 1.75rem)", fontWeight: 900,
                   color: "#fff", lineHeight: 1.2, margin: 0,
                 }}>
-                  {popup.titleHe}
+                  {popup?.titleHe}
                 </h2>
                 <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup.date}</span>
-                  {popup.author && (
+                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup?.date}</span>
+                  {popup?.author && (
                     <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: 0.5 }}>
                       ✍ {popup.author}
                     </span>
@@ -162,7 +178,7 @@ export default function Home() {
                 </div>
               </div>
               <button
-                onClick={() => setPopup(null)}
+                onClick={closePopup}
                 style={{
                   background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
                   color: "rgba(255,255,255,0.45)", width: 38, height: 38,
@@ -175,20 +191,20 @@ export default function Home() {
 
             {/* Scrollable body */}
             <div className="popup-scroll" style={{ overflowY: "auto", flex: 1 }}>
-              {/* Top: excerpt (right) + image (left) side-by-side */}
-              <div style={{ padding: "1.5rem 2rem 0", display: "flex", gap: "1.25rem", alignItems: "flex-start", flexDirection: "row" }}>
+              {/* Top: excerpt (right 50%) + image (left 50%) side-by-side */}
+              <div style={{ padding: "1.5rem 2rem 0", display: "flex", gap: "1.5rem", alignItems: "stretch", flexDirection: "row" }}>
                 <p style={{
                   flex: 1, fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8,
                   fontStyle: "italic", borderRight: "3px solid #EAFF00", paddingRight: "1rem",
                   margin: 0,
                 }}>
-                  {popup.excerptHe}
+                  {popup?.excerptHe}
                 </p>
-                {popup.image && (
-                  <div style={{ flex: "0 0 42%", maxWidth: 240 }}>
+                {popup?.image && (
+                  <div style={{ flex: "0 0 50%" }}>
                     <img
-                      src={popup.image} alt={popup.titleHe}
-                      style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", display: "block", borderRadius: 12 }}
+                      src={popup.image} alt={popup?.titleHe}
+                      style={{ width: "100%", height: "100%", minHeight: 180, objectFit: "cover", display: "block", borderRadius: 12 }}
                     />
                   </div>
                 )}
@@ -199,12 +215,12 @@ export default function Home() {
                   fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95,
                   whiteSpace: "pre-wrap", textAlign: "right",
                 }}>
-                  {popup.bodyHe}
+                  {popup?.bodyHe}
                 </div>
-                {(popup as Article & { bodyImage?: string }).bodyImage && (
+                {(popup as (Article & { bodyImage?: string }) | null)?.bodyImage && (
                   <div style={{ marginTop: "2rem" }}>
                     <img
-                      src={(popup as Article & { bodyImage?: string }).bodyImage}
+                      src={(popup as Article & { bodyImage?: string })!.bodyImage}
                       alt=""
                       style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 12, display: "block" }}
                     />
@@ -215,12 +231,12 @@ export default function Home() {
                 <div style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 10, alignItems: "center" }}>
                   <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 2, textTransform: "uppercase", marginLeft: 8 }}>שתף</span>
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(popup.titleHe + " " + window.location.href)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent((popup?.titleHe ?? "") + " " + window.location.href)}`}
                     target="_blank" rel="noreferrer"
                     title="WhatsApp"
-                    style={{ width: 44, height: 44, borderRadius: "50%", background: "#25D366", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
+                    style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
                   >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
                     </svg>
                   </a>
@@ -228,19 +244,19 @@ export default function Home() {
                     href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
                     target="_blank" rel="noreferrer"
                     title="Facebook"
-                    style={{ width: 44, height: 44, borderRadius: "50%", background: "#1877F2", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
+                    style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
                   >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
                     </svg>
                   </a>
                   <a
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(popup.titleHe)}&url=${encodeURIComponent(window.location.href)}`}
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(popup?.titleHe ?? "")}&url=${encodeURIComponent(window.location.href)}`}
                     target="_blank" rel="noreferrer"
                     title="X (Twitter)"
-                    style={{ width: 44, height: 44, borderRadius: "50%", background: "#0A0A0A", border: "1.5px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
+                    style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4 4l16 16M20 4 4 20"/>
                     </svg>
                   </a>
@@ -583,29 +599,7 @@ export default function Home() {
           <div className="en-only"><div className="sec-h">OUR SERVICES</div></div>
         </div>
         <div className="srv-grid">
-          {([
-            {
-              n: "01", he: "שיעורים פרטיים", en: "Private Lessons",
-              dHe: "תוכנית אישית שנבנית בדיוק עבורך. בקצב שלך, ברמה שלך, עם מיקוד על המטרות האישיות שלך.",
-              dEn: "A personal program built exactly for you. Your pace, your level, your goals.",
-              bodyHe: "שיעורים פרטיים בקרב מגע הם הדרך המהירה והאפקטיבית ביותר להתקדם.\n\nכל שיעור מותאם אישית לפי הרמה הנוכחית שלך, המטרות שלך, והקצב שמתאים לך. אנחנו בונים יחד תוכנית עבודה שמתחילה מהיסודות ומתקדמת בהתאם להתפתחות שלך.\n\nתחומים שנכסה:\n• טכניקות הגנה עצמית בסיסיות ומתקדמות\n• עמידה, תנועה ועמדת לחימה\n• הגנה מפני חטיפות, אחיזות ומתקפות שונות\n• לחימה בטווחים שונים\n• מנטליות ותגובה תחת לחץ",
-              bodyEn: "Private Krav Maga lessons are the fastest and most effective path to progress.\n\nEach lesson is customized to your current level, goals, and pace. We build a training plan together that starts from the fundamentals and advances according to your development.\n\nTopics covered:\n• Basic and advanced self-defense techniques\n• Stance, movement, and fighting posture\n• Defense against grabs, holds, and various attacks\n• Fighting at different ranges\n• Mindset and response under pressure",
-            },
-            {
-              n: "02", he: "שיעורי קבוצה", en: "Group Classes",
-              dHe: "אימון קבוצתי אינטנסיבי ומהנה. ללמוד יחד, להתפתח יחד, באווירה שדוחפת אותך קדימה.",
-              dEn: "Intense and fun group training. Learn together, grow together in a motivating atmosphere.",
-              bodyHe: "שיעורי הקבוצה שלנו משלבים אימון גופני אינטנסיבי עם לימוד טכניקות קרב מגע.\n\nהאווירה הקבוצתית יוצרת מוטיבציה גבוהה, והאימון עם שותפים שונים מכין אותך לתרחישים אמיתיים.\n\nמה כוללים השיעורים:\n• חימום ואימון גופני פונקציונלי\n• לימוד ותרגול טכניקות חדשות\n• תרגילי ספרינג עם שותף\n• סימולציות תרחישי אמת\n• ביקורת ושיפור אישי\n\nהשיעורים מתאימים לכל הרמות — מתחילים עד מתקדמים.",
-              bodyEn: "Our group classes combine intense physical training with Krav Maga technique instruction.\n\nThe group atmosphere creates high motivation, and training with different partners prepares you for real scenarios.\n\nWhat classes include:\n• Warm-up and functional fitness training\n• Learning and practicing new techniques\n• Sparring drills with a partner\n• Real-scenario simulations\n• Personal feedback and improvement\n\nClasses are suitable for all levels — beginners to advanced.",
-            },
-            {
-              n: "03", he: "סדנאות", en: "Workshops",
-              dHe: "סדנאות ממוקדות לנשים, ילדים, ארגונים ומסגרות שונות. ניתן להתאים לכל קבוצה וצורך.",
-              dEn: "Focused workshops for women, children, organizations. Customized for any group and need.",
-              bodyHe: "הסדנאות שלנו מותאמות לקבוצות ומסגרות מגוונות — ניתן לקיים אותן בכל מקום ובכל פורמט.\n\nסוגי סדנאות:\n• סדנת הגנה עצמית לנשים — מיומנויות חיוניות, הגברת ביטחון עצמי, מודעות ומניעה\n• סדנה לילדים ובני נוער — מיומנויות הגנה, בניית ביטחון, ערכי מסגרת\n• סדנה לארגונים — בניית צוות, הדרכה מקצועית, סימולציות\n• סדנה לאנשי ביטחון — שדרוג מיומנויות, טכניקות מתקדמות\n\nהסדנה מותאמת בדיוק לצרכים ולמטרות שלכם. צרו קשר לתיאום.",
-              bodyEn: "Our workshops are tailored for diverse groups and settings — they can be held anywhere and in any format.\n\nWorkshop types:\n• Women's self-defense workshop — essential skills, confidence building, awareness and prevention\n• Children & teens workshop — defense skills, confidence building, discipline values\n• Corporate workshop — team building, professional training, simulations\n• Security personnel workshop — skill upgrade, advanced techniques\n\nEach workshop is customized exactly to your needs and goals. Contact us to arrange.",
-            },
-          ] as Service[]).map((s, i) => (
+          {(content?.services || []).map((s, i) => (
             <div key={s.n} className="srv appear" style={{ transitionDelay: `${i * 0.12}s` }}>
               <div className="srv-n">{s.n}</div>
               <div className="srv-sq"></div>
@@ -737,7 +731,7 @@ export default function Home() {
           </div>
           <div className="agrid">
             {articles.map((a, i) => (
-              <div key={a.id} className="ac appear" onClick={() => setPopup(a)} style={{ cursor: "pointer", transitionDelay: `${i * 0.1}s` }}>
+              <div key={a.id} className="ac appear" onClick={() => openPopup(a)} style={{ cursor: "pointer", transitionDelay: `${i * 0.1}s` }}>
                 <div className="ac-thumb">
                   {a.image && <img className="ac-thumb-img site-img" src={a.image} alt="" />}
                   <div className="ac-cat">{a.categoryHe}</div>
@@ -790,24 +784,41 @@ export default function Home() {
                 <a href={`mailto:${content.email}`} className="c-detail-val">{content.email}</a>
               </div>
             )}
-            {content?.instagram && (
-              <div className="c-detail-row">
-                <span className="c-detail-lbl">Instagram</span>
-                <span className="c-detail-val">{content.instagram}</span>
-              </div>
-            )}
-            {content?.facebook && (
-              <div className="c-detail-row">
-                <span className="c-detail-lbl">Facebook</span>
-                <span className="c-detail-val">{content.facebook}</span>
-              </div>
-            )}
           </div>
-          <div className="c-social" style={{ marginTop: "2rem" }}>
-            {content?.instagram && <a className="soc-btn" href={`https://instagram.com/${content.instagram.replace('@','')}`} target="_blank" rel="noreferrer">IG</a>}
-            {content?.facebook && <a className="soc-btn" href="#" target="_blank" rel="noreferrer">FB</a>}
-            {content?.whatsapp && <a className="soc-btn" href={`https://wa.me/972${content.whatsapp.replace(/[-\s]/g,'').slice(1)}`} target="_blank" rel="noreferrer">WA</a>}
-          </div>
+          {(content?.instagram || content?.facebook || content?.whatsapp) && (
+            <div style={{ display: "flex", gap: 10, marginTop: "1.5rem", flexWrap: "wrap" }}>
+              {content?.instagram && (
+                <a
+                  href={`https://instagram.com/${content.instagram.replace('@','')}`}
+                  target="_blank" rel="noreferrer"
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 50, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                  {content.instagram}
+                </a>
+              )}
+              {content?.facebook && (
+                <a
+                  href={content.facebook.startsWith('http') ? content.facebook : `https://facebook.com/${content.facebook}`}
+                  target="_blank" rel="noreferrer"
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 50, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                  {content.facebook}
+                </a>
+              )}
+              {content?.whatsapp && (
+                <a
+                  href={`https://wa.me/972${content.whatsapp.replace(/[-\s]/g,'').slice(1)}`}
+                  target="_blank" rel="noreferrer"
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 50, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                  WhatsApp
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </section>
 

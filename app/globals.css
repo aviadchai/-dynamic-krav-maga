@@ -525,6 +525,23 @@ nav.site-nav {
   position: relative;
   display: flex; align-items: center; gap: 0;
 }
+.reels-outer::before,
+.reels-outer::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+.reels-outer::before {
+  right: 44px;
+  background: linear-gradient(to left, transparent, var(--black));
+}
+.reels-outer::after {
+  left: 44px;
+  background: linear-gradient(to right, transparent, var(--black));
+}
 .reels-grid {
   display: flex;
   overflow-x: auto;
