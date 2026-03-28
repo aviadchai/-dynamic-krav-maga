@@ -52,22 +52,6 @@ export default function Home() {
     return () => { document.body.style.overflow = ""; };
   }, [mobileMenu]);
 
-  // Image fade-in on load
-  useEffect(() => {
-    const register = (img: HTMLImageElement) => {
-      const container = img.closest('.hero-right, .about-img, .ac-thumb, .inst-card-img')
-      const onLoad = () => {
-        img.classList.add('img-ready')
-        container?.classList.add('loaded')
-      }
-      if (img.complete && img.naturalWidth > 0) onLoad()
-      else {
-        img.addEventListener('load', onLoad, { once: true })
-        img.addEventListener('error', () => img.classList.add('img-ready'), { once: true })
-      }
-    }
-    document.querySelectorAll<HTMLImageElement>('.site-img').forEach(register)
-  }, [content, instructors, articles])
 
   // Scroll-triggered appear animations
   useEffect(() => {
@@ -572,7 +556,7 @@ export default function Home() {
                   <div key={inst.id} className={`inst-card appear${idx === 0 ? ' inst-card-main' : ''}`} dir="ltr" style={{ transitionDelay: `${idx * 0.1}s` }}>
                     <div className="inst-card-img">
                       {inst.image
-                        ? <img className="site-img" src={inst.image} alt={inst.nameHe} />
+                        ? <img className="site-img" src={inst.image} alt={inst.nameHe} onLoad={e => e.currentTarget.closest('.inst-card-img')?.classList.add('loaded')} />
                         : <div className="inst-card-placeholder">👤</div>
                       }
                     </div>
@@ -626,13 +610,8 @@ export default function Home() {
         <div className="tgrid">
           {(content?.testimonials || []).map((tc: Testimonial, i: number) => (
             <div key={i} className="tc appear" style={{ transitionDelay: `${i * 0.1}s` }}>
-              <div className="tc-stars">★★★★★</div>
-              <p className="tc-text he-only">
-                <span className="q-mark q-mark-open">&ldquo;</span>{tc.textHe}<span className="q-mark q-mark-close">&rdquo;</span>
-              </p>
-              <p className="tc-text en-only">
-                <span className="q-mark q-mark-open">&ldquo;</span>{tc.textEn}<span className="q-mark q-mark-close">&rdquo;</span>
-              </p>
+              <p className="tc-text he-only">{tc.textHe}</p>
+              <p className="tc-text en-only">{tc.textEn}</p>
               <div className="tc-sep"></div>
               <div className="tc-name">{tc.name}</div>
               <div className="tc-role he-only">{tc.roleHe}</div>

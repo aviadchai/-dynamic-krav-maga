@@ -111,12 +111,13 @@ export default function ContentPage() {
     })
   }, [])
 
-  // Warn before tab close/refresh when dirty
+  // Warn before tab close/refresh when dirty + set global flag
   useEffect(() => {
+    window.__adminDirty = !!isDirty
     if (!isDirty) return
     const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
     window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
+    return () => { window.removeEventListener('beforeunload', handler) }
   }, [isDirty])
 
   function set<K extends keyof SiteContent>(key: K, value: SiteContent[K]) {

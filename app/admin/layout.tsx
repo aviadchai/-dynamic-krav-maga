@@ -2,6 +2,8 @@
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+declare global { interface Window { __adminDirty?: boolean } }
+
 const S = (d: string) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d={d} />
@@ -62,7 +64,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             const active = pathname === item.href ||
               (item.href !== '/admin' && pathname.startsWith(item.href))
             return (
-              <Link key={item.href} href={item.href} style={{
+              <Link key={item.href} href={item.href} onClick={e => {
+                if (window.__adminDirty && !confirm('יש שינויים שלא נשמרו. לעזוב את הדף?')) e.preventDefault()
+              }} style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '10px 12px', borderRadius: 10,
                 marginBottom: 4,

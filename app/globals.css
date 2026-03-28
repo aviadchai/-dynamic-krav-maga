@@ -39,14 +39,9 @@ html { scroll-behavior: smooth; }
   animation: shimmer 1.6s ease-in-out infinite;
 }
 
-/* Image fade-in on load */
-.site-img {
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  animation: imgFallback 0s 1.5s forwards;
-}
-@keyframes imgFallback { to { opacity: 1; } }
-.site-img.img-ready { opacity: 1; animation: none; }
+/* Images — show immediately, no JS dependency */
+.site-img { display: block; }
+.site-img.img-ready { display: block; }
 
 /* Scroll-triggered appear */
 .appear {
@@ -318,28 +313,28 @@ nav.site-nav {
 .chip:hover { border-color: var(--lime); color: var(--lime); }
 
 /* ── SERVICES ── */
-.services { background: #0D1219; padding: 7rem 3rem; }
+.services { background: var(--black); padding: 7rem 3rem; }
 .sec-head { text-align: center; margin-bottom: 3.5rem; }
 .srv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
 .srv {
-  background: var(--mid);
-  border: 1.5px solid rgba(255,255,255,0.06);
+  background: var(--lime);
+  border: none;
   border-radius: var(--r);
   padding: 2.5rem 2rem;
   position: relative; overflow: hidden;
-  transition: all .3s; cursor: pointer;
+  transition: transform .3s, box-shadow .3s; cursor: pointer;
 }
-.srv:hover { border-color: rgba(234,255,0,0.35); transform: translateY(-5px); }
+.srv:hover { transform: translateY(-6px); box-shadow: 0 22px 60px rgba(234,255,0,0.25); }
 .srv-n {
   font-family: var(--font-barlow), sans-serif;
   font-size: 6rem; font-weight: 900;
-  color: rgba(234,255,0,0.04);
+  color: rgba(0,0,0,0.07);
   position: absolute; top: -10px; right: 16px; line-height: 1;
   user-select: none; pointer-events: none;
 }
 .srv-sq {
   width: 48px; height: 10px;
-  background: var(--lime);
+  background: rgba(0,0,0,0.75);
   border-radius: 10px;
   transform: skewX(-14deg);
   margin-bottom: 1.5rem;
@@ -348,41 +343,42 @@ nav.site-nav {
 .srv-link {
   display: inline-flex; align-items: center; gap: 6px;
   background: transparent;
-  border: 1.5px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5);
+  border: 1.5px solid rgba(0,0,0,0.22); color: rgba(0,0,0,0.65);
   font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
   margin-top: 1.5rem; padding: 11px 24px; border-radius: 10px;
   transform: skewX(-12deg); cursor: pointer; transition: all .2s;
   text-decoration: none;
 }
 .srv-link span { display: inline-block; transform: skewX(12deg); }
-.srv-link:hover { border-color: var(--lime); color: var(--lime); }
+.srv-link:hover { border-color: rgba(0,0,0,0.8); color: var(--black); background: rgba(0,0,0,0.06); }
 .srv-name {
   font-family: var(--font-barlow), sans-serif;
   font-weight: 900; font-size: 1.9rem; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--black);
   margin-bottom: .6rem;
 }
 .srv-name-he {
   font-family: var(--font-heebo), sans-serif;
   font-weight: 900; font-size: 1.6rem; letter-spacing: -0.5px;
+  color: var(--black);
   margin-bottom: .6rem;
 }
-.srv-desc { font-size: .83rem; color: rgba(255,255,255,0.4); line-height: 1.7; }
+.srv-desc { font-size: .83rem; color: rgba(0,0,0,0.55); line-height: 1.7; }
 
 /* ── INSTRUCTORS ── */
 .inst-section { background: var(--black); padding: 6rem 3rem; }
 .inst-grid { display: grid; gap: 1.25rem; }
-/* Instructor card — parallelogram (brand style) horizontal layout */
+/* Instructor card — horizontal layout */
 .inst-card {
   display: flex; flex-direction: row;
   background: var(--mid);
   border-radius: var(--r); overflow: hidden;
-  transform: skewX(-10deg);
   transition: transform .3s, box-shadow .3s;
   min-height: 220px;
   position: relative;
 }
 .inst-card:hover {
-  transform: skewX(-10deg) translateY(-5px);
+  transform: translateY(-5px);
   box-shadow: 0 22px 52px rgba(234,255,0,0.09);
 }
 /* Image — left side, fills the parallelogram naturally */
@@ -405,12 +401,10 @@ nav.site-nav {
   display: flex; align-items: center; justify-content: center;
   font-size: 4rem; background: var(--light);
 }
-/* Card body — counter-skewed so text appears straight */
 .inst-card-body {
   flex: 1; padding: 1.75rem;
   display: flex; flex-direction: column; justify-content: center;
   direction: rtl;
-  transform: skewX(10deg);
 }
 .inst-card-role {
   font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
@@ -442,18 +436,19 @@ nav.site-nav {
   border-radius: var(--r);
   padding: 2rem;
   transition: border-color .3s;
+  position: relative; overflow: hidden;
 }
 .tc:hover { border-color: rgba(234,255,0,0.2); }
-.tc-stars { color: var(--lime); font-size: 13px; letter-spacing: 3px; margin-bottom: 1rem; }
-.tc-text { font-size: .88rem; color: rgba(255,255,255,0.6); line-height: 1.75; font-style: italic; margin-bottom: 1.3rem; }
-.q-mark {
-  font-family: var(--font-barlow), sans-serif;
-  font-size: 2rem; font-weight: 900; line-height: 1;
-  color: var(--lime); opacity: 0.28; display: inline-block;
-  vertical-align: -0.3rem;
+.tc::before {
+  content: '\201C';
+  position: absolute;
+  top: -1.5rem; right: 1rem;
+  font-size: 9rem; line-height: 1;
+  color: rgba(255,255,255,0.055);
+  font-family: Georgia, 'Times New Roman', serif;
+  user-select: none; pointer-events: none;
 }
-.q-mark-open { margin-left: 3px; }
-.q-mark-close { margin-right: 3px; }
+.tc-text { font-size: .88rem; color: rgba(255,255,255,0.6); line-height: 1.55; font-style: italic; margin-bottom: 1.3rem; }
 .tc-sep { width: 100%; height: 1px; background: rgba(255,255,255,0.06); margin-bottom: 1rem; }
 .tc-name { font-weight: 800; font-size: 13px; letter-spacing: .5px; }
 .tc-role { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
@@ -525,27 +520,12 @@ nav.site-nav {
   position: relative;
   display: flex; align-items: center; gap: 0;
 }
-.reels-outer::before,
-.reels-outer::after {
-  content: '';
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 80px;
-  z-index: 2;
-  pointer-events: none;
-}
-.reels-outer::before {
-  right: 44px;
-  background: linear-gradient(to left, transparent, var(--black));
-}
-.reels-outer::after {
-  left: 44px;
-  background: linear-gradient(to right, transparent, var(--black));
-}
 .reels-grid {
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
   gap: 1.25rem;
   padding-bottom: 1rem;
   -webkit-overflow-scrolling: touch;

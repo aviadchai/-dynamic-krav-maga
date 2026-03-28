@@ -30,6 +30,8 @@ export default function InstructorsPage() {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function load() {
@@ -90,23 +92,46 @@ export default function InstructorsPage() {
     load()
   }
 
-  async function moveOrder(id: string, direction: 'up' | 'down') {
+  function onDragStart(id: string) { setDragId(id) }
+  function onDragOver(e: React.DragEvent, id: string) { e.preventDefault(); setDragOverId(id) }
+  function onDragEnd() { setDragId(null); setDragOverId(null) }
+
+  async function onDrop(e: React.DragEvent, targetId: string) {
+    e.preventDefault()
+    if (!dragId || dragId === targetId) { setDragId(null); setDragOverId(null); return }
     const sorted = [...instructors].sort((a, b) => a.order - b.order)
-    const idx = sorted.findIndex(i => i.id === id)
-    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
-    if (swapIdx < 0 || swapIdx >= sorted.length) return
-    const a = sorted[idx], b = sorted[swapIdx]
-    await Promise.all([
-      fetch(`/api/instructors/${a.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...a, order: b.order }) }),
-      fetch(`/api/instructors/${b.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...b, order: a.order }) }),
-    ])
-    load()
+    const fromIdx = sorted.findIndex(i => i.id === dragId)
+    const toIdx = sorted.findIndex(i => i.id === targetId)
+    const reordered = [...sorted]
+    const [moved] = reordered.splice(fromIdx, 1)
+    reordered.splice(toIdx, 0, moved)
+    const updated = reordered.map((inst, idx) => ({ ...inst, order: idx + 1 }))
+    setInstructors(updated)
+    setDragId(null); setDragOverId(null)
+    await Promise.all(updated.map(inst =>
+      fetch(`/api/instructors/${inst.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inst),
+      })
+    ))
   }
+
+  const sorted = [...instructors].sort((a, b) => a.order - b.order)
 
   return (
     <div style={{ padding: '2.5rem', direction: 'rtl' }}>
+      <style>{`
+        .inst-admin-card { position: relative; }
+        .inst-admin-card .card-actions { opacity: 0; transition: opacity 0.15s; }
+        .inst-admin-card:hover .card-actions { opacity: 1; }
+      `}</style>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>מאמנים</h1>
+        <div>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>מאמנים</h1>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, marginTop: 4 }}>גרור כדי לסדר מחדש</p>
+        </div>
         <button onClick={startNew} style={{
           background: '#EAFF00', color: '#0A0A0A', border: 'none',
           padding: '11px 24px', borderRadius: 50,
@@ -116,14 +141,28 @@ export default function InstructorsPage() {
         </button>
       </div>
 
-      {/* Instructor cards */}
+      {/* Instructor cards — draggable */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        {[...instructors].sort((a, b) => a.order - b.order).map((inst, idx, arr) => (
-          <div key={inst.id} style={{
-            background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)',
-            borderRadius: 14, padding: '1.5rem',
-          }}>
+        {sorted.map((inst) => (
+          <div
+            key={inst.id}
+            className="inst-admin-card"
+            draggable
+            onDragStart={() => onDragStart(inst.id)}
+            onDragOver={e => onDragOver(e, inst.id)}
+            onDrop={e => onDrop(e, inst.id)}
+            onDragEnd={onDragEnd}
+            style={{
+              background: '#141414',
+              border: `1.5px solid ${dragOverId === inst.id ? 'rgba(234,255,0,0.4)' : 'rgba(255,255,255,0.07)'}`,
+              borderRadius: 14, padding: '1.5rem',
+              opacity: dragId === inst.id ? 0.45 : 1,
+              cursor: 'grab', transition: 'border-color .15s, opacity .15s',
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              {/* Drag handle */}
+              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 16, flexShrink: 0, letterSpacing: 2, userSelect: 'none' }}>⠿</div>
               <div style={{
                 width: 52, height: 52, borderRadius: '50%',
                 background: '#1C1C1C',
@@ -134,31 +173,27 @@ export default function InstructorsPage() {
               }}>
                 {!inst.image && '👤'}
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, color: '#fff', fontSize: 15 }}>{inst.nameHe}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 800, color: '#fff', fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inst.nameHe}</div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{inst.roleHe}</div>
               </div>
-              {/* Order controls */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <button onClick={() => moveOrder(inst.id, 'up')} disabled={idx === 0} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: idx === 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)', width: 28, height: 28, borderRadius: 6, cursor: idx === 0 ? 'default' : 'pointer', fontSize: 13 }}>↑</button>
-                <button onClick={() => moveOrder(inst.id, 'down')} disabled={idx === arr.length - 1} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: idx === arr.length - 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)', width: 28, height: 28, borderRadius: 6, cursor: idx === arr.length - 1 ? 'default' : 'pointer', fontSize: 13 }}>↓</button>
+              {/* Hover-reveal actions */}
+              <div className="card-actions" style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                <button onClick={() => startEdit(inst)} style={{
+                  background: 'rgba(255,255,255,0.08)', border: 'none',
+                  color: 'rgba(255,255,255,0.7)', padding: '6px 12px',
+                  borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12,
+                }}>עריכה</button>
+                <button onClick={() => del(inst.id)} style={{
+                  background: 'rgba(255,50,50,0.08)', border: 'none',
+                  color: 'rgba(255,80,80,0.7)', padding: '6px 10px',
+                  borderRadius: 8, cursor: 'pointer', fontSize: 12,
+                }}>✕</button>
               </div>
             </div>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginBottom: '1rem' }}>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6, margin: 0 }}>
               {inst.bioHe}
             </p>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => startEdit(inst)} style={{
-                flex: 1, background: 'rgba(255,255,255,0.05)', border: 'none',
-                color: 'rgba(255,255,255,0.6)', padding: '8px', borderRadius: 8,
-                cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12,
-              }}>עריכה</button>
-              <button onClick={() => del(inst.id)} style={{
-                background: 'rgba(255,50,50,0.08)', border: 'none',
-                color: 'rgba(255,80,80,0.7)', padding: '8px 12px',
-                borderRadius: 8, cursor: 'pointer', fontSize: 12,
-              }}>✕</button>
-            </div>
           </div>
         ))}
       </div>
