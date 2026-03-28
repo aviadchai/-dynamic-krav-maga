@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Article, Instructor, SiteContent } from "@/lib/db";
+import type { Article, Instructor, SiteContent, Testimonial, Reel } from "@/lib/db";
 
 type Lang = "he" | "en";
 
@@ -12,6 +12,10 @@ export default function Home() {
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [content, setContent] = useState<SiteContent | null>(null);
   const [popup, setPopup] = useState<Article | null>(null);
+  const [mobileMenu, setMobileMenu] = useState(false);
+
+  type Service = { n: string; he: string; en: string; dHe: string; dEn: string; bodyHe: string; bodyEn: string; image?: string }
+  const [servicePopup, setServicePopup] = useState<Service | null>(null);
 
   useEffect(() => {
     const nc = { cache: 'no-store' as const }
@@ -22,12 +26,45 @@ export default function Home() {
     fetch("/api/content", nc).then(r => r.json()).then(setContent);
   }, []);
 
-  // Close popup on ESC
+  // Close popups on ESC
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setPopup(null); };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { setPopup(null); setServicePopup(null); setMobileMenu(false); } };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenu ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenu]);
+
+  // Image fade-in on load
+  useEffect(() => {
+    const register = (img: HTMLImageElement) => {
+      const container = img.closest('.hero-right, .about-img, .ac-thumb, .inst-card-img')
+      const onLoad = () => {
+        img.classList.add('img-ready')
+        container?.classList.add('loaded')
+      }
+      if (img.complete && img.naturalWidth > 0) onLoad()
+      else {
+        img.addEventListener('load', onLoad, { once: true })
+        img.addEventListener('error', () => img.classList.add('img-ready'), { once: true })
+      }
+    }
+    document.querySelectorAll<HTMLImageElement>('.site-img').forEach(register)
+  }, [content, instructors, articles])
+
+  // Scroll-triggered appear animations
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target) } }),
+      { threshold: 0.08, rootMargin: '0px 0px -32px 0px' }
+    )
+    document.querySelectorAll('.appear').forEach(el => obs.observe(el))
+    return () => obs.disconnect()
+  }, [content, instructors, articles])
 
   function switchLang(next: Lang) {
     if (next === lang) return;
@@ -114,9 +151,14 @@ export default function Home() {
                 }}>
                   {popup.titleHe}
                 </h2>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", marginTop: 8, letterSpacing: 1 }}>
-                  {popup.date}
-                </p>
+                <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup.date}</span>
+                  {popup.author && (
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: 0.5 }}>
+                      ✍ {popup.author}
+                    </span>
+                  )}
+                </div>
               </div>
               <button
                 onClick={() => setPopup(null)}
@@ -132,26 +174,41 @@ export default function Home() {
 
             {/* Scrollable body */}
             <div className="popup-scroll" style={{ overflowY: "auto", flex: 1 }}>
-              {popup.image && (
-                <img
-                  src={popup.image} alt={popup.titleHe}
-                  style={{ width: "100%", height: 240, objectFit: "cover", display: "block" }}
-                />
-              )}
-              <div style={{ padding: "2rem" }}>
+              {/* Top: excerpt (right) + image (left) side-by-side */}
+              <div style={{ padding: "1.5rem 2rem 0", display: "flex", gap: "1.25rem", alignItems: "flex-start", flexDirection: "row" }}>
                 <p style={{
-                  fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8,
-                  marginBottom: "1.5rem", fontStyle: "italic",
-                  borderRight: "3px solid #EAFF00", paddingRight: "1rem",
+                  flex: 1, fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8,
+                  fontStyle: "italic", borderRight: "3px solid #EAFF00", paddingRight: "1rem",
+                  margin: 0,
                 }}>
                   {popup.excerptHe}
                 </p>
+                {popup.image && (
+                  <div style={{ flex: "0 0 42%", maxWidth: 240 }}>
+                    <img
+                      src={popup.image} alt={popup.titleHe}
+                      style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", display: "block", borderRadius: 12 }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div style={{ padding: "1.5rem 2rem 2rem" }}>
                 <div style={{
                   fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95,
                   whiteSpace: "pre-wrap", textAlign: "right",
                 }}>
                   {popup.bodyHe}
                 </div>
+                {(popup as Article & { bodyImage?: string }).bodyImage && (
+                  <div style={{ marginTop: "2rem" }}>
+                    <img
+                      src={(popup as Article & { bodyImage?: string }).bodyImage}
+                      alt=""
+                      style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 12, display: "block" }}
+                    />
+                  </div>
+                )}
 
                 {/* Share buttons */}
                 <div style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 10, alignItems: "center" }}>
@@ -159,19 +216,162 @@ export default function Home() {
                   <a
                     href={`https://wa.me/?text=${encodeURIComponent(popup.titleHe + " " + window.location.href)}`}
                     target="_blank" rel="noreferrer"
-                    style={{ background: "#25D366", color: "#fff", padding: "8px 18px", borderRadius: 50, fontSize: 12, fontWeight: 700, textDecoration: "none" }}
-                  >WhatsApp</a>
+                    title="WhatsApp"
+                    style={{ width: 44, height: 44, borderRadius: "50%", background: "#25D366", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    </svg>
+                  </a>
                   <a
                     href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
                     target="_blank" rel="noreferrer"
-                    style={{ background: "#1877F2", color: "#fff", padding: "8px 18px", borderRadius: 50, fontSize: 12, fontWeight: 700, textDecoration: "none" }}
-                  >Facebook</a>
+                    title="Facebook"
+                    style={{ width: 44, height: 44, borderRadius: "50%", background: "#1877F2", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                    </svg>
+                  </a>
                   <a
                     href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(popup.titleHe)}&url=${encodeURIComponent(window.location.href)}`}
                     target="_blank" rel="noreferrer"
-                    style={{ background: "#000", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", padding: "8px 18px", borderRadius: 50, fontSize: 12, fontWeight: 700, textDecoration: "none" }}
-                  >X</a>
+                    title="X (Twitter)"
+                    style={{ width: 44, height: 44, borderRadius: "50%", background: "#0A0A0A", border: "1.5px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 4l16 16M20 4 4 20"/>
+                    </svg>
+                  </a>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SERVICE POPUP */}
+      {servicePopup && (
+        <div
+          onClick={() => setServicePopup(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            background: "rgba(8,8,8,0.82)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+            padding: "0",
+            animation: "srvBgIn 0.32s ease forwards",
+          }}
+        >
+          <style>{`
+            @keyframes srvBgIn { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes srvSlideUp {
+              from { opacity: 0; transform: translateY(64px) scale(0.97); }
+              to   { opacity: 1; transform: translateY(0) scale(1); }
+            }
+          `}</style>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "#131313",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: "20px 20px 0 0",
+              width: "100%",
+              maxWidth: 860,
+              maxHeight: "92vh",
+              display: "flex", flexDirection: "column",
+              direction: "rtl",
+              overflow: "hidden",
+              boxShadow: "0 -20px 80px rgba(0,0,0,0.6)",
+              animation: "srvSlideUp 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards",
+              margin: "0 auto",
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              padding: "1.6rem 2rem",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+              gap: "1rem",
+            }}>
+              <div>
+                <span style={{
+                  display: "inline-block",
+                  background: brandColor, color: brandBg,
+                  fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
+                  padding: "3px 12px", borderRadius: 50, marginBottom: 10,
+                }}>
+                  {servicePopup.n}
+                </span>
+                <h2 style={{
+                  fontFamily: "var(--font-heebo), sans-serif",
+                  fontSize: "clamp(1.3rem, 3vw, 1.75rem)", fontWeight: 900,
+                  color: "#fff", lineHeight: 1.2, margin: 0,
+                }}>
+                  {lang === "he" ? servicePopup.he : servicePopup.en}
+                </h2>
+              </div>
+              <button
+                onClick={() => setServicePopup(null)}
+                style={{
+                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.45)", width: 38, height: 38,
+                  borderRadius: "50%", cursor: "pointer", fontSize: 17, flexShrink: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}
+              >✕</button>
+            </div>
+            {/* Body */}
+            <div className="popup-scroll" style={{ overflowY: "auto", flex: 1 }}>
+              {servicePopup.image ? (
+                <img src={servicePopup.image} alt={servicePopup.he} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+              ) : (
+                <div style={{
+                  height: 130, background: "linear-gradient(135deg, #0E0E0E 0%, #181818 100%)",
+                  position: "relative", overflow: "hidden",
+                  display: "flex", alignItems: "center", padding: "1.5rem 2rem", gap: "1.25rem",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                }}>
+                  <span style={{
+                    fontFamily: "var(--font-barlow)", fontSize: "9rem", fontWeight: 900, lineHeight: 1,
+                    color: "rgba(234,255,0,0.05)",
+                    position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%) skewX(-8deg)",
+                    userSelect: "none",
+                  }}>{servicePopup.n}</span>
+                  {[0,1,2].map(i => (
+                    <div key={i} style={{
+                      position: "absolute", top: "15%", left: `${28 + i * 7}%`,
+                      width: 2, height: "70%",
+                      background: "var(--lime)", opacity: 0.08 + i * 0.04,
+                      transform: "skewX(-20deg)",
+                    }} />
+                  ))}
+                  <div style={{ width: 48, height: 9, background: "var(--lime)", borderRadius: 10, transform: "skewX(-14deg)", flexShrink: 0, position: "relative" }} />
+                </div>
+              )}
+              <div style={{ padding: "2rem" }}>
+                <p style={{
+                  fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8,
+                  marginBottom: "1.5rem", fontStyle: "italic",
+                  borderRight: `3px solid ${brandColor}`, paddingRight: "1rem",
+                }}>
+                  {lang === "he" ? servicePopup.dHe : servicePopup.dEn}
+                </p>
+                <div style={{ fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95, whiteSpace: "pre-wrap", textAlign: "right" }}>
+                  {lang === "he" ? servicePopup.bodyHe : servicePopup.bodyEn}
+                </div>
+                <a href="#contact" onClick={() => setServicePopup(null)} style={{
+                  display: "inline-flex", marginTop: "2rem",
+                  background: brandColor, color: brandBg,
+                  padding: "12px 32px", borderRadius: 8,
+                  fontFamily: "var(--font-heebo), sans-serif", fontWeight: 800, fontSize: 14,
+                  textDecoration: "none", transform: "skewX(-12deg)",
+                }}>
+                  <span style={{ display: "inline-block", transform: "skewX(12deg)" }}>
+                    {lang === "he" ? "צור קשר" : "Contact Us"}
+                  </span>
+                </a>
               </div>
             </div>
           </div>
@@ -180,23 +380,85 @@ export default function Home() {
 
     <div className={`lang-${lang} lang-fade${fading ? " lang-fading" : ""}`}>
 
+      {/* MOBILE MENU OVERLAY */}
+      {mobileMenu && (
+        <div className="mob-menu" dir={lang === "he" ? "rtl" : "ltr"}>
+          <style>{`
+            @keyframes mobMenuIn {
+              from { opacity: 0; transform: translateX(${lang === "he" ? "100%" : "-100%"}); }
+              to   { opacity: 1; transform: translateX(0); }
+            }
+            @keyframes mobLinkIn {
+              from { opacity: 0; transform: translateY(24px); }
+              to   { opacity: 1; transform: translateY(0); }
+            }
+          `}</style>
+          {/* Top bar */}
+          <div className="mob-menu-top">
+            <img src={logoDark} alt="logo" className="mob-menu-logo" />
+            <button className="mob-close" onClick={() => setMobileMenu(false)}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Links */}
+          <nav className="mob-nav">
+            {[
+              { href: "#about",        he: "עלינו",   en: "About" },
+              { href: "#services",     he: "שירותים", en: "Services" },
+              { href: "#testimonials", he: "המלצות",  en: "Reviews" },
+              { href: "#articles",     he: "מאמרים",  en: "Articles" },
+            ].map((item, i) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="mob-link"
+                style={{ animationDelay: `${0.06 + i * 0.07}s` }}
+                onClick={() => setMobileMenu(false)}
+              >
+                <span className="mob-link-num">0{i + 1}</span>
+                {lang === "he" ? item.he : item.en}
+                <span className="mob-link-arrow">←</span>
+              </a>
+            ))}
+          </nav>
+
+          {/* Bottom */}
+          <div className="mob-menu-bottom">
+            <a href="#contact" className="mob-cta" onClick={() => setMobileMenu(false)}>
+              <span>{lang === "he" ? "צור קשר" : "Contact Us"}</span>
+            </a>
+            <div className="mob-lang">
+              <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>עברית</button>
+              <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>English</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* NAV — toggle left | links+CTA+logo right */}
       <nav className="site-nav">
         <div className="lang-sw">
           <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>עברית</button>
           <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>English</button>
         </div>
+        {/* Hamburger — mobile only */}
+        <button className="hamburger" onClick={() => setMobileMenu(true)} aria-label="פתח תפריט">
+          <span></span><span></span><span></span>
+        </button>
         <div className="nav-right-group">
-          <ul className="nav-center">
-            <li><a href="#about"><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
-            <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
-            <li><a href="#testimonials"><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
-            {articles.length > 0 && <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>}
-          </ul>
           <a href="#contact" className="cta-nav">
             <span className="he-only">צור קשר</span>
             <span className="en-only">Contact</span>
           </a>
+          <ul className="nav-center">
+            <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>
+            <li><a href="#testimonials"><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
+            <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
+            <li><a href="#about"><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
+          </ul>
           <div className="nav-logo">
             <img src={logoDark} alt="Dynamic Krav Maga" />
           </div>
@@ -212,83 +474,102 @@ export default function Home() {
             <span className="pill-txt en-only">{content?.badgePillEn || 'Certified Krav Maga Instructor'}</span>
           </div>
           <div className="he-only">
-            <div className="h1-he">הגן על<br /><span className="lime">עצמך</span><br />באמת</div>
+            <div className="h1-he">
+              {(content?.heroTitleHe || 'הגן על\nעצמך\nבאמת').split('\n').map((line, i, arr) =>
+                i === Math.floor(arr.length / 2)
+                  ? <span key={i}><span className="lime">{line}</span><br /></span>
+                  : <span key={i}>{line}<br /></span>
+              )}
+            </div>
           </div>
           <div className="en-only">
-            <div className="h1-en">DEFEND<br /><span className="lime">YOUR</span><br />SELF</div>
+            <div className="h1-en">
+              {(content?.heroTitleEn || 'DEFEND\nYOUR\nSELF').split('\n').map((line, i, arr) =>
+                i === Math.floor(arr.length / 2)
+                  ? <span key={i}><span className="lime">{line}</span><br /></span>
+                  : <span key={i}>{line}<br /></span>
+              )}
+            </div>
           </div>
           <p className="hero-sub he-only">{content?.heroSubHe}</p>
           <p className="hero-sub en-only">{content?.heroSubEn}</p>
           <div className="hero-btns">
-            <a href="#contact" className="btn-fill he-only">התחל עכשיו</a>
-            <a href="#contact" className="btn-fill en-only">Get Started</a>
-            <a href="#services" className="btn-ghost he-only">גלה עוד</a>
-            <a href="#services" className="btn-ghost en-only">Learn More</a>
+            <a href="#contact" className="btn-fill he-only"><span>{content?.heroBtnPrimaryHe || 'התחל עכשיו'}</span></a>
+            <a href="#contact" className="btn-fill en-only"><span>{content?.heroBtnPrimaryEn || 'Get Started'}</span></a>
+            <a href="#services" className="btn-ghost he-only"><span>{content?.heroBtnSecondaryHe || 'גלה עוד'}</span></a>
+            <a href="#services" className="btn-ghost en-only"><span>{content?.heroBtnSecondaryEn || 'Learn More'}</span></a>
           </div>
           <div className="hero-nums">
-            <div><div className="hn-val">15+</div><div className="hn-lbl he-only">שנות ניסיון</div><div className="hn-lbl en-only">Years Exp.</div></div>
-            <div><div className="hn-val">500+</div><div className="hn-lbl he-only">תלמידים</div><div className="hn-lbl en-only">Students</div></div>
-            <div><div className="hn-val">100%</div><div className="hn-lbl he-only">מעשי</div><div className="hn-lbl en-only">Practical</div></div>
+            <div><div className="hn-val">{content?.heroNum1Val || '15+'}</div><div className="hn-lbl he-only">{content?.heroNum1LblHe || 'שנות ניסיון'}</div><div className="hn-lbl en-only">{content?.heroNum1LblEn || 'Years Exp.'}</div></div>
+            <div><div className="hn-val">{content?.heroNum2Val || '500+'}</div><div className="hn-lbl he-only">{content?.heroNum2LblHe || 'תלמידים'}</div><div className="hn-lbl en-only">{content?.heroNum2LblEn || 'Students'}</div></div>
+            <div><div className="hn-val">{content?.heroNum3Val || '100%'}</div><div className="hn-lbl he-only">{content?.heroNum3LblHe || 'מעשי'}</div><div className="hn-lbl en-only">{content?.heroNum3LblEn || 'Practical'}</div></div>
           </div>
         </div>
         <div className="hero-right">
-          <img src="/images/hero.jpg" alt="Maor Levi" />
+          <img className="site-img" src={content?.heroImage || '/images/hero.jpg'} alt="Maor Levi" />
         </div>
       </div>
 
       {/* ABOUT */}
       <section className="about" id="about">
-        <div className="about-img">
-          <img src="/images/about.jpg" alt="Maor" />
-        </div>
         <div className="about-body">
-          <div className="about-tag he-only">עלינו</div>
-          <div className="about-tag en-only">About Us</div>
-          <div className="he-only"><div className="about-h">לחימה<br />שמגיעה<br />מהשטח</div></div>
-          <div className="en-only"><div className="about-h">FIGHTING<br />FROM THE<br />FIELD</div></div>
+          <div className="about-tag he-only">{content?.aboutTagHe || 'עלינו'}</div>
+          <div className="about-tag en-only">{content?.aboutTagEn || 'About Us'}</div>
+          <div className="he-only">
+            <div className="about-h">
+              {(content?.aboutTitleHe || 'לחימה\nשמגיעה\nמהשטח').split('\n').map((line, i) => <span key={i}>{line}<br /></span>)}
+            </div>
+          </div>
+          <div className="en-only">
+            <div className="about-h">
+              {(content?.aboutTitleEn || 'FIGHTING\nFROM THE\nFIELD').split('\n').map((line, i) => <span key={i}>{line}<br /></span>)}
+            </div>
+          </div>
           <div className="about-bar"></div>
+          {content?.aboutExcerptHe && <p className="he-only about-excerpt">{content.aboutExcerptHe}</p>}
+          {content?.aboutExcerptEn && <p className="en-only about-excerpt">{content.aboutExcerptEn}</p>}
           {content?.aboutParaHe.map((p, i) => <p key={i} className="he-only about-p">{p}</p>)}
           {content?.aboutParaEn.map((p, i) => <p key={i} className="en-only about-p">{p}</p>)}
+        </div>
+        <div className="about-img">
+          <img className="site-img" src={content?.aboutImage || '/images/about.jpg'} alt="Maor" />
         </div>
       </section>
 
       {/* INSTRUCTORS */}
       {instructors.length > 0 && (
-        <section style={{ background: "#0A0A0A", padding: "5rem 3rem" }}>
+        <section className="inst-section" id="instructors">
           <div className="sec-head">
             <div className="sec-tag he-only">הצוות שלנו</div>
             <div className="sec-tag en-only">Our Team</div>
             <div className="he-only"><div className="sec-h-he">המאמנים</div></div>
             <div className="en-only"><div className="sec-h">THE INSTRUCTORS</div></div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem", maxWidth: 1000, margin: "0 auto" }}>
-            {[...instructors].sort((a, b) => a.order - b.order).map(inst => (
-              <div key={inst.id} style={{
-                background: "#141414", border: "1.5px solid rgba(255,255,255,0.06)",
-                borderRadius: 14, padding: "2rem", textAlign: "center",
-              }}>
-                <div style={{
-                  width: 80, height: 80, borderRadius: "50%", margin: "0 auto 1rem",
-                  background: "#1C1C1C",
-                  backgroundImage: inst.image ? `url(${inst.image})` : "none",
-                  backgroundSize: "cover", backgroundPosition: "center",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 32, border: "2px solid rgba(234,255,0,0.15)",
-                }}>
-                  {!inst.image && "👤"}
-                </div>
-                <div style={{ fontWeight: 900, fontSize: 16, color: "#fff", marginBottom: 4 }}>
-                  {t(inst.nameHe, inst.nameEn)}
-                </div>
-                <div style={{ fontSize: 11, color: "#EAFF00", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
-                  {t(inst.roleHe, inst.roleEn)}
-                </div>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.7 }}>
-                  {t(inst.bioHe, inst.bioEn)}
-                </p>
+          {(() => {
+            const sorted = [...instructors].sort((a, b) => a.order - b.order)
+            const count = sorted.length
+            const cols = count === 1 ? '1fr' : count === 2 ? '1fr 1fr' : count === 3 ? '2fr 1fr 1fr' : 'repeat(2, 1fr)'
+            return (
+              <div className="inst-grid" style={{ gridTemplateColumns: cols }}>
+                {sorted.map((inst, idx) => (
+                  <div key={inst.id} className={`inst-card appear${idx === 0 ? ' inst-card-main' : ''}`} dir="ltr" style={{ transitionDelay: `${idx * 0.1}s` }}>
+                    <div className="inst-card-img">
+                      {inst.image
+                        ? <img className="site-img" src={inst.image} alt={inst.nameHe} />
+                        : <div className="inst-card-placeholder">👤</div>
+                      }
+                    </div>
+                    <div className="inst-card-body">
+                      <div className="inst-card-role">{t(inst.roleHe, inst.roleEn)}</div>
+                      <div className="inst-card-name">{t(inst.nameHe, inst.nameEn)}</div>
+                      <div className="inst-card-bar"></div>
+                      <p className="inst-card-bio">{t(inst.bioHe, inst.bioEn)}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )
+          })()}
         </section>
       )}
 
@@ -301,19 +582,39 @@ export default function Home() {
           <div className="en-only"><div className="sec-h">OUR SERVICES</div></div>
         </div>
         <div className="srv-grid">
-          {[
-            { n: "01", he: "שיעורים פרטיים", en: "PRIVATE LESSONS", dHe: "תוכנית אישית שנבנית בדיוק עבורך. בקצב שלך, ברמה שלך, עם מיקוד על המטרות האישיות שלך.", dEn: "A personal program built exactly for you. Your pace, your level, your goals." },
-            { n: "02", he: "שיעורי קבוצה", en: "GROUP CLASSES", dHe: "אימון קבוצתי אינטנסיבי ומהנה. ללמוד יחד, להתפתח יחד, באווירה שדוחפת אותך קדימה.", dEn: "Intense and fun group training. Learn together, grow together in a motivating atmosphere." },
-            { n: "03", he: "סדנאות", en: "WORKSHOPS", dHe: "סדנאות ממוקדות לנשים, ילדים, ארגונים ומסגרות שונות. ניתן להתאים לכל קבוצה וצורך.", dEn: "Focused workshops for women, children, organizations. Customized for any group and need." },
-          ].map(s => (
-            <div key={s.n} className="srv">
+          {([
+            {
+              n: "01", he: "שיעורים פרטיים", en: "Private Lessons",
+              dHe: "תוכנית אישית שנבנית בדיוק עבורך. בקצב שלך, ברמה שלך, עם מיקוד על המטרות האישיות שלך.",
+              dEn: "A personal program built exactly for you. Your pace, your level, your goals.",
+              bodyHe: "שיעורים פרטיים בקרב מגע הם הדרך המהירה והאפקטיבית ביותר להתקדם.\n\nכל שיעור מותאם אישית לפי הרמה הנוכחית שלך, המטרות שלך, והקצב שמתאים לך. אנחנו בונים יחד תוכנית עבודה שמתחילה מהיסודות ומתקדמת בהתאם להתפתחות שלך.\n\nתחומים שנכסה:\n• טכניקות הגנה עצמית בסיסיות ומתקדמות\n• עמידה, תנועה ועמדת לחימה\n• הגנה מפני חטיפות, אחיזות ומתקפות שונות\n• לחימה בטווחים שונים\n• מנטליות ותגובה תחת לחץ",
+              bodyEn: "Private Krav Maga lessons are the fastest and most effective path to progress.\n\nEach lesson is customized to your current level, goals, and pace. We build a training plan together that starts from the fundamentals and advances according to your development.\n\nTopics covered:\n• Basic and advanced self-defense techniques\n• Stance, movement, and fighting posture\n• Defense against grabs, holds, and various attacks\n• Fighting at different ranges\n• Mindset and response under pressure",
+            },
+            {
+              n: "02", he: "שיעורי קבוצה", en: "Group Classes",
+              dHe: "אימון קבוצתי אינטנסיבי ומהנה. ללמוד יחד, להתפתח יחד, באווירה שדוחפת אותך קדימה.",
+              dEn: "Intense and fun group training. Learn together, grow together in a motivating atmosphere.",
+              bodyHe: "שיעורי הקבוצה שלנו משלבים אימון גופני אינטנסיבי עם לימוד טכניקות קרב מגע.\n\nהאווירה הקבוצתית יוצרת מוטיבציה גבוהה, והאימון עם שותפים שונים מכין אותך לתרחישים אמיתיים.\n\nמה כוללים השיעורים:\n• חימום ואימון גופני פונקציונלי\n• לימוד ותרגול טכניקות חדשות\n• תרגילי ספרינג עם שותף\n• סימולציות תרחישי אמת\n• ביקורת ושיפור אישי\n\nהשיעורים מתאימים לכל הרמות — מתחילים עד מתקדמים.",
+              bodyEn: "Our group classes combine intense physical training with Krav Maga technique instruction.\n\nThe group atmosphere creates high motivation, and training with different partners prepares you for real scenarios.\n\nWhat classes include:\n• Warm-up and functional fitness training\n• Learning and practicing new techniques\n• Sparring drills with a partner\n• Real-scenario simulations\n• Personal feedback and improvement\n\nClasses are suitable for all levels — beginners to advanced.",
+            },
+            {
+              n: "03", he: "סדנאות", en: "Workshops",
+              dHe: "סדנאות ממוקדות לנשים, ילדים, ארגונים ומסגרות שונות. ניתן להתאים לכל קבוצה וצורך.",
+              dEn: "Focused workshops for women, children, organizations. Customized for any group and need.",
+              bodyHe: "הסדנאות שלנו מותאמות לקבוצות ומסגרות מגוונות — ניתן לקיים אותן בכל מקום ובכל פורמט.\n\nסוגי סדנאות:\n• סדנת הגנה עצמית לנשים — מיומנויות חיוניות, הגברת ביטחון עצמי, מודעות ומניעה\n• סדנה לילדים ובני נוער — מיומנויות הגנה, בניית ביטחון, ערכי מסגרת\n• סדנה לארגונים — בניית צוות, הדרכה מקצועית, סימולציות\n• סדנה לאנשי ביטחון — שדרוג מיומנויות, טכניקות מתקדמות\n\nהסדנה מותאמת בדיוק לצרכים ולמטרות שלכם. צרו קשר לתיאום.",
+              bodyEn: "Our workshops are tailored for diverse groups and settings — they can be held anywhere and in any format.\n\nWorkshop types:\n• Women's self-defense workshop — essential skills, confidence building, awareness and prevention\n• Children & teens workshop — defense skills, confidence building, discipline values\n• Corporate workshop — team building, professional training, simulations\n• Security personnel workshop — skill upgrade, advanced techniques\n\nEach workshop is customized exactly to your needs and goals. Contact us to arrange.",
+            },
+          ] as Service[]).map((s, i) => (
+            <div key={s.n} className="srv appear" style={{ transitionDelay: `${i * 0.12}s` }}>
               <div className="srv-n">{s.n}</div>
-              <div className="srv-line"></div>
+              <div className="srv-sq"></div>
               <div className="he-only"><div className="srv-name-he">{s.he}</div></div>
               <div className="en-only"><div className="srv-name">{s.en}</div></div>
               <p className="srv-desc he-only">{s.dHe}</p>
               <p className="srv-desc en-only">{s.dEn}</p>
-              <div className="srv-link"><span className="he-only">פרטים נוספים</span><span className="en-only">Learn More</span> →</div>
+              <div className="srv-link" onClick={() => setServicePopup(s)}>
+                <span><span className="he-only">פרטים נוספים</span><span className="en-only">Learn More</span> →</span>
+              </div>
             </div>
           ))}
         </div>
@@ -328,16 +629,15 @@ export default function Home() {
           <div className="en-only"><div className="sec-h">STUDENT REVIEWS</div></div>
         </div>
         <div className="tgrid">
-          {[
-            { name: "שירה כ. / Shira K.", roleHe: "תלמידה פרטית", roleEn: "Private Student", he: "מאור הוא מדריך יוצא דופן. בזכותו הרגשתי ביטחון עצמי שלא הכרתי. ממליצה בחום לכולם.", en: "Maor is an exceptional instructor. Thanks to him I found confidence I never had. Highly recommended." },
-            { name: "דניאל מ. / Daniel M.", roleHe: "מנהל HR", roleEn: "HR Manager", he: "הסדנה לצוות שלנו הייתה חוויה בלתי נשכחת. מקצועי, מרתק ומעשי לגמרי. נחזור בטח.", en: "The workshop for our team was unforgettable. Professional, engaging, completely practical." },
-            { name: "רחל א. / Rachel A.", roleHe: "אמא לתלמיד", roleEn: "Parent", he: "שלחתי את בני למאור. אחרי חודש רואים שינוי אדיר — הרבה יותר בטוח ומרוכז בכל דבר.", en: "Sent my son to Maor. After a month the change is huge — so much more confident and focused." },
-          ].map(tc => (
-            <div key={tc.name} className="tc">
+          {(content?.testimonials || []).map((tc: Testimonial, i: number) => (
+            <div key={i} className="tc appear" style={{ transitionDelay: `${i * 0.1}s` }}>
               <div className="tc-stars">★★★★★</div>
-              <span className="qmark">&quot;</span>
-              <p className="tc-text he-only">&quot;{tc.he}&quot;</p>
-              <p className="tc-text en-only">&quot;{tc.en}&quot;</p>
+              <p className="tc-text he-only">
+                <span className="q-mark q-mark-open">&ldquo;</span>{tc.textHe}<span className="q-mark q-mark-close">&rdquo;</span>
+              </p>
+              <p className="tc-text en-only">
+                <span className="q-mark q-mark-open">&ldquo;</span>{tc.textEn}<span className="q-mark q-mark-close">&rdquo;</span>
+              </p>
               <div className="tc-sep"></div>
               <div className="tc-name">{tc.name}</div>
               <div className="tc-role he-only">{tc.roleHe}</div>
@@ -347,25 +647,72 @@ export default function Home() {
         </div>
       </section>
 
-      {/* REELS — Instagram embeds */}
-      <section className="reels-section">
-        <div className="sec-head">
-          <div className="sec-tag he-only">תוכן</div>
-          <div className="sec-tag en-only">Content</div>
-          <div className="he-only"><div className="sec-h-he">רילס</div></div>
-          <div className="en-only"><div className="sec-h">OUR REELS</div></div>
-        </div>
-        <div className="reels-grid">
-          <div className="reel-wrap">
-            <iframe
-              src="https://www.instagram.com/reel/DTiFg_OlJFk/embed/"
-              allowFullScreen
-              scrolling="no"
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-            />
+      {/* REELS */}
+      {(content?.reels?.length ?? 0) > 0 && (
+        <section className="reels-section">
+          <div className="sec-head">
+            <div className="sec-tag he-only">תוכן</div>
+            <div className="sec-tag en-only">Content</div>
+            <div className="he-only"><div className="sec-h-he">רילס</div></div>
+            <div className="en-only"><div className="sec-h">OUR REELS</div></div>
           </div>
-        </div>
-      </section>
+          <div className="reels-grid">
+            {content!.reels.map(reel => {
+              const isYt = reel.platform === 'youtube'
+              const isFbPost = reel.platform === 'facebook' && !reel.url.includes('/videos/') && !reel.url.includes('fb.watch')
+              const embedUrl = (() => {
+                const { url, platform } = reel
+                if (platform === 'instagram') {
+                  const m = url.match(/\/(reel|p)\/([A-Za-z0-9_-]+)/)
+                  if (m) return `https://www.instagram.com/${m[1]}/${m[2]}/embed/`
+                }
+                if (platform === 'youtube') {
+                  let id = ''
+                  if (url.includes('watch?v=')) id = url.split('watch?v=')[1].split('&')[0]
+                  else if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split('?')[0]
+                  else if (url.includes('/shorts/')) id = url.split('/shorts/')[1].split('?')[0]
+                  if (id) return `https://www.youtube.com/embed/${id}`
+                }
+                if (platform === 'tiktok') {
+                  const m = url.match(/\/video\/(\d+)/)
+                  if (m) return `https://www.tiktok.com/embed/v2/${m[1]}`
+                }
+                if (platform === 'facebook' && (url.includes('/videos/') || url.includes('fb.watch'))) {
+                  return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=320`
+                }
+                return url
+              })()
+              if (isFbPost) return (
+                <div key={reel.id} className={`reel-item${isYt ? ' reel-item-wide' : ''}`}>
+                  <a href={reel.url} target="_blank" rel="noreferrer" className="reel-fb-card" style={{ flex: 1 }}>
+                    <div className="fb-card-inner">
+                      <div className="fb-card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                      </div>
+                      <div className="fb-card-label">{reel.title || 'פוסט פייסבוק'}</div>
+                      <div className="fb-card-btn">צפה בפייסבוק ↗</div>
+                    </div>
+                  </a>
+                  {reel.title && <div className="reel-title">{reel.title}</div>}
+                </div>
+              )
+              return (
+                <div key={reel.id} className={`reel-item${isYt ? ' reel-item-wide' : ''}`}>
+                  <div className={`reel-wrap${isYt ? ' reel-wide' : ''}`}>
+                    <iframe
+                      src={embedUrl}
+                      allowFullScreen
+                      scrolling="no"
+                      allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    />
+                  </div>
+                  {reel.title && <div className="reel-title">{reel.title}</div>}
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ARTICLES — Hebrew only */}
       {articles.length > 0 && lang === "he" && (
@@ -373,14 +720,14 @@ export default function Home() {
           <div className="art-head">
             <div>
               <div className="sec-tag">ידע וכלים</div>
-              <div className="sec-h-he">מאמרים ו<span className="lime">תוכן</span></div>
+              <div className="sec-h-he">מאמרים ותוכן</div>
             </div>
           </div>
           <div className="agrid">
-            {articles.map(a => (
-              <div key={a.id} className="ac" onClick={() => setPopup(a)} style={{ cursor: "pointer" }}>
+            {articles.map((a, i) => (
+              <div key={a.id} className="ac appear" onClick={() => setPopup(a)} style={{ cursor: "pointer", transitionDelay: `${i * 0.1}s` }}>
                 <div className="ac-thumb">
-                  {a.image && <img className="ac-thumb-img" src={a.image} alt="" />}
+                  {a.image && <img className="ac-thumb-img site-img" src={a.image} alt="" />}
                   <div className="ac-cat">{a.categoryHe}</div>
                 </div>
                 <div className="ac-body">
