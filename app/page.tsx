@@ -27,11 +27,12 @@ export default function Home() {
 
   useEffect(() => {
     const nc = { cache: 'no-store' as const }
-    fetch("/api/articles", nc).then(r => r.json()).then((data: Article[]) =>
+    const t = Date.now()
+    fetch(`/api/articles?t=${t}`, nc).then(r => r.json()).then((data: Article[]) =>
       setArticles(data.filter(a => a.published))
     );
-    fetch("/api/instructors", nc).then(r => r.json()).then(setInstructors);
-    fetch("/api/content", nc).then(r => r.json()).then(setContent);
+    fetch(`/api/instructors?t=${t}`, nc).then(r => r.json()).then(setInstructors);
+    fetch(`/api/content?t=${t}`, nc).then(r => r.json()).then(setContent);
   }, []);
 
   function openPopup(article: Article) {
