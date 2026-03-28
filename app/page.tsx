@@ -185,10 +185,10 @@ export default function Home() {
                   {popup?.excerptHe}
                 </p>
                 {popup?.image && (
-                  <div style={{ flex: "0 0 50%" }}>
+                  <div style={{ flex: "0 0 50%", transform: "skewX(-7deg)", borderRadius: 20, overflow: "hidden", boxShadow: "0 16px 40px rgba(0,0,0,0.5)", alignSelf: "stretch", minHeight: 160 }}>
                     <img
                       src={popup.image} alt={popup?.titleHe}
-                      style={{ width: "100%", height: "100%", minHeight: 180, objectFit: "cover", display: "block", borderRadius: 12 }}
+                      style={{ width: "110%", height: "100%", objectFit: "cover", display: "block", transform: "skewX(7deg)", marginLeft: "-5%" }}
                     />
                   </div>
                 )}
@@ -533,7 +533,10 @@ export default function Home() {
           {content?.aboutParaEn.map((p, i) => <p key={i} className="en-only about-p">{p}</p>)}
         </div>
         <div className="about-img">
-          <img className="site-img" src={content?.aboutImage || '/images/about.jpg'} alt="Maor" />
+          <div className="about-img-inner">
+            <img className="site-img" src={content?.aboutImage || '/images/about.jpg'} alt="Maor"
+              onLoad={e => e.currentTarget.closest('.about-img-inner')?.classList.add('loaded')} />
+          </div>
         </div>
       </section>
 

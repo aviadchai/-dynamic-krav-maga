@@ -19,6 +19,10 @@ html { scroll-behavior: smooth; }
 }
 
 /* ── ANIMATIONS ── */
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 @keyframes shimmer {
   0%   { background-position: -600px 0; }
   100% { background-position: 600px 0; }
@@ -89,6 +93,15 @@ body {
 .lang-he .c-social,
 .lang-he footer,
 .lang-he .c-detail-row { text-align: unset; }
+
+/* ── NAV entrance ── */
+nav.site-nav { animation: heroIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
+/* Hero text entrance */
+.badge-pill { animation: heroIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.12s both; }
+.h1-he, .h1-en { animation: heroIn 0.75s cubic-bezier(0.22,1,0.36,1) 0.26s both; }
+.hero-sub  { animation: heroIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.42s both; }
+.hero-btns { animation: heroIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.55s both; }
+.hero-nums { animation: heroIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.68s both; }
 
 /* ── NAV ── toggle left | links+logo right */
 nav.site-nav {
@@ -163,6 +176,10 @@ nav.site-nav {
   background-size: 600px 100%;
   animation: shimmer 1.8s ease-in-out infinite;
 }
+/* Hebrew layout: image on LEFT — curves on outer (left) corners */
+.lang-he .hero-right { border-radius: 100px 0 0 40px; }
+/* English layout: image on RIGHT — curves on outer (right) corners */
+.lang-en .hero-right { border-radius: 0 100px 40px 0; }
 .hero-right.loaded { animation: none; background: var(--mid); }
 .hero-right img {
   width: 100%; height: 100%; object-fit: cover;
@@ -257,16 +274,29 @@ nav.site-nav {
   min-height: 70vh;
 }
 .about-img {
-  position: relative; overflow: hidden; min-height: 500px;
+  position: relative; overflow: visible; min-height: 500px;
+  display: flex; align-items: stretch;
+  padding: 3rem 2rem;
+}
+/* Floating parallelogram inside about-img */
+.about-img-inner {
+  flex: 1;
+  transform: skewX(-7deg);
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 28px 70px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.35);
+  position: relative;
   background: linear-gradient(90deg, #191919 25%, #222 50%, #191919 75%);
   background-size: 600px 100%;
   animation: shimmer 1.8s ease-in-out infinite;
 }
-.about-img.loaded { animation: none; background: var(--light); }
-.about-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(10%); }
-.about-img::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(to right, transparent 60%, #EEECEA 100%);
+.about-img-inner.loaded { animation: none; background: var(--light); }
+.about-img-inner img {
+  width: 110%; height: 100%;
+  object-fit: cover; filter: grayscale(10%);
+  transform: skewX(7deg);
+  margin-left: -5%;
+  display: block;
 }
 .about-body {
   background: #EEECEA; color: #111;
@@ -476,30 +506,48 @@ nav.site-nav {
 .art-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; }
 .agrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
 .ac {
-  background: var(--mid);
-  border: 1.5px solid rgba(255,255,255,0.06);
-  border-radius: var(--r); overflow: hidden;
-  transition: all .3s; cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  cursor: pointer;
+  transition: transform .3s;
 }
-.ac:hover { border-color: rgba(234,255,0,0.2); transform: translateY(-3px); }
+.ac:hover { transform: translateY(-5px); }
+/* Floating parallelogram thumbnail — Image 2 style */
 .ac-thumb {
   aspect-ratio: 16/9;
   background: linear-gradient(90deg, #131313 25%, #1a1a1a 50%, #131313 75%);
   background-size: 600px 100%;
   animation: shimmer 1.8s ease-in-out infinite;
-  display: flex; align-items: center; justify-content: center;
   position: relative; overflow: hidden;
+  transform: skewX(-7deg);
+  border-radius: 20px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55), 0 6px 16px rgba(0,0,0,0.35);
+  margin-bottom: 1.25rem;
+  transition: box-shadow .3s;
+}
+.ac:hover .ac-thumb {
+  box-shadow: 0 26px 60px rgba(0,0,0,0.6), 0 8px 20px rgba(234,255,0,0.1);
 }
 .ac-thumb.loaded { animation: none; background: var(--light); }
-.ac-thumb-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(30%); }
-.ac-thumb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(10,10,10,.7)); }
+.ac-thumb-img {
+  width: 110%; height: 100%;
+  object-fit: cover; filter: grayscale(20%);
+  transform: skewX(7deg);
+  margin-left: -5%;
+  display: block;
+}
+.ac-thumb::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(10,10,10,.65)); }
 .ac-cat {
   position: absolute; bottom: 10px; right: 12px; z-index: 1;
   background: var(--lime); color: var(--black);
   font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
   padding: 3px 10px; border-radius: 50px;
+  transform: skewX(7deg);
+  transform-origin: right center;
 }
-.ac-body { padding: 1.5rem; }
+.ac-body { padding: 0 6px 1rem; }
 .ac-date { font-size: 10px; color: rgba(255,255,255,0.25); letter-spacing: 2px; text-transform: uppercase; margin-bottom: .5rem; }
 .ac-title {
   font-family: var(--font-barlow), sans-serif;
