@@ -705,10 +705,8 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           </div>
           {(() => {
             const sorted = [...instructors].sort((a, b) => a.order - b.order)
-            const count = sorted.length
-            const cols = count === 1 ? 'minmax(0, 560px)' : 'repeat(2, 1fr)'
             return (
-              <div className="inst-grid" style={{ gridTemplateColumns: cols, justifyContent: count === 1 ? 'center' : undefined }}>
+              <div className="inst-grid">
                 {sorted.map((inst, idx) => (
                   <div key={inst.id} className={`inst-card appear${idx === 0 ? ' inst-card-main' : ''}`} dir="ltr" style={{ transitionDelay: `${idx * 0.1}s` }}>
                     <div className="inst-card-img">

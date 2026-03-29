@@ -404,22 +404,31 @@ nav.site-nav {
 
 /* ── INSTRUCTORS ── */
 .inst-section { background: var(--black); padding: 6rem 3rem; }
-.inst-grid { display: grid; gap: 1.25rem; }
+.inst-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
 /* Instructor card — horizontal layout */
 .inst-card {
   display: flex; flex-direction: row;
   background: var(--mid);
   border-radius: var(--r); overflow: hidden;
   transition: transform .3s, box-shadow .3s;
-  align-items: stretch; min-height: 200px;
+  align-items: stretch; min-height: 230px;
 }
 .inst-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 20px 50px rgba(255,255,255,0.065);
 }
+/* Main instructor — full width, taller */
+.inst-card-main {
+  grid-column: 1 / -1;
+  min-height: 320px;
+}
+.inst-card-main .inst-card-img { flex: 0 0 300px; }
+.inst-card-main .inst-card-name { font-size: 1.7rem; }
+.inst-card-main .inst-card-role { font-size: 11px; letter-spacing: 3px; }
+.inst-card-main .inst-card-bio { font-size: .88rem; }
 /* Image — parallelogram on the left side */
 .inst-card-img {
-  flex: 0 0 170px;
+  flex: 0 0 200px;
   position: relative; overflow: hidden;
   transform: skewX(-7deg);
   margin: 0 10px 0 -24px;
@@ -876,9 +885,10 @@ footer {
     -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .inst-grid::-webkit-scrollbar { display: none; }
-  .inst-card { flex: 0 0 86vw; scroll-snap-align: center; min-height: 140px; }
+  .inst-card { flex: 0 0 82vw; scroll-snap-align: center; min-height: 150px; }
   .inst-card-img { flex: 0 0 130px; }
-  .inst-card-main { flex: 0 0 90vw; }
+  .inst-card-main { flex: 0 0 90vw; min-height: 200px; }
+  .inst-card-main .inst-card-img { flex: 0 0 160px; }
 
   /* Contact */
   .contact { padding: 3rem 1.25rem; gap: 2rem; grid-template-columns: 1fr; }
