@@ -39,6 +39,10 @@ html { scroll-behavior: smooth; }
   from { opacity: 1; transform: scale(1); }
   to   { opacity: 0; transform: scale(0.97); }
 }
+@keyframes loaderFill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -131,7 +135,7 @@ nav.site-nav {
   justify-content: flex-end;
 }
 .nav-logo { display: flex; align-items: center; margin-right: 6px; }
-.nav-logo img { height: 48px; width: auto; display: block; }
+.nav-logo img { height: 38px; width: auto; display: block; }
 .nav-center { display: flex; gap: 0; list-style: none; }
 .nav-center a {
   color: rgba(255,255,255,0.5);
@@ -527,14 +531,15 @@ nav.site-nav {
 .art-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; }
 .agrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
 .ac {
-  background: transparent;
-  border: none;
-  border-radius: 0;
+  background: var(--mid);
+  border: 1.5px solid rgba(255,255,255,0.07);
+  border-radius: var(--r);
   overflow: visible;
   cursor: pointer;
-  transition: transform .3s;
+  transition: transform .3s, border-color .3s;
+  padding: 0.85rem 0.85rem 0;
 }
-.ac:hover { transform: translateY(-5px); }
+.ac:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.15); }
 /* Floating parallelogram thumbnail — Image 2 style */
 .ac-thumb {
   aspect-ratio: 16/9;
@@ -545,7 +550,7 @@ nav.site-nav {
   transform: skewX(-7deg);
   border-radius: 20px;
   box-shadow: 0 18px 50px rgba(0,0,0,0.55), 0 6px 16px rgba(0,0,0,0.35);
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.85rem;
   transition: box-shadow .3s;
 }
 .ac:hover .ac-thumb {
@@ -845,9 +850,10 @@ footer {
   .hamburger { display: flex; }
   .nav-center { display: none; }
   .cta-nav { display: none; }
-  .nav-right-group { gap: 8px; }
-  .nav-logo img { height: 36px; }
-  .lang-sw { visibility: hidden; } /* keep space but hide — hamburger handles lang */
+  .nav-right-group { gap: 8px; position: absolute; right: 1rem; }
+  .nav-logo img { height: 34px; }
+  nav.site-nav { display: flex; justify-content: center; }
+  .lang-sw { visibility: visible; }
 
   /* Hero */
   .hero { grid-template-columns: 1fr; }
@@ -866,7 +872,9 @@ footer {
   .about-body { padding: 2.5rem 1.5rem; order: 1; }
 
   /* Sections */
-  .services, .testimonials, .articles, .reels-section, .inst-section { padding: 3rem 1.25rem; }
+  .services, .testimonials, .articles, .inst-section { padding: 3rem 1.25rem; }
+  .reels-section { padding: 3rem 0 1rem; }
+  .reels-section .sec-head { padding: 0 1.25rem; margin-bottom: 1.5rem; }
   .srv-grid, .agrid { grid-template-columns: 1fr; gap: 1rem; }
   .sec-head { margin-bottom: 2rem; }
 
@@ -879,10 +887,11 @@ footer {
   .tgrid::-webkit-scrollbar { display: none; }
   .tc { flex: 0 0 80vw; scroll-snap-align: start; }
 
-  /* Reels on mobile — fixed height based on 72vw width × 16/9 */
-  .reel-item { flex: 0 0 72vw; }
-  .reel-item-wide { flex: 0 0 85vw; }
-  .reel-wrap, .reel-fb-card { height: calc(72vw * 16 / 9); }
+  /* Reels on mobile — full width */
+  .reel-item { flex: 0 0 95vw; scroll-snap-align: center; }
+  .reel-item-wide { flex: 0 0 95vw; }
+  .reel-wrap, .reel-fb-card { height: calc(95vw * 16 / 9); }
+  .reels-grid { gap: 0.75rem; padding: 0 2.5vw; }
 
   /* Horizontal scroll — instructors */
   .inst-grid {

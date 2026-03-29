@@ -25,10 +25,21 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   type Service = { n: string; he: string; en: string; dHe: string; dEn: string; bodyHe: string; bodyEn: string; image?: string }
   const [servicePopup, setServicePopup] = useState<Service | null>(null);
   const [servicePopupClosing, setServicePopupClosing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingOut, setLoadingOut] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [aboutClosing, setAboutClosing] = useState(false);
 
   function closeServicePopup() { setServicePopupClosing(true); setTimeout(() => { setServicePopup(null); setServicePopupClosing(false); }, 200); }
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setLoadingOut(true);
+      setTimeout(() => setLoading(false), 500);
+    }, 1400);
+    return () => clearTimeout(t);
+  }, []);
+
   function openAbout() { setAboutOpen(true); }
   function closeAbout() { setAboutClosing(true); setTimeout(() => { setAboutOpen(false); setAboutClosing(false); }, 200); }
   const reelsRef = useRef<HTMLDivElement>(null);
@@ -89,6 +100,30 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
     <>
       {/* Dynamic brand colors */}
       <style>{`:root { --lime: ${brandColor}; --black: ${brandBg}; --white: ${brandColorText}; --brand2: ${brandColorSecondary}; }`}</style>
+
+      {/* PAGE LOADER */}
+      {loading && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 99999,
+          background: "var(--black)",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          gap: "2rem",
+          opacity: loadingOut ? 0 : 1,
+          transition: "opacity 0.5s ease",
+          pointerEvents: "none",
+        }}>
+          <style>{`
+            @keyframes loaderFill {
+              from { width: 0%; }
+              to   { width: 100%; }
+            }
+          `}</style>
+          <img src={logoDark} alt="Dynamic Krav Maga" style={{ height: 50, width: "auto", opacity: 0.85, filter: "brightness(10)" }} />
+          <div style={{ width: 160, height: 2, background: "rgba(255,255,255,0.1)", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: "100%", background: "var(--lime)", borderRadius: 2, animation: "loaderFill 1.2s cubic-bezier(0.4,0,0.2,1) forwards" }} />
+          </div>
+        </div>
+      )}
 
       {/* ARTICLE POPUP — outside fade wrapper so opacity doesn't affect it */}
       {(popup || popupClosing) && (
@@ -562,8 +597,8 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       {/* NAV — toggle left | links+CTA+logo right */}
       <nav className="site-nav">
         <div className="lang-sw">
-          <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>עברית</button>
-          <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>English</button>
+          <button className={lang === "he" ? "on" : ""} onClick={() => switchLang("he")}>HE</button>
+          <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>EN</button>
         </div>
         {/* Hamburger — mobile only */}
         <button className="hamburger" onClick={() => setMobileMenu(true)} aria-label="פתח תפריט">
@@ -769,7 +804,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           <div className="reels-outer">
             <button
               className="reel-nav-btn reel-nav-prev"
-              onClick={() => { reelsRef.current?.scrollBy({ left: -340, behavior: 'smooth' }) }}
+              onClick={() => { reelsRef.current?.scrollBy({ left: 340, behavior: 'smooth' }) }}
               aria-label="Previous"
             >‹</button>
             <div className="reels-grid" ref={reelsRef}>
@@ -828,7 +863,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             </div>
             <button
               className="reel-nav-btn reel-nav-next"
-              onClick={() => { reelsRef.current?.scrollBy({ left: 340, behavior: 'smooth' }) }}
+              onClick={() => { reelsRef.current?.scrollBy({ left: -340, behavior: 'smooth' }) }}
               aria-label="Next"
             >›</button>
           </div>
