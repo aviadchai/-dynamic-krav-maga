@@ -416,22 +416,29 @@ nav.site-nav {
 }
 .inst-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 22px 52px rgba(234,255,0,0.09);
+  box-shadow: 0 22px 52px rgba(255,255,255,0.08);
 }
-/* Image — left side, fills the parallelogram naturally */
+/* Image — parallelogram style */
 .inst-card-img {
-  flex: 0 0 40%;
+  flex: 0 0 42%;
   position: relative; overflow: hidden;
+  transform: skewX(-7deg);
+  margin-left: -14px;
   background: linear-gradient(90deg, #131313 25%, #1a1a1a 50%, #131313 75%);
   background-size: 600px 100%;
   animation: shimmer 1.8s ease-in-out infinite;
 }
-.inst-card-main .inst-card-img { flex: 0 0 44%; }
+.inst-card-main .inst-card-img { flex: 0 0 46%; }
 .inst-card-img.loaded { animation: none; background: none; }
 .inst-card-img img {
   width: 100%; height: 100%;
   object-fit: cover; object-position: top center;
   display: block;
+  transform: skewX(7deg) scale(1.15);
+  transition: transform 0.5s ease;
+}
+.inst-card:hover .inst-card-img img {
+  transform: skewX(7deg) scale(1.2);
 }
 .inst-card-placeholder {
   width: 100%; height: 100%; min-height: 220px;
