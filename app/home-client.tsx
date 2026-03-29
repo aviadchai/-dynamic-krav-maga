@@ -38,7 +38,16 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   const allCategories = ["הכל", ...Array.from(new Set(articles.map(a => a.categoryHe).filter(Boolean)))];
   const filteredArticles = activeCategory === "הכל" ? articles : articles.filter(a => a.categoryHe === activeCategory);
 
-  const sortedInstructors = [...instructors].sort((a, b) => a.order - b.order);
+  const [instBioPopup, setInstBioPopup] = useState<typeof instructors[0] | null>(null);
+  const [instBioClosing, setInstBioClosing] = useState(false);
+  function openInstBio(inst: typeof instructors[0]) { setInstBioPopup(inst); }
+  function closeInstBio() { setInstBioClosing(true); setTimeout(() => { setInstBioPopup(null); setInstBioClosing(false); }, 200); }
+
+  const sortedInstructors = [...instructors].sort((a, b) => {
+    if (a.isMain && !b.isMain) return -1;
+    if (!a.isMain && b.isMain) return 1;
+    return a.order - b.order;
+  });
   const instMain = sortedInstructors[0];
   const instDeputy = sortedInstructors[1];
   const instRest = sortedInstructors.slice(2, 5);
@@ -66,7 +75,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
 
   // Close popups on ESC
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { closePopup(); closeAbout(); closeServicePopup(); closeAllArticles(); setMobileMenu(false); } };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { closePopup(); closeAbout(); closeServicePopup(); closeAllArticles(); closeInstBio(); setMobileMenu(false); } };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
@@ -522,6 +531,34 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
         </div>
       )}
 
+      {/* INSTRUCTOR BIO POPUP */}
+      {(instBioPopup || instBioClosing) && (
+        <div onClick={closeInstBio} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(8,8,8,0.85)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "3vw", animation: instBioClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#131313", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 18, width: "100%", maxWidth: 700, overflow: "hidden", direction: "rtl" }}>
+            {instBioPopup?.image && (
+              <div style={{ width: "100%", height: 320, overflow: "hidden", position: "relative" }}>
+                <img src={instBioPopup.image} alt={t(instBioPopup.nameHe, instBioPopup.nameEn)} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #131313 0%, transparent 50%)" }} />
+                <button onClick={closeInstBio} style={{ position: "absolute", top: 16, left: 16, background: "rgba(0,0,0,0.5)", border: "none", color: "rgba(255,255,255,0.7)", width: 36, height: 36, borderRadius: "50%", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+              </div>
+            )}
+            <div style={{ padding: "1.75rem 2rem 2rem" }}>
+              {!instBioPopup?.image && (
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
+                  <button onClick={closeInstBio} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: "rgba(255,255,255,0.5)", width: 36, height: 36, borderRadius: "50%", cursor: "pointer", fontSize: 16 }}>✕</button>
+                </div>
+              )}
+              {instBioPopup?.roleHe && <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: "var(--lime)", marginBottom: 8 }}>{t(instBioPopup.roleHe, instBioPopup.roleEn)}</div>}
+              <div style={{ fontSize: "1.5rem", fontWeight: 900, color: "#fff", marginBottom: "0.75rem", fontFamily: "var(--font-heebo), sans-serif" }}>{t(instBioPopup!.nameHe, instBioPopup!.nameEn)}</div>
+              <div style={{ width: 32, height: 3, background: "var(--lime)", borderRadius: 2, transform: "skewX(-20deg)", marginBottom: "1.25rem" }} />
+              <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.65)", lineHeight: 1.85, whiteSpace: "pre-wrap" }}>
+                {t(instBioPopup?.popupBioHe || instBioPopup?.bioHe || '', instBioPopup?.popupBioEn || instBioPopup?.bioEn || '')}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SERVICE POPUP */}
       {(servicePopup || servicePopupClosing) && (
         <div
@@ -812,7 +849,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           <div className="inst-layout">
             <div className="inst-top-row">
               {instMain && (
-                <div className="icard icard--main appear">
+                <div className="icard icard--main">
                   {instMain.image ? <img src={instMain.image} alt={t(instMain.nameHe, instMain.nameEn)} /> : <div className="icard-placeholder">👤</div>}
                   <div className="icard-overlay" />
                   <div className="icard-info">
@@ -820,11 +857,19 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                     <div className="icard-name">{t(instMain.nameHe, instMain.nameEn)}</div>
                     <div className="icard-bar" />
                     {instMain.bioHe && <p className="icard-bio">{t(instMain.bioHe, instMain.bioEn)}</p>}
+                    {(instMain.popupBioHe || instMain.bioHe) && (
+                      <button onClick={() => openInstBio(instMain)} style={{ marginTop: "1rem", background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.2)", color: "#fff", padding: "9px 20px", borderRadius: 50, cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-heebo), sans-serif", backdropFilter: "blur(4px)", transition: "all .2s" }}
+                        onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.18)"; }}
+                        onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.1)"; }}
+                      >
+                        {lang === "he" ? "הצג ביוגרפיה" : "Full Bio"}
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
               {instDeputy && (
-                <div className="icard icard--deputy appear">
+                <div className="icard icard--deputy">
                   {instDeputy.image ? <img src={instDeputy.image} alt={t(instDeputy.nameHe, instDeputy.nameEn)} /> : <div className="icard-placeholder">👤</div>}
                   <div className="icard-overlay" />
                   <div className="icard-info">
@@ -839,7 +884,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             {instRest.length > 0 && (
               <div className="inst-bottom-row">
                 {instRest.map(inst => (
-                  <div key={inst.id} className="icard icard--sm appear">
+                  <div key={inst.id} className="icard icard--sm">
                     {inst.image ? <img src={inst.image} alt={t(inst.nameHe, inst.nameEn)} /> : <div className="icard-placeholder">👤</div>}
                     <div className="icard-overlay" />
                     <div className="icard-info">

@@ -36,8 +36,11 @@ export type Instructor = {
   roleEn: string
   bioHe: string
   bioEn: string
+  popupBioHe?: string
+  popupBioEn?: string
   image: string
   order: number
+  isMain?: boolean
 }
 
 export type Reel = {

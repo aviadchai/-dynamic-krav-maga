@@ -21,7 +21,7 @@ const inp: React.CSSProperties = {
 
 const empty: Omit<Instructor, 'id'> = {
   nameHe: '', nameEn: '', roleHe: '', roleEn: '',
-  bioHe: '', bioEn: '', image: '', order: 1,
+  bioHe: '', bioEn: '', popupBioHe: '', popupBioEn: '', image: '', order: 1, isMain: false,
 }
 
 export default function InstructorsPage() {
@@ -49,11 +49,19 @@ export default function InstructorsPage() {
 
   function startEdit(inst: Instructor) {
     setEditing(inst)
-    setForm({ nameHe: inst.nameHe, nameEn: inst.nameEn, roleHe: inst.roleHe, roleEn: inst.roleEn, bioHe: inst.bioHe, bioEn: inst.bioEn, image: inst.image, order: inst.order })
+    setForm({ nameHe: inst.nameHe, nameEn: inst.nameEn, roleHe: inst.roleHe, roleEn: inst.roleEn, bioHe: inst.bioHe, bioEn: inst.bioEn, popupBioHe: inst.popupBioHe || '', popupBioEn: inst.popupBioEn || '', image: inst.image, order: inst.order, isMain: inst.isMain || false })
   }
 
-  function set(key: string, value: string | number) {
+  function set(key: string, value: string | number | boolean) {
     setForm(f => ({ ...f, [key]: value }))
+  }
+
+  async function setMain(id: string) {
+    const updated = instructors.map(i => ({ ...i, isMain: i.id === id }))
+    setInstructors(updated)
+    await Promise.all(updated.map(i =>
+      fetch(`/api/instructors/${i.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...i }) })
+    ))
   }
 
   async function save() {
@@ -190,17 +198,15 @@ export default function InstructorsPage() {
                 <div style={{ fontWeight: 800, color: '#fff', fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inst.nameHe}</div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{inst.roleHe}</div>
               </div>
-              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                <button onClick={() => startEdit(inst)} style={{
-                  background: 'rgba(255,255,255,0.08)', border: 'none',
-                  color: 'rgba(255,255,255,0.7)', padding: '6px 12px',
-                  borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12,
-                }}>עריכה</button>
-                <button onClick={() => del(inst.id)} style={{
-                  background: 'rgba(255,50,50,0.08)', border: 'none',
-                  color: 'rgba(255,80,80,0.7)', padding: '6px 10px',
-                  borderRadius: 8, cursor: 'pointer', fontSize: 12,
-                }}>✕</button>
+              <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
+                <button
+                  onClick={() => setMain(inst.id)}
+                  title="הגדר כמאמן ראשי"
+                  style={{ background: inst.isMain ? 'rgba(234,255,0,0.15)' : 'rgba(255,255,255,0.05)', border: inst.isMain ? '1.5px solid rgba(234,255,0,0.4)' : '1.5px solid rgba(255,255,255,0.1)', color: inst.isMain ? '#EAFF00' : 'rgba(255,255,255,0.3)', width: 32, height: 32, borderRadius: 8, cursor: 'pointer', fontSize: 15 }}>
+                  ★
+                </button>
+                <button onClick={() => startEdit(inst)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.7)', padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12 }}>עריכה</button>
+                <button onClick={() => del(inst.id)} style={{ background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.7)', padding: '6px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 12 }}>✕</button>
               </div>
             </div>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6, margin: 0 }}>
@@ -245,6 +251,20 @@ export default function InstructorsPage() {
             <input style={{ ...inp, flex: 1, fontSize: 12 }} value={form.image} onChange={e => set('image', e.target.value)} placeholder="או URL..." dir="ltr" />
           </div>
         </F>
+
+        {/* Popup bio — shown as full bio in popup */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.25rem', marginTop: '0.5rem', marginBottom: '1rem' }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: '1rem' }}>ביוגרפיה מורחבת — מוצגת בפופאפ "הצג ביוגרפיה" (ריק = ישתמש בביוגרפיה הרגילה)</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <F label="ביוגרפיה מורחבת — עברית">
+              <textarea style={{ ...inp, resize: 'vertical', minHeight: 120, lineHeight: 1.7 }} value={form.popupBioHe || ''} onChange={e => set('popupBioHe', e.target.value)} placeholder="טקסט מורחב שיופיע בחלונית..." />
+            </F>
+            <F label="Extended Bio — English">
+              <textarea style={{ ...inp, resize: 'vertical', minHeight: 120, lineHeight: 1.7, direction: 'ltr' }} value={form.popupBioEn || ''} onChange={e => set('popupBioEn', e.target.value)} placeholder="Extended text shown in popup..." />
+            </F>
+          </div>
+        </div>
+
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
           {editing && (
             <button onClick={() => { setEditing(null); setForm(empty) }} style={{
