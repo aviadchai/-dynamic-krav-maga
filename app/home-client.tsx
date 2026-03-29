@@ -660,18 +660,12 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           <div className="about-bar"></div>
           <button
             onClick={openAbout}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: '#111', color: '#fff', border: '2px solid #111',
-              padding: '11px 26px', borderRadius: 50, cursor: 'pointer',
-              fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 14,
-              marginBottom: '1.5rem', transition: 'all .2s',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = '#111'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#111'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+            className="btn-fill"
+            style={{ background: '#111', color: '#fff', border: 'none', cursor: 'pointer', marginBottom: '1.5rem', fontFamily: 'var(--font-heebo), sans-serif' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#333'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#111'; }}
           >
-            {t('קרא אודותינו', 'Read About Us')}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            <span>{t('קרא אודותינו', 'Read About Us')}</span>
           </button>
           {content?.aboutExcerptHe && <p className="he-only about-excerpt">{content.aboutExcerptHe}</p>}
           {content?.aboutExcerptEn && <p className="en-only about-excerpt">{content.aboutExcerptEn}</p>}
