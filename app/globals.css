@@ -405,23 +405,24 @@ nav.site-nav {
 /* ── INSTRUCTORS ── */
 .inst-section { background: var(--black); padding: 6rem 3rem; }
 .inst-grid { display: grid; gap: 1.25rem; }
-/* Instructor card — vertical layout */
+/* Instructor card — horizontal layout */
 .inst-card {
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: row;
   background: var(--mid);
   border-radius: var(--r); overflow: hidden;
   transition: transform .3s, box-shadow .3s;
+  align-items: stretch; min-height: 200px;
 }
 .inst-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 24px 56px rgba(255,255,255,0.07);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 50px rgba(255,255,255,0.065);
 }
-/* Image — square with parallelogram style */
+/* Image — parallelogram on the left side */
 .inst-card-img {
-  aspect-ratio: 1/1;
+  flex: 0 0 170px;
   position: relative; overflow: hidden;
   transform: skewX(-7deg);
-  margin: 0 -18px;
+  margin: 0 10px 0 -24px;
   background: linear-gradient(90deg, #131313 25%, #1a1a1a 50%, #131313 75%);
   background-size: 600px 100%;
   animation: shimmer 1.8s ease-in-out infinite;
@@ -440,12 +441,12 @@ nav.site-nav {
 .inst-card-placeholder {
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 4rem; background: var(--light);
+  font-size: 3rem; background: var(--light);
 }
 .inst-card-body {
-  padding: 1.5rem 1.75rem;
+  flex: 1; padding: 1.75rem 1.75rem 1.75rem 1.25rem;
   display: flex; flex-direction: column;
-  direction: rtl;
+  justify-content: center; direction: rtl;
 }
 .inst-card-role {
   font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
@@ -875,8 +876,9 @@ footer {
     -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
   .inst-grid::-webkit-scrollbar { display: none; }
-  .inst-card { flex: 0 0 82vw; scroll-snap-align: center; min-height: 160px; }
-  .inst-card-main { flex: 0 0 88vw; min-height: 190px; }
+  .inst-card { flex: 0 0 86vw; scroll-snap-align: center; min-height: 140px; }
+  .inst-card-img { flex: 0 0 130px; }
+  .inst-card-main { flex: 0 0 90vw; }
 
   /* Contact */
   .contact { padding: 3rem 1.25rem; gap: 2rem; grid-template-columns: 1fr; }
