@@ -36,6 +36,8 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   function closeServicePopup() { setServicePopupClosing(true); setTimeout(() => { setServicePopup(null); setServicePopupClosing(false); }, 200); }
   function openAllArticles() { setActiveCategory("הכל"); setAllArticlesOpen(true); }
   function closeAllArticles() { setAllArticlesClosing(true); setTimeout(() => { setAllArticlesOpen(false); setAllArticlesClosing(false); }, 200); }
+  const allCategories = ["הכל", ...Array.from(new Set(articles.map(a => a.categoryHe).filter(Boolean)))];
+  const filteredArticles = activeCategory === "הכל" ? articles : articles.filter(a => a.categoryHe === activeCategory);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -426,84 +428,80 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       )}
 
       {/* ALL ARTICLES MODAL */}
-      {(allArticlesOpen || allArticlesClosing) && (() => {
-        const categories = ["הכל", ...Array.from(new Set(articles.map(a => a.categoryHe).filter(Boolean)))];
-        const filtered = activeCategory === "הכל" ? articles : articles.filter(a => a.categoryHe === activeCategory);
-        return (
+      {(allArticlesOpen || allArticlesClosing) && (
+        <div
+          onClick={closeAllArticles}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            background: "rgba(8,8,8,0.88)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            display: "flex", alignItems: "flex-start", justifyContent: "center",
+            padding: "3vw",
+            animation: allArticlesClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease",
+            overflowY: "auto",
+          }}
+        >
           <div
-            onClick={closeAllArticles}
+            onClick={e => e.stopPropagation()}
             style={{
-              position: "fixed", inset: 0, zIndex: 9999,
-              background: "rgba(8,8,8,0.88)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              display: "flex", alignItems: "flex-start", justifyContent: "center",
-              padding: "3vw",
-              animation: allArticlesClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease",
-              overflowY: "auto",
+              background: "#131313",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: 18,
+              width: "100%",
+              maxWidth: 1100,
+              padding: "2.5rem",
+              direction: "rtl",
             }}
           >
-            <div
-              onClick={e => e.stopPropagation()}
-              style={{
-                background: "#131313",
-                border: "1px solid rgba(255,255,255,0.09)",
-                borderRadius: 18,
-                width: "100%",
-                maxWidth: 1100,
-                padding: "2.5rem",
-                direction: "rtl",
-              }}
-            >
-              {/* Header */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem" }}>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: "var(--lime)", textTransform: "uppercase", marginBottom: 6 }}>ידע וכלים</div>
-                  <div style={{ fontSize: "1.6rem", fontWeight: 900, color: "#fff" }}>כל המאמרים</div>
-                </div>
-                <button onClick={closeAllArticles} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: "rgba(255,255,255,0.5)", width: 40, height: 40, borderRadius: "50%", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem" }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: "var(--lime)", textTransform: "uppercase", marginBottom: 6 }}>ידע וכלים</div>
+                <div style={{ fontSize: "1.6rem", fontWeight: 900, color: "#fff" }}>כל המאמרים</div>
               </div>
+              <button onClick={closeAllArticles} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: "rgba(255,255,255,0.5)", width: 40, height: 40, borderRadius: "50%", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+            </div>
 
-              {/* Category filter chips */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: "2rem" }}>
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    style={{
-                      background: activeCategory === cat ? "var(--lime)" : "rgba(255,255,255,0.06)",
-                      color: activeCategory === cat ? "#0A0A0A" : "rgba(255,255,255,0.5)",
-                      border: activeCategory === cat ? "none" : "1.5px solid rgba(255,255,255,0.1)",
-                      padding: "7px 18px", borderRadius: 50,
-                      cursor: "pointer", fontSize: 12, fontWeight: 700,
-                      fontFamily: "var(--font-heebo), sans-serif",
-                      transition: "all .15s",
-                    }}
-                  >{cat}</button>
-                ))}
-              </div>
+            {/* Category filter chips */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: "2rem" }}>
+              {allCategories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  style={{
+                    background: activeCategory === cat ? "var(--lime)" : "rgba(255,255,255,0.06)",
+                    color: activeCategory === cat ? "#0A0A0A" : "rgba(255,255,255,0.5)",
+                    border: activeCategory === cat ? "none" : "1.5px solid rgba(255,255,255,0.1)",
+                    padding: "7px 18px", borderRadius: 50,
+                    cursor: "pointer", fontSize: 12, fontWeight: 700,
+                    fontFamily: "var(--font-heebo), sans-serif",
+                    transition: "all .15s",
+                  }}
+                >{cat}</button>
+              ))}
+            </div>
 
-              {/* Articles grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.25rem" }}>
-                {filtered.map(a => (
-                  <div key={a.id} className="ac" onClick={() => { closeAllArticles(); setTimeout(() => openPopup(a), 220); }} style={{ cursor: "pointer" }}>
-                    <div className="ac-thumb">
-                      {a.image && <img className="ac-thumb-img site-img" src={a.image} alt="" />}
-                      <div className="ac-cat">{a.categoryHe}</div>
-                    </div>
-                    <div className="ac-body">
-                      <div className="ac-date">{a.date}</div>
-                      <div className="ac-title-he">{a.titleHe}</div>
-                      <p className="ac-ex">{a.excerptHe}</p>
-                      <div className="ac-more">קרא עוד →</div>
-                    </div>
+            {/* Articles grid */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.25rem" }}>
+              {filteredArticles.map(a => (
+                <div key={a.id} className="ac" onClick={() => { closeAllArticles(); setTimeout(() => openPopup(a), 220); }} style={{ cursor: "pointer" }}>
+                  <div className="ac-thumb">
+                    {a.image && <img className="ac-thumb-img site-img" src={a.image} alt="" />}
+                    <div className="ac-cat">{a.categoryHe}</div>
                   </div>
-                ))}
-              </div>
+                  <div className="ac-body">
+                    <div className="ac-date">{a.date}</div>
+                    <div className="ac-title-he">{a.titleHe}</div>
+                    <p className="ac-ex">{a.excerptHe}</p>
+                    <div className="ac-more">קרא עוד →</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        );
-      })()}
+        </div>
+      )}
 
       {/* SERVICE POPUP */}
       {(servicePopup || servicePopupClosing) && (
@@ -797,29 +795,31 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             const count = sorted.length
             const cols = count === 1 ? 'minmax(0, 520px)' : `repeat(${Math.min(count, 4)}, 1fr)`
             return (
-              <div className="inst-grid" style={{ gridTemplateColumns: cols, justifyContent: count === 1 ? 'center' : undefined }}>
-                {sorted.map((inst, idx) => (
-                  <div key={inst.id} className={`inst-card appear${idx === 0 ? ' inst-card-main' : ''}`} dir="ltr" style={{ transitionDelay: `${idx * 0.1}s` }}>
-                    <div className="inst-card-img">
-                      {inst.image
-                        ? <img className="site-img" src={inst.image} alt={inst.nameHe} onLoad={e => e.currentTarget.closest('.inst-card-img')?.classList.add('loaded')} />
-                        : <div className="inst-card-placeholder">👤</div>
-                      }
+              <>
+                <div className="inst-grid" style={{ gridTemplateColumns: cols, justifyContent: count === 1 ? 'center' : undefined }}>
+                  {sorted.map((inst, idx) => (
+                    <div key={inst.id} className={`inst-card appear${idx === 0 ? ' inst-card-main' : ''}`} dir="ltr" style={{ transitionDelay: `${idx * 0.1}s` }}>
+                      <div className="inst-card-img">
+                        {inst.image
+                          ? <img className="site-img" src={inst.image} alt={inst.nameHe} onLoad={e => e.currentTarget.closest('.inst-card-img')?.classList.add('loaded')} />
+                          : <div className="inst-card-placeholder">👤</div>
+                        }
+                      </div>
+                      <div className="inst-card-body">
+                        <div className="inst-card-role">{t(inst.roleHe, inst.roleEn)}</div>
+                        <div className="inst-card-name">{t(inst.nameHe, inst.nameEn)}</div>
+                        <div className="inst-card-bar"></div>
+                        <p className="inst-card-bio">{t(inst.bioHe, inst.bioEn)}</p>
+                      </div>
                     </div>
-                    <div className="inst-card-body">
-                      <div className="inst-card-role">{t(inst.roleHe, inst.roleEn)}</div>
-                      <div className="inst-card-name">{t(inst.nameHe, inst.nameEn)}</div>
-                      <div className="inst-card-bar"></div>
-                      <p className="inst-card-bio">{t(inst.bioHe, inst.bioEn)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {count > 1 && (
-                <div className="scroll-dots">
-                  {sorted.map((_, i) => <span key={i} className="scroll-dot" />)}
+                  ))}
                 </div>
-              )}
+                {count > 1 && (
+                  <div className="scroll-dots">
+                    {sorted.map((_, i) => <span key={i} className="scroll-dot" />)}
+                  </div>
+                )}
+              </>
             )
           })()}
         </section>
