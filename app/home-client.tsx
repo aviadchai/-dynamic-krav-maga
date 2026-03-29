@@ -148,7 +148,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             <div className="popup-scroll" style={{ overflowY: "auto", maxHeight: "calc(100vh - 4rem)" }}>
               {/* Two-column: title+excerpt | image+meta */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", padding: "2.5rem 2rem 1.5rem", alignItems: "start" }}>
-                {/* Right col (RTL first): category + title + excerpt */}
+                {/* Right col (RTL first): category + title + excerpt + meta */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem", paddingTop: "0.5rem" }}>
                   {popup?.categoryHe && (
                     <span style={{
@@ -176,8 +176,14 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                       {popup.excerptHe}
                     </p>
                   )}
+                  {(popup?.date || popup?.author) && (
+                    <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap", paddingTop: "0.25rem" }}>
+                      {popup?.date && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup.date}</span>}
+                      {popup?.author && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5 }}>✍ {popup.author}</span>}
+                    </div>
+                  )}
                 </div>
-                {/* Left col: image + meta row */}
+                {/* Left col: image only */}
                 <div>
                   {popup?.image && (
                     <div style={{ aspectRatio: "16/9", transform: "skewX(-7deg)", borderRadius: 16, overflow: "hidden", boxShadow: "0 16px 40px rgba(0,0,0,0.5)" }}>
@@ -187,10 +193,6 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                       />
                     </div>
                   )}
-                  <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 12, paddingRight: 4, flexWrap: "wrap" }}>
-                    {popup?.date && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup.date}</span>}
-                    {popup?.author && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5 }}>✍ {popup.author}</span>}
-                  </div>
                 </div>
               </div>
 
@@ -705,8 +707,10 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           </div>
           {(() => {
             const sorted = [...instructors].sort((a, b) => a.order - b.order)
+            const count = sorted.length
+            const cols = count === 1 ? 'minmax(0, 520px)' : `repeat(${Math.min(count, 4)}, 1fr)`
             return (
-              <div className="inst-grid">
+              <div className="inst-grid" style={{ gridTemplateColumns: cols, justifyContent: count === 1 ? 'center' : undefined }}>
                 {sorted.map((inst, idx) => (
                   <div key={inst.id} className={`inst-card appear${idx === 0 ? ' inst-card-main' : ''}`} dir="ltr" style={{ transitionDelay: `${idx * 0.1}s` }}>
                     <div className="inst-card-img">

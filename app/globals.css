@@ -404,31 +404,27 @@ nav.site-nav {
 
 /* ── INSTRUCTORS ── */
 .inst-section { background: var(--black); padding: 6rem 3rem; }
-.inst-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+.inst-grid { display: grid; gap: 1.25rem; }
 /* Instructor card — horizontal layout */
 .inst-card {
   display: flex; flex-direction: row;
   background: var(--mid);
   border-radius: var(--r); overflow: hidden;
   transition: transform .3s, box-shadow .3s;
-  align-items: stretch; min-height: 230px;
+  align-items: stretch; min-height: 240px;
 }
 .inst-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 20px 50px rgba(255,255,255,0.065);
 }
-/* Main instructor — full width, taller */
-.inst-card-main {
-  grid-column: 1 / -1;
-  min-height: 320px;
-}
-.inst-card-main .inst-card-img { flex: 0 0 300px; }
-.inst-card-main .inst-card-name { font-size: 1.7rem; }
-.inst-card-main .inst-card-role { font-size: 11px; letter-spacing: 3px; }
-.inst-card-main .inst-card-bio { font-size: .88rem; }
+/* Main instructor — slightly taller, bigger image + text */
+.inst-card-main { min-height: 290px; }
+.inst-card-main .inst-card-img { flex: 0 0 210px; }
+.inst-card-main .inst-card-name { font-size: 1.45rem; }
+.inst-card-main .inst-card-bio { font-size: .86rem; }
 /* Image — parallelogram on the left side */
 .inst-card-img {
-  flex: 0 0 200px;
+  flex: 0 0 165px;
   position: relative; overflow: hidden;
   transform: skewX(-7deg);
   margin: 0 10px 0 -24px;
@@ -622,7 +618,8 @@ nav.site-nav {
   border: 1.5px solid rgba(255,255,255,0.06);
   background: var(--mid);
   transition: border-color .3s;
-  aspect-ratio: 9/16;
+  height: 498px;
+  flex-shrink: 0;
   position: relative;
 }
 .reel-wrap:hover { border-color: rgba(234,255,0,0.25); }
@@ -637,7 +634,7 @@ nav.site-nav {
   text-decoration: none;
   background: linear-gradient(135deg, #1877F2 0%, #0d5fc7 100%);
   display: flex; align-items: center; justify-content: center;
-  aspect-ratio: 9/16; border-radius: var(--r);
+  height: 498px; border-radius: var(--r);
   transition: transform .2s, box-shadow .2s;
 }
 .reel-fb-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(24,119,242,0.3); }
@@ -874,9 +871,10 @@ footer {
   .tgrid::-webkit-scrollbar { display: none; }
   .tc { flex: 0 0 80vw; scroll-snap-align: start; }
 
-  /* Reels on mobile — smaller cards */
+  /* Reels on mobile — fixed height based on 72vw width × 16/9 */
   .reel-item { flex: 0 0 72vw; }
   .reel-item-wide { flex: 0 0 85vw; }
+  .reel-wrap, .reel-fb-card { height: calc(72vw * 16 / 9); }
 
   /* Horizontal scroll — instructors */
   .inst-grid {
