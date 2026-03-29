@@ -365,7 +365,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                           {lang === 'he' ? entry.textHe : entry.textEn}
                         </p>
                         {entry.image && (
-                          <div style={{ transform: "skewX(-7deg)", borderRadius: 16, overflow: "hidden", maxWidth: 480, marginTop: "1rem", aspectRatio: "16/9" }}>
+                          <div style={{ transform: "skewX(-7deg)", borderRadius: 12, overflow: "hidden", maxWidth: 320, maxHeight: 200, marginTop: "0.75rem", aspectRatio: "16/9" }}>
                             <img
                               src={entry.image} alt={entry.titleHe}
                               onLoad={e => {
