@@ -29,9 +29,37 @@ export default function AboutAdminPage() {
   const [form, setForm] = useState(emptyEntry())
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [translatingAll, setTranslatingAll] = useState(false)
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  async function translateAll() {
+    if (entries.length === 0) return
+    setTranslatingAll(true)
+    try {
+      const fields: Record<string, string> = {}
+      entries.forEach((e, i) => {
+        if (e.titleHe) fields[`t${i}`] = e.titleHe
+        if (e.textHe) fields[`d${i}`] = e.textHe
+      })
+      const res = await fetch('/api/translate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields }),
+      })
+      const { translations } = await res.json()
+      const updated = entries.map((e, i) => ({
+        ...e,
+        titleEn: translations[`t${i}`] || e.titleEn,
+        textEn: translations[`d${i}`] || e.textEn,
+      }))
+      setEntries(updated)
+      await fetch('/api/content', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ aboutTimeline: updated }),
+      })
+    } finally { setTranslatingAll(false) }
+  }
 
   async function load() {
     const res = await fetch('/api/content')
@@ -129,13 +157,24 @@ export default function AboutAdminPage() {
           <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>טיימליין — אודותינו</h1>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, marginTop: 4 }}>גרור כדי לסדר מחדש</p>
         </div>
-        <button onClick={startNew} style={{
-          background: '#EAFF00', color: '#0A0A0A', border: 'none',
-          padding: '11px 24px', borderRadius: 50,
-          fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 13, cursor: 'pointer',
-        }}>
-          + רשומה חדשה
-        </button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {entries.length > 0 && (
+            <button onClick={translateAll} disabled={translatingAll} style={{
+              background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.25)', color: '#EAFF00',
+              padding: '11px 20px', borderRadius: 50, cursor: translatingAll ? 'wait' : 'pointer',
+              fontFamily: 'var(--font-heebo), sans-serif', fontSize: 13, fontWeight: 700,
+            }}>
+              {translatingAll ? '⏳ מתרגם...' : '✨ תרגם הכל לאנגלית'}
+            </button>
+          )}
+          <button onClick={startNew} style={{
+            background: '#EAFF00', color: '#0A0A0A', border: 'none',
+            padding: '11px 24px', borderRadius: 50,
+            fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 13, cursor: 'pointer',
+          }}>
+            + רשומה חדשה
+          </button>
+        </div>
       </div>
 
       {/* Timeline entries — draggable */}

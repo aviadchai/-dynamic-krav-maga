@@ -435,13 +435,30 @@ export default function ContentPage() {
       </Section>
 
       {/* ── CONTACT ── */}
-      <Section title="פרטי יצירת קשר" open={open.has('contact')} onToggle={() => toggle('contact')} locked={locked}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <F label="טלפון"><input style={inp} value={content.phone || ''} onChange={e => set('phone', e.target.value)} placeholder="054-0000000" dir="ltr" /></F>
-          <F label="WhatsApp"><input style={inp} value={content.whatsapp || ''} onChange={e => set('whatsapp', e.target.value)} placeholder="054-0000000" dir="ltr" /></F>
-          <F label="Email"><input style={inp} value={content.email || ''} onChange={e => set('email', e.target.value)} placeholder="mail@example.com" dir="ltr" /></F>
-          <F label="Instagram"><input style={inp} value={content.instagram || ''} onChange={e => set('instagram', e.target.value)} placeholder="@username" dir="ltr" /></F>
-          <F label="Facebook"><input style={inp} value={content.facebook || ''} onChange={e => set('facebook', e.target.value)} placeholder="שם הדף או URL" dir="ltr" /></F>
+      <Section title="צור קשר — Contact" open={open.has('contact')} onToggle={() => toggle('contact')} locked={locked} action={
+        <button type="button" disabled={translating === 'contact'} style={trBtnStyle(true, translating === 'contact')} onClick={async () => {
+          if (!isEditing) startEdit()
+          const t = await tr('contact', { contactSubHe: content.contactSubHe || '' })
+          if (t.contactSubHe) set('contactSubHe', t.contactSubHe)
+        }}>{translating === 'contact' ? '⏳' : '✨ תרגם'}</button>
+      }>
+        <div style={twoCol}>
+          <F label="טקסט תיאור — עברית">
+            <textarea style={{ ...inp, resize: 'vertical', minHeight: 70 }} value={content.contactSubHe || ''} onChange={e => set('contactSubHe', e.target.value)} placeholder="שאלה? רוצים לקבוע שיעור ראשון? פשוט כתבו." />
+          </F>
+          <F label="Description — English">
+            <textarea style={{ ...inp, resize: 'vertical', minHeight: 70, direction: 'ltr' }} value={content.contactSubEn || ''} onChange={e => set('contactSubEn', e.target.value)} placeholder="Questions? Want to book a first class? Just write." />
+          </F>
+        </div>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.25rem', marginTop: '.25rem' }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: '1rem' }}>פרטי קשר</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <F label="טלפון"><input style={inp} value={content.phone || ''} onChange={e => set('phone', e.target.value)} placeholder="054-0000000" dir="ltr" /></F>
+            <F label="WhatsApp"><input style={inp} value={content.whatsapp || ''} onChange={e => set('whatsapp', e.target.value)} placeholder="054-0000000" dir="ltr" /></F>
+            <F label="Email"><input style={inp} value={content.email || ''} onChange={e => set('email', e.target.value)} placeholder="mail@example.com" dir="ltr" /></F>
+            <F label="Instagram"><input style={inp} value={content.instagram || ''} onChange={e => set('instagram', e.target.value)} placeholder="@username" dir="ltr" /></F>
+            <F label="Facebook"><input style={inp} value={content.facebook || ''} onChange={e => set('facebook', e.target.value)} placeholder="שם הדף או URL" dir="ltr" /></F>
+          </div>
         </div>
       </Section>
 

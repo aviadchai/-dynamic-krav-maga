@@ -117,6 +117,8 @@ export type SiteContent = {
   instagram: string
   facebook: string
   whatsapp: string
+  contactSubHe: string
+  contactSubEn: string
   // Services
   services: ServiceItem[]
   // About timeline
@@ -200,6 +202,8 @@ const defaultContent: SiteContent = {
   instagram: '',
   facebook: '',
   whatsapp: '',
+  contactSubHe: 'שאלה? רוצים לקבוע שיעור ראשון? פשוט כתבו.',
+  contactSubEn: 'Questions? Want to book a first class? Just write.',
   brandColor: '#EAFF00',
   brandColorSecondary: '',
   brandColorText: '#FFFFFF',

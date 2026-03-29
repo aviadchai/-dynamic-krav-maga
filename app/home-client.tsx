@@ -1033,8 +1033,9 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           <div className="he-only"><div className="sec-h-he">צור<br />קשר</div></div>
           <div className="en-only"><div className="sec-h">GET IN<br />TOUCH</div></div>
           <div className="accent-bar"></div>
-          <p className="c-info-sub he-only">שאלה? רוצים לקבוע שיעור ראשון? פשוט כתבו.</p>
-          <p className="c-info-sub en-only">Questions? Want to book a first class? Just write.</p>
+          {(content?.contactSubHe || content?.contactSubEn) && (
+            <p className="c-info-sub">{t(content?.contactSubHe || '', content?.contactSubEn || '')}</p>
+          )}
           <div className="c-details">
             {content?.phone && (
               <div className="c-detail-row">
