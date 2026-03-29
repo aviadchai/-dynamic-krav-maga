@@ -499,7 +499,7 @@ nav.site-nav {
   transition: border-color .3s, box-shadow .3s, transform .3s;
   position: relative; overflow: hidden;
 }
-.tc:hover { border-color: rgba(255,255,255,0.12); box-shadow: 0 16px 48px rgba(255,255,255,0.065); transform: translateY(-4px) scale(1.02); }
+.tc:hover { border-color: rgba(255,255,255,0.1); box-shadow: none; transform: translateY(-2px); }
 .tc::before {
   content: '\201C';
   position: absolute;
@@ -543,19 +543,19 @@ nav.site-nav {
   overflow: hidden;
   cursor: pointer;
   transition: transform .3s, border-color .3s;
-  padding: 0.85rem 0.85rem 0;
+  padding: 0;
 }
 .ac:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.15); }
-/* Floating parallelogram thumbnail — Image 2 style */
+/* Thumbnail flush to top of card */
 .ac-thumb {
   aspect-ratio: 16/9;
   background: linear-gradient(90deg, #131313 25%, #1a1a1a 50%, #131313 75%);
   background-size: 600px 100%;
   animation: shimmer 1.8s ease-in-out infinite;
   position: relative; overflow: hidden;
-  border-radius: 10px;
+  border-radius: 0;
   box-shadow: none;
-  margin: 0 0 0.85rem;
+  margin: 0;
   transition: opacity .3s;
 }
 .ac:hover .ac-thumb { opacity: 0.88; }
@@ -572,7 +572,7 @@ nav.site-nav {
   font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
   padding: 3px 10px; border-radius: 50px;
 }
-.ac-body { padding: 0 6px 1rem; }
+.ac-body { padding: 0.85rem 0.85rem 1rem; }
 .ac-date { font-size: 10px; color: rgba(255,255,255,0.25); letter-spacing: 2px; text-transform: uppercase; margin-bottom: .5rem; }
 .ac-title {
   font-family: var(--font-barlow), sans-serif;
