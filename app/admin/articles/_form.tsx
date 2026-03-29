@@ -53,8 +53,30 @@ export function ArticleForm({ initialData, onSave, saving }: Props) {
   })
   const [uploading, setUploading] = useState(false)
   const [uploadingBody, setUploadingBody] = useState(false)
+  const [translating, setTranslating] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const fileBodyRef = useRef<HTMLInputElement>(null)
+
+  async function translateAll() {
+    if (!data.titleHe && !data.excerptHe && !data.bodyHe) return
+    setTranslating(true)
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { titleHe: data.titleHe, excerptHe: data.excerptHe, bodyHe: data.bodyHe } }),
+      })
+      const { translations } = await res.json()
+      setData(d => ({
+        ...d,
+        titleEn: translations.titleHe || d.titleEn,
+        excerptEn: translations.excerptHe || d.excerptEn,
+        bodyEn: translations.bodyHe || d.bodyEn,
+      }))
+    } finally {
+      setTranslating(false)
+    }
+  }
 
   function set(key: string, value: string | boolean) {
     setData(d => ({ ...d, [key]: value }))
@@ -104,6 +126,37 @@ export function ArticleForm({ initialData, onSave, saving }: Props) {
         </F>
         <F label="תוכן המאמר">
           <textarea style={{ ...ta, minHeight: 360 }} value={data.bodyHe} onChange={e => set('bodyHe', e.target.value)} placeholder="כתוב את המאמר כאן...&#10;&#10;ניתן לרשום כל שורה חדשה בשורה חדשה." />
+        </F>
+      </div>
+
+      {/* Translate button + English content */}
+      <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.75rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase' }}>תוכן באנגלית</div>
+          <button
+            type="button"
+            onClick={translateAll}
+            disabled={translating || (!data.titleHe && !data.excerptHe && !data.bodyHe)}
+            style={{
+              background: translating ? 'rgba(234,255,0,0.05)' : 'rgba(234,255,0,0.1)',
+              border: '1.5px solid rgba(234,255,0,0.3)',
+              color: '#EAFF00', padding: '8px 20px', borderRadius: 50,
+              fontFamily: 'var(--font-heebo), sans-serif', fontSize: 13, fontWeight: 700,
+              cursor: translating ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', gap: 8,
+              opacity: (!data.titleHe && !data.excerptHe && !data.bodyHe) ? 0.4 : 1,
+            }}>
+            {translating ? '⏳ מתרגם...' : '✨ תרגם אוטומטית מעברית'}
+          </button>
+        </div>
+        <F label="כותרת (English)">
+          <input style={{ ...inp, direction: 'ltr' }} value={data.titleEn} onChange={e => set('titleEn', e.target.value)} placeholder="Article title in English" />
+        </F>
+        <F label="תקציר (English)">
+          <textarea style={{ ...ta, direction: 'ltr' }} value={data.excerptEn} onChange={e => set('excerptEn', e.target.value)} placeholder="Short excerpt in English..." />
+        </F>
+        <F label="תוכן (English)">
+          <textarea style={{ ...ta, minHeight: 200, direction: 'ltr' }} value={data.bodyEn} onChange={e => set('bodyEn', e.target.value)} placeholder="Article body in English..." />
         </F>
       </div>
 
