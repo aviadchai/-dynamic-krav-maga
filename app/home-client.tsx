@@ -88,6 +88,20 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
     return () => obs.disconnect()
   }, [content, instructors, articles, lang])
 
+  const [activeSection, setActiveSection] = useState<string>('');
+
+  useEffect(() => {
+    const ids = ['about', 'services', 'testimonials', 'reels', 'articles', 'contact', 'instructors'];
+    const obs = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => { if (e.isIntersecting) setActiveSection(e.target.id); });
+      },
+      { rootMargin: '-40% 0px -55% 0px', threshold: 0 }
+    );
+    ids.forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el); });
+    return () => obs.disconnect();
+  }, []);
+
   function switchLang(next: Lang) {
     if (next === lang) return;
     setFading(true);
@@ -641,8 +655,8 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             {[
               { href: "#about",        he: "עלינו",   en: "About" },
               { href: "#services",     he: "שירותים", en: "Services" },
-              { href: "#testimonials", he: "המלצות",  en: "Reviews" },
               { href: "#reels",        he: "רילס",    en: "Reels" },
+              { href: "#testimonials", he: "המלצות",  en: "Reviews" },
               { href: "#articles",     he: "מאמרים",  en: "Articles" },
             ].map((item, i) => (
               <a
@@ -688,11 +702,11 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             <span className="en-only">Contact</span>
           </a>
           <ul className="nav-center">
-            <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>
-            <li><a href="#testimonials"><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
-            <li><a href="#reels"><span className="he-only">רילס</span><span className="en-only">Reels</span></a></li>
-            <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
-            <li><a href="#about"><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
+            <li><a href="#articles" className={activeSection === 'articles' ? 'nav-active' : ''}><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>
+            <li><a href="#reels" className={activeSection === 'reels' ? 'nav-active' : ''}><span className="he-only">רילס</span><span className="en-only">Reels</span></a></li>
+            <li><a href="#testimonials" className={activeSection === 'testimonials' ? 'nav-active' : ''}><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
+            <li><a href="#services" className={activeSection === 'services' ? 'nav-active' : ''}><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
+            <li><a href="#about" className={activeSection === 'about' || activeSection === 'instructors' ? 'nav-active' : ''}><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
           </ul>
           <div className="nav-logo">
             <img src={logoDark} alt="Dynamic Krav Maga" />

@@ -157,6 +157,7 @@ nav.site-nav {
   transition: all .2s;
 }
 .nav-center a:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+.nav-center a.nav-active { color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.07); border-radius: 8px; }
 .lang-sw {
   display: flex; align-items: center;
   background: rgba(255,255,255,0.06);
