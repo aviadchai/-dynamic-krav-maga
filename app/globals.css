@@ -281,7 +281,7 @@ nav.site-nav {
   background: #EEECEA;
 }
 .about-img {
-  position: relative; overflow: visible; min-height: 500px;
+  position: relative; overflow: hidden; min-height: 500px;
   display: flex; align-items: stretch;
   padding: 3rem 2rem;
   background: #EEECEA;

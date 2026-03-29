@@ -365,8 +365,8 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                           {lang === 'he' ? entry.textHe : entry.textEn}
                         </p>
                         {entry.image && (
-                          <div style={{ transform: "skewX(-7deg)", borderRadius: 16, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", maxWidth: 480, marginTop: "1rem" }}>
-                            <img src={entry.image} alt={entry.titleHe} style={{ width: "100%", height: 220, objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.2)" }} />
+                          <div style={{ transform: "skewX(-7deg)", borderRadius: 16, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", maxWidth: 480, marginTop: "1rem", aspectRatio: "16/9" }}>
+                            <img src={entry.image} alt={entry.titleHe} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.1)" }} />
                           </div>
                         )}
                       </div>
@@ -660,10 +660,10 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           <div className="about-bar"></div>
           <button
             onClick={openAbout}
-            className="btn-fill"
-            style={{ background: '#111', color: '#fff', border: 'none', cursor: 'pointer', marginBottom: '1.5rem', fontFamily: 'var(--font-heebo), sans-serif' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#333'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#111'; }}
+            className="btn-ghost"
+            style={{ border: '1.5px solid #111', color: '#111', background: 'transparent', cursor: 'pointer', marginBottom: '1.5rem', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12, padding: '7px 18px' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#111'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = '#111'; }}
           >
             <span>{t('קרא אודותינו', 'Read About Us')}</span>
           </button>
