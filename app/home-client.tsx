@@ -19,7 +19,6 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   const [content] = useState<SiteContent>(initialContent);
   const [popup, setPopup] = useState<Article | null>(null);
   const [popupClosing, setPopupClosing] = useState(false);
-  const lastPopupRef = useRef<Article | null>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
 
   type Service = { n: string; he: string; en: string; dHe: string; dEn: string; bodyHe: string; bodyEn: string; image?: string }
@@ -39,6 +38,11 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   const allCategories = ["הכל", ...Array.from(new Set(articles.map(a => a.categoryHe).filter(Boolean)))];
   const filteredArticles = activeCategory === "הכל" ? articles : articles.filter(a => a.categoryHe === activeCategory);
 
+  const sortedInstructors = [...instructors].sort((a, b) => a.order - b.order);
+  const instMain = sortedInstructors[0];
+  const instDeputy = sortedInstructors[1];
+  const instRest = sortedInstructors.slice(2, 5);
+
   useEffect(() => {
     const t = setTimeout(() => {
       setLoadingOut(true);
@@ -52,7 +56,6 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   const reelsRef = useRef<HTMLDivElement>(null);
 
   function openPopup(article: Article) {
-    lastPopupRef.current = article;
     setPopup(article);
   }
 
@@ -81,7 +84,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target) } }),
       { threshold: 0.08, rootMargin: '0px 0px -32px 0px' }
     )
-    document.querySelectorAll('.appear').forEach(el => obs.observe(el))
+    document.querySelectorAll('.appear:not(.visible)').forEach(el => obs.observe(el))
     return () => obs.disconnect()
   }, [content, instructors, articles, lang])
 
@@ -792,46 +795,48 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             <div className="he-only"><div className="sec-h-he">המאמנים</div></div>
             <div className="en-only"><div className="sec-h">THE INSTRUCTORS</div></div>
           </div>
-          {(() => {
-            const sorted = [...instructors].sort((a, b) => a.order - b.order)
-            const main = sorted[0]
-            const deputy = sorted[1]
-            const rest = sorted.slice(2, 5)
-            function ICard({ inst, variant }: { inst: typeof sorted[0], variant: 'main' | 'deputy' | 'sm' }) {
-              return (
-                <div className={`icard icard--${variant} appear`}>
-                  {inst.image
-                    ? <img src={inst.image} alt={t(inst.nameHe, inst.nameEn)} />
-                    : <div className="icard-placeholder">👤</div>
-                  }
+          <div className="inst-layout">
+            <div className="inst-top-row">
+              {instMain && (
+                <div className="icard icard--main appear">
+                  {instMain.image ? <img src={instMain.image} alt={t(instMain.nameHe, instMain.nameEn)} /> : <div className="icard-placeholder">👤</div>}
                   <div className="icard-overlay" />
                   <div className="icard-info">
-                    {inst.roleHe && <div className="icard-role">{t(inst.roleHe, inst.roleEn)}</div>}
-                    <div className="icard-name">{t(inst.nameHe, inst.nameEn)}</div>
-                    {variant !== 'sm' && (
-                      <>
-                        <div className="icard-bar" />
-                        {inst.bioHe && <p className="icard-bio">{t(inst.bioHe, inst.bioEn)}</p>}
-                      </>
-                    )}
+                    {instMain.roleHe && <div className="icard-role">{t(instMain.roleHe, instMain.roleEn)}</div>}
+                    <div className="icard-name">{t(instMain.nameHe, instMain.nameEn)}</div>
+                    <div className="icard-bar" />
+                    {instMain.bioHe && <p className="icard-bio">{t(instMain.bioHe, instMain.bioEn)}</p>}
                   </div>
                 </div>
-              )
-            }
-            return (
-              <div className="inst-layout">
-                <div className="inst-top-row">
-                  {main && <ICard inst={main} variant="main" />}
-                  {deputy && <ICard inst={deputy} variant="deputy" />}
-                </div>
-                {rest.length > 0 && (
-                  <div className="inst-bottom-row">
-                    {rest.map(inst => <ICard key={inst.id} inst={inst} variant="sm" />)}
+              )}
+              {instDeputy && (
+                <div className="icard icard--deputy appear">
+                  {instDeputy.image ? <img src={instDeputy.image} alt={t(instDeputy.nameHe, instDeputy.nameEn)} /> : <div className="icard-placeholder">👤</div>}
+                  <div className="icard-overlay" />
+                  <div className="icard-info">
+                    {instDeputy.roleHe && <div className="icard-role">{t(instDeputy.roleHe, instDeputy.roleEn)}</div>}
+                    <div className="icard-name">{t(instDeputy.nameHe, instDeputy.nameEn)}</div>
+                    <div className="icard-bar" />
+                    {instDeputy.bioHe && <p className="icard-bio">{t(instDeputy.bioHe, instDeputy.bioEn)}</p>}
                   </div>
-                )}
+                </div>
+              )}
+            </div>
+            {instRest.length > 0 && (
+              <div className="inst-bottom-row">
+                {instRest.map(inst => (
+                  <div key={inst.id} className="icard icard--sm appear">
+                    {inst.image ? <img src={inst.image} alt={t(inst.nameHe, inst.nameEn)} /> : <div className="icard-placeholder">👤</div>}
+                    <div className="icard-overlay" />
+                    <div className="icard-info">
+                      {inst.roleHe && <div className="icard-role">{t(inst.roleHe, inst.roleEn)}</div>}
+                      <div className="icard-name">{t(inst.nameHe, inst.nameEn)}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )
-          })()}
+            )}
+          </div>
         </section>
       )}
 
