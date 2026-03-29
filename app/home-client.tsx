@@ -123,131 +123,132 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               border: "1px solid rgba(255,255,255,0.09)",
               borderRadius: 18,
               width: "calc(100vw - 4rem)",
-              maxWidth: 1400,
-              height: "calc(100vh - 4rem)",
-              display: "flex", flexDirection: "column",
+              maxWidth: 1200,
+              maxHeight: "calc(100vh - 4rem)",
               direction: "rtl",
               overflow: "hidden",
               boxShadow: "0 40px 80px rgba(0,0,0,0.7)",
+              position: "relative",
             }}
           >
-            {/* Header */}
-            <div style={{
-              padding: "1.6rem 2rem",
-              borderBottom: "1px solid rgba(255,255,255,0.06)",
-              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-              gap: "1rem",
-            }}>
-              <div>
-                <span style={{
-                  display: "inline-block",
-                  background: "#EAFF00", color: "#0A0A0A",
-                  fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
-                  padding: "3px 12px", borderRadius: 50, marginBottom: 10,
-                }}>
-                  {popup?.categoryHe}
-                </span>
-                <h2 style={{
-                  fontFamily: "var(--font-heebo), sans-serif",
-                  fontSize: "clamp(1.3rem, 3vw, 1.75rem)", fontWeight: 900,
-                  color: "#fff", lineHeight: 1.2, margin: 0,
-                }}>
-                  {popup?.titleHe}
-                </h2>
-                <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup?.date}</span>
-                  {popup?.author && (
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: 0.5 }}>
-                      ✍ {popup.author}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={closePopup}
-                style={{
-                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.45)", width: 38, height: 38,
-                  borderRadius: "50%", cursor: "pointer", fontSize: 17, flexShrink: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "all .15s",
-                }}
-              >✕</button>
-            </div>
+            {/* Close button */}
+            <button
+              onClick={closePopup}
+              style={{
+                position: "absolute", top: 16, left: 16, zIndex: 10,
+                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.45)", width: 38, height: 38,
+                borderRadius: "50%", cursor: "pointer", fontSize: 17,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all .15s",
+              }}
+            >✕</button>
 
             {/* Scrollable body */}
-            <div className="popup-scroll" style={{ overflowY: "auto", flex: 1 }}>
-              {/* Top: excerpt (right 50%) + image (left 50%) side-by-side */}
-              <div style={{ padding: "1.5rem 2rem 0", display: "flex", gap: "1.5rem", alignItems: "stretch", flexDirection: "row" }}>
-                <p style={{
-                  flex: 1, fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8,
-                  fontStyle: "italic", borderRight: "3px solid #EAFF00", paddingRight: "1rem",
-                  margin: 0,
-                }}>
-                  {popup?.excerptHe}
-                </p>
-                {popup?.image && (
-                  <div style={{ flex: "0 0 50%", transform: "skewX(-7deg)", borderRadius: 20, overflow: "hidden", boxShadow: "0 16px 40px rgba(0,0,0,0.5)", alignSelf: "stretch", minHeight: 160 }}>
-                    <img
-                      src={popup.image} alt={popup?.titleHe}
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.2)" }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div style={{ padding: "1.5rem 2rem 2rem" }}>
-                <div style={{
-                  fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95,
-                  whiteSpace: "pre-wrap", textAlign: "right",
-                }}>
-                  {popup?.bodyHe}
+            <div className="popup-scroll" style={{ overflowY: "auto", maxHeight: "calc(100vh - 4rem)" }}>
+              {/* Two-column: title+excerpt | image+meta */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", padding: "2.5rem 2rem 1.5rem", alignItems: "start" }}>
+                {/* Right col (RTL first): category + title + excerpt */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", paddingTop: "0.5rem" }}>
+                  {popup?.categoryHe && (
+                    <span style={{
+                      display: "inline-block", alignSelf: "flex-start",
+                      background: "#EAFF00", color: "#0A0A0A",
+                      fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
+                      padding: "3px 12px", borderRadius: 50,
+                    }}>
+                      {popup.categoryHe}
+                    </span>
+                  )}
+                  <h2 style={{
+                    fontFamily: "var(--font-heebo), sans-serif",
+                    fontSize: "clamp(1.3rem, 2.5vw, 1.9rem)", fontWeight: 900,
+                    color: "#fff", lineHeight: 1.2, margin: 0,
+                  }}>
+                    {popup?.titleHe}
+                  </h2>
+                  {popup?.excerptHe && (
+                    <p style={{
+                      fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8,
+                      fontStyle: "italic", borderRight: "3px solid #EAFF00", paddingRight: "1rem",
+                      margin: 0,
+                    }}>
+                      {popup.excerptHe}
+                    </p>
+                  )}
                 </div>
-                {(popup as (Article & { bodyImage?: string }) | null)?.bodyImage && (
-                  <div style={{ marginTop: "2rem" }}>
-                    <img
-                      src={(popup as Article & { bodyImage?: string })!.bodyImage}
-                      alt=""
-                      style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 12, display: "block" }}
-                    />
+                {/* Left col: image + meta row */}
+                <div>
+                  {popup?.image && (
+                    <div style={{ aspectRatio: "16/9", transform: "skewX(-7deg)", borderRadius: 16, overflow: "hidden", boxShadow: "0 16px 40px rgba(0,0,0,0.5)" }}>
+                      <img
+                        src={popup.image} alt={popup?.titleHe}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.1)" }}
+                      />
+                    </div>
+                  )}
+                  <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 12, paddingRight: 4, flexWrap: "wrap" }}>
+                    {popup?.date && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup.date}</span>}
+                    {popup?.author && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5 }}>✍ {popup.author}</span>}
                   </div>
-                )}
-
-                {/* Share buttons */}
-                <div style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 10, alignItems: "center" }}>
-                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 2, textTransform: "uppercase", marginLeft: 8 }}>שתף</span>
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent((popup?.titleHe ?? "") + " " + window.location.href)}`}
-                    target="_blank" rel="noreferrer"
-                    title="WhatsApp"
-                    style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                    </svg>
-                  </a>
-                  <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
-                    target="_blank" rel="noreferrer"
-                    title="Facebook"
-                    style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-                    </svg>
-                  </a>
-                  <a
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(popup?.titleHe ?? "")}&url=${encodeURIComponent(window.location.href)}`}
-                    target="_blank" rel="noreferrer"
-                    title="X (Twitter)"
-                    style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 4l16 16M20 4 4 20"/>
-                    </svg>
-                  </a>
                 </div>
               </div>
+
+              {/* Body text */}
+              {popup?.bodyHe && (
+                <div style={{ padding: "1.5rem 2rem 2rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div style={{
+                    fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95,
+                    whiteSpace: "pre-wrap", textAlign: "right",
+                  }}>
+                    {popup.bodyHe}
+                  </div>
+                  {(popup as (Article & { bodyImage?: string }) | null)?.bodyImage && (
+                    <div style={{ marginTop: "2rem" }}>
+                      <img
+                        src={(popup as Article & { bodyImage?: string })!.bodyImage}
+                        alt=""
+                        style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 12, display: "block" }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Share buttons */}
+                  <div style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 10, alignItems: "center" }}>
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: 2, textTransform: "uppercase", marginLeft: 8 }}>שתף</span>
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent((popup?.titleHe ?? "") + " " + window.location.href)}`}
+                      target="_blank" rel="noreferrer"
+                      title="WhatsApp"
+                      style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                      </svg>
+                    </a>
+                    <a
+                      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                      target="_blank" rel="noreferrer"
+                      title="Facebook"
+                      style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                      </svg>
+                    </a>
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(popup?.titleHe ?? "")}&url=${encodeURIComponent(window.location.href)}`}
+                      target="_blank" rel="noreferrer"
+                      title="X (Twitter)"
+                      style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flexShrink: 0 }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 4l16 16M20 4 4 20"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -549,6 +550,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               { href: "#about",        he: "עלינו",   en: "About" },
               { href: "#services",     he: "שירותים", en: "Services" },
               { href: "#testimonials", he: "המלצות",  en: "Reviews" },
+              { href: "#reels",        he: "רילס",    en: "Reels" },
               { href: "#articles",     he: "מאמרים",  en: "Articles" },
             ].map((item, i) => (
               <a
@@ -596,6 +598,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           <ul className="nav-center">
             <li><a href="#articles"><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>
             <li><a href="#testimonials"><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
+            <li><a href="#reels"><span className="he-only">רילס</span><span className="en-only">Reels</span></a></li>
             <li><a href="#services"><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
             <li><a href="#about"><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
           </ul>
@@ -777,7 +780,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
 
       {/* REELS */}
       {(content?.reels?.length ?? 0) > 0 && (
-        <section className="reels-section">
+        <section className="reels-section" id="reels">
           <div className="sec-head">
             <div className="sec-tag he-only">תוכן</div>
             <div className="sec-tag en-only">Content</div>
