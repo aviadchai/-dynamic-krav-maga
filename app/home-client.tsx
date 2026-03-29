@@ -83,7 +83,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
     )
     document.querySelectorAll('.appear').forEach(el => obs.observe(el))
     return () => obs.disconnect()
-  }, [content, instructors, articles])
+  }, [content, instructors, articles, lang])
 
   function switchLang(next: Lang) {
     if (next === lang) return;
