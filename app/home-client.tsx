@@ -24,9 +24,11 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
 
   type Service = { n: string; he: string; en: string; dHe: string; dEn: string; bodyHe: string; bodyEn: string; image?: string }
   const [servicePopup, setServicePopup] = useState<Service | null>(null);
+  const [servicePopupClosing, setServicePopupClosing] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [aboutClosing, setAboutClosing] = useState(false);
 
+  function closeServicePopup() { setServicePopupClosing(true); setTimeout(() => { setServicePopup(null); setServicePopupClosing(false); }, 200); }
   function openAbout() { setAboutOpen(true); }
   function closeAbout() { setAboutClosing(true); setTimeout(() => { setAboutOpen(false); setAboutClosing(false); }, 200); }
   const reelsRef = useRef<HTMLDivElement>(null);
@@ -43,7 +45,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
 
   // Close popups on ESC
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { closePopup(); closeAbout(); setServicePopup(null); setMobileMenu(false); } };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { closePopup(); closeAbout(); closeServicePopup(); setMobileMenu(false); } };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
@@ -394,86 +396,55 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       )}
 
       {/* SERVICE POPUP */}
-      {servicePopup && (
+      {(servicePopup || servicePopupClosing) && (
         <div
-          onClick={() => setServicePopup(null)}
+          onClick={closeServicePopup}
           style={{
             position: "fixed", inset: 0, zIndex: 9999,
             background: "rgba(8,8,8,0.82)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
-            display: "flex", alignItems: "flex-end", justifyContent: "center",
-            padding: "0",
-            animation: "srvBgIn 0.32s ease forwards",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "3vw",
+            animation: servicePopupClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease",
           }}
         >
-          <style>{`
-            @keyframes srvBgIn { from { opacity: 0 } to { opacity: 1 } }
-            @keyframes srvSlideUp {
-              from { opacity: 0; transform: translateY(64px) scale(0.97); }
-              to   { opacity: 1; transform: translateY(0) scale(1); }
-            }
-          `}</style>
           <div
             onClick={e => e.stopPropagation()}
             style={{
               background: "#131313",
               border: "1px solid rgba(255,255,255,0.09)",
-              borderRadius: "20px 20px 0 0",
-              width: "100%",
+              borderRadius: 18,
+              width: "calc(100vw - 4rem)",
               maxWidth: 860,
-              maxHeight: "92vh",
+              maxHeight: "calc(100vh - 4rem)",
               display: "flex", flexDirection: "column",
               direction: "rtl",
               overflow: "hidden",
-              boxShadow: "0 -20px 80px rgba(0,0,0,0.6)",
-              animation: "srvSlideUp 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards",
-              margin: "0 auto",
+              boxShadow: "0 40px 80px rgba(0,0,0,0.7)",
+              position: "relative",
             }}
           >
-            {/* Header */}
-            <div style={{
-              padding: "1.6rem 2rem",
-              borderBottom: "1px solid rgba(255,255,255,0.06)",
-              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-              gap: "1rem",
-            }}>
-              <div>
-                <span style={{
-                  display: "inline-block",
-                  background: brandColor, color: brandBg,
-                  fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
-                  padding: "3px 12px", borderRadius: 50, marginBottom: 10,
-                }}>
-                  {servicePopup.n}
-                </span>
-                <h2 style={{
-                  fontFamily: "var(--font-heebo), sans-serif",
-                  fontSize: "clamp(1.3rem, 3vw, 1.75rem)", fontWeight: 900,
-                  color: "#fff", lineHeight: 1.2, margin: 0,
-                }}>
-                  {lang === "he" ? servicePopup.he : servicePopup.en}
-                </h2>
-              </div>
-              <button
-                onClick={() => setServicePopup(null)}
-                style={{
-                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.45)", width: 38, height: 38,
-                  borderRadius: "50%", cursor: "pointer", fontSize: 17, flexShrink: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}
-              >✕</button>
-            </div>
+            {/* Close button */}
+            <button
+              onClick={closeServicePopup}
+              style={{
+                position: "absolute", top: 16, left: 16, zIndex: 10,
+                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.45)", width: 38, height: 38,
+                borderRadius: "50%", cursor: "pointer", fontSize: 17,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all .15s",
+              }}
+            >✕</button>
             {/* Body */}
-            <div className="popup-scroll" style={{ overflowY: "auto", flex: 1 }}>
-              {servicePopup.image ? (
-                <img src={servicePopup.image} alt={servicePopup.he} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+            <div className="popup-scroll" style={{ overflowY: "auto", maxHeight: "calc(100vh - 4rem)" }}>
+              {servicePopup?.image ? (
+                <img src={servicePopup.image} alt={servicePopup?.he} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
               ) : (
                 <div style={{
-                  height: 130, background: "linear-gradient(135deg, #0E0E0E 0%, #181818 100%)",
+                  height: 120, background: "linear-gradient(135deg, #0E0E0E 0%, #181818 100%)",
                   position: "relative", overflow: "hidden",
-                  display: "flex", alignItems: "center", padding: "1.5rem 2rem", gap: "1.25rem",
                   borderBottom: "1px solid rgba(255,255,255,0.05)",
                 }}>
                   <span style={{
@@ -481,30 +452,36 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                     color: "rgba(234,255,0,0.05)",
                     position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%) skewX(-8deg)",
                     userSelect: "none",
-                  }}>{servicePopup.n}</span>
-                  {[0,1,2].map(i => (
-                    <div key={i} style={{
-                      position: "absolute", top: "15%", left: `${28 + i * 7}%`,
-                      width: 2, height: "70%",
-                      background: "var(--lime)", opacity: 0.08 + i * 0.04,
-                      transform: "skewX(-20deg)",
-                    }} />
-                  ))}
-                  <div style={{ width: 48, height: 9, background: "var(--lime)", borderRadius: 10, transform: "skewX(-14deg)", flexShrink: 0, position: "relative" }} />
+                  }}>{servicePopup?.n}</span>
                 </div>
               )}
-              <div style={{ padding: "2rem" }}>
+              <div style={{ padding: "2rem 2rem 2rem" }}>
+                <span style={{
+                  display: "inline-block", marginBottom: 12,
+                  background: brandColor, color: brandBg,
+                  fontSize: 9, fontWeight: 800, letterSpacing: 2.5, textTransform: "uppercase",
+                  padding: "3px 12px", borderRadius: 50,
+                }}>
+                  {servicePopup?.n}
+                </span>
+                <h2 style={{
+                  fontFamily: "var(--font-heebo), sans-serif",
+                  fontSize: "clamp(1.3rem, 3vw, 1.75rem)", fontWeight: 900,
+                  color: "#fff", lineHeight: 1.2, margin: "0 0 1.5rem",
+                }}>
+                  {lang === "he" ? servicePopup?.he : servicePopup?.en}
+                </h2>
                 <p style={{
                   fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8,
                   marginBottom: "1.5rem", fontStyle: "italic",
                   borderRight: `3px solid ${brandColor}`, paddingRight: "1rem",
                 }}>
-                  {lang === "he" ? servicePopup.dHe : servicePopup.dEn}
+                  {lang === "he" ? servicePopup?.dHe : servicePopup?.dEn}
                 </p>
                 <div style={{ fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95, whiteSpace: "pre-wrap", textAlign: "right" }}>
-                  {lang === "he" ? servicePopup.bodyHe : servicePopup.bodyEn}
+                  {lang === "he" ? servicePopup?.bodyHe : servicePopup?.bodyEn}
                 </div>
-                <a href="#contact" onClick={() => setServicePopup(null)} style={{
+                <a href="#contact" onClick={closeServicePopup} style={{
                   display: "inline-flex", marginTop: "2rem",
                   background: brandColor, color: brandBg,
                   padding: "12px 32px", borderRadius: 8,
