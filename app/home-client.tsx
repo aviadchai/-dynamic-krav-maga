@@ -29,8 +29,13 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   const [loadingOut, setLoadingOut] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [aboutClosing, setAboutClosing] = useState(false);
+  const [allArticlesOpen, setAllArticlesOpen] = useState(false);
+  const [allArticlesClosing, setAllArticlesClosing] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>("הכל");
 
   function closeServicePopup() { setServicePopupClosing(true); setTimeout(() => { setServicePopup(null); setServicePopupClosing(false); }, 200); }
+  function openAllArticles() { setActiveCategory("הכל"); setAllArticlesOpen(true); }
+  function closeAllArticles() { setAllArticlesClosing(true); setTimeout(() => { setAllArticlesOpen(false); setAllArticlesClosing(false); }, 200); }
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -56,7 +61,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
 
   // Close popups on ESC
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { closePopup(); closeAbout(); closeServicePopup(); setMobileMenu(false); } };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") { closePopup(); closeAbout(); closeServicePopup(); closeAllArticles(); setMobileMenu(false); } };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
@@ -419,6 +424,86 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           </div>
         </div>
       )}
+
+      {/* ALL ARTICLES MODAL */}
+      {(allArticlesOpen || allArticlesClosing) && (() => {
+        const categories = ["הכל", ...Array.from(new Set(articles.map(a => a.categoryHe).filter(Boolean)))];
+        const filtered = activeCategory === "הכל" ? articles : articles.filter(a => a.categoryHe === activeCategory);
+        return (
+          <div
+            onClick={closeAllArticles}
+            style={{
+              position: "fixed", inset: 0, zIndex: 9999,
+              background: "rgba(8,8,8,0.88)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              display: "flex", alignItems: "flex-start", justifyContent: "center",
+              padding: "3vw",
+              animation: allArticlesClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease",
+              overflowY: "auto",
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: "#131313",
+                border: "1px solid rgba(255,255,255,0.09)",
+                borderRadius: 18,
+                width: "100%",
+                maxWidth: 1100,
+                padding: "2.5rem",
+                direction: "rtl",
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem" }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: "var(--lime)", textTransform: "uppercase", marginBottom: 6 }}>ידע וכלים</div>
+                  <div style={{ fontSize: "1.6rem", fontWeight: 900, color: "#fff" }}>כל המאמרים</div>
+                </div>
+                <button onClick={closeAllArticles} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: "rgba(255,255,255,0.5)", width: 40, height: 40, borderRadius: "50%", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+              </div>
+
+              {/* Category filter chips */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: "2rem" }}>
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    style={{
+                      background: activeCategory === cat ? "var(--lime)" : "rgba(255,255,255,0.06)",
+                      color: activeCategory === cat ? "#0A0A0A" : "rgba(255,255,255,0.5)",
+                      border: activeCategory === cat ? "none" : "1.5px solid rgba(255,255,255,0.1)",
+                      padding: "7px 18px", borderRadius: 50,
+                      cursor: "pointer", fontSize: 12, fontWeight: 700,
+                      fontFamily: "var(--font-heebo), sans-serif",
+                      transition: "all .15s",
+                    }}
+                  >{cat}</button>
+                ))}
+              </div>
+
+              {/* Articles grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.25rem" }}>
+                {filtered.map(a => (
+                  <div key={a.id} className="ac" onClick={() => { closeAllArticles(); setTimeout(() => openPopup(a), 220); }} style={{ cursor: "pointer" }}>
+                    <div className="ac-thumb">
+                      {a.image && <img className="ac-thumb-img site-img" src={a.image} alt="" />}
+                      <div className="ac-cat">{a.categoryHe}</div>
+                    </div>
+                    <div className="ac-body">
+                      <div className="ac-date">{a.date}</div>
+                      <div className="ac-title-he">{a.titleHe}</div>
+                      <p className="ac-ex">{a.excerptHe}</p>
+                      <div className="ac-more">קרא עוד →</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* SERVICE POPUP */}
       {(servicePopup || servicePopupClosing) && (
@@ -878,9 +963,14 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               <div className="sec-tag">ידע וכלים</div>
               <div className="sec-h-he">מאמרים ותוכן</div>
             </div>
+            {articles.length > 3 && (
+              <button onClick={openAllArticles} style={{ background: "var(--lime)", color: "#0A0A0A", border: "none", padding: "11px 26px", borderRadius: 50, cursor: "pointer", fontFamily: "var(--font-heebo), sans-serif", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
+                כל המאמרים ({articles.length})
+              </button>
+            )}
           </div>
           <div className="agrid">
-            {articles.map((a, i) => (
+            {articles.slice(0, 3).map((a, i) => (
               <div key={a.id} className="ac appear" onClick={() => openPopup(a)} style={{ cursor: "pointer", transitionDelay: `${i * 0.1}s` }}>
                 <div className="ac-thumb">
                   {a.image && <img className="ac-thumb-img site-img" src={a.image} alt="" />}
@@ -895,6 +985,16 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               </div>
             ))}
           </div>
+          {articles.length > 3 && (
+            <div style={{ textAlign: "center", marginTop: "2rem" }}>
+              <button onClick={openAllArticles} style={{ background: "none", border: "1.5px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.6)", padding: "12px 32px", borderRadius: 50, cursor: "pointer", fontFamily: "var(--font-heebo), sans-serif", fontWeight: 700, fontSize: 13, transition: "border-color .2s, color .2s" }}
+                onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.4)"; (e.currentTarget as HTMLButtonElement).style.color = "#fff"; }}
+                onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.15)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.6)"; }}
+              >
+                עוד מאמרים ←
+              </button>
+            </div>
+          )}
         </section>
       )}
 

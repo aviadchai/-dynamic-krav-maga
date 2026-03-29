@@ -890,6 +890,7 @@ footer {
   .reels-section .sec-head { padding: 0 1.25rem; margin-bottom: 1.5rem; }
   .srv-grid, .agrid { grid-template-columns: 1fr; gap: 1rem; }
   .sec-head { margin-bottom: 2rem; }
+  .art-head { flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
 
   /* Horizontal scroll — testimonials */
   .tgrid {
