@@ -174,7 +174,7 @@ nav.site-nav {
   position: relative; height: 92vh;
   overflow: visible;
   display: flex; align-items: stretch;
-  padding: 2rem 2rem 2rem 1.5rem;
+  padding: 4rem 3rem 4rem 2rem;
 }
 /* Hebrew hero: text on the right, image on the left */
 .lang-he .hero-left { order: 2; }
@@ -281,9 +281,9 @@ nav.site-nav {
   background: #EEECEA;
 }
 .about-img {
-  position: relative; overflow: hidden; min-height: 500px;
+  position: relative; overflow: hidden; min-height: 400px;
   display: flex; align-items: stretch;
-  padding: 3rem 2rem;
+  padding: 5rem 4rem;
   background: #EEECEA;
 }
 /* Floating parallelogram inside about-img */
@@ -292,7 +292,7 @@ nav.site-nav {
   transform: skewX(-7deg);
   border-radius: 32px;
   overflow: hidden;
-  box-shadow: 0 28px 70px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.35);
+  box-shadow: none;
   position: relative;
   background: linear-gradient(90deg, #191919 25%, #222 50%, #191919 75%);
   background-size: 600px 100%;

@@ -661,7 +661,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           <button
             onClick={openAbout}
             className="btn-ghost"
-            style={{ border: '1.5px solid #111', color: '#111', background: 'transparent', cursor: 'pointer', marginBottom: '1.5rem', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12, padding: '7px 18px' }}
+            style={{ border: '1.5px solid #111', color: '#111', background: 'transparent', cursor: 'pointer', marginBottom: '1.5rem', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12, padding: '7px 18px', alignSelf: 'flex-start' }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#111'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = '#111'; }}
           >
