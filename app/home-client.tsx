@@ -365,8 +365,19 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                           {lang === 'he' ? entry.textHe : entry.textEn}
                         </p>
                         {entry.image && (
-                          <div style={{ transform: "skewX(-7deg)", borderRadius: 16, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", maxWidth: 480, marginTop: "1rem", aspectRatio: "16/9" }}>
-                            <img src={entry.image} alt={entry.titleHe} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.1)" }} />
+                          <div style={{ transform: "skewX(-7deg)", borderRadius: 16, overflow: "hidden", maxWidth: 480, marginTop: "1rem", aspectRatio: "16/9" }}>
+                            <img
+                              src={entry.image} alt={entry.titleHe}
+                              onLoad={e => {
+                                const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+                                const p = e.currentTarget.parentElement;
+                                if (!p) return;
+                                if (w / h > 1.2) p.style.aspectRatio = '16/9';
+                                else if (w / h < 0.85) p.style.aspectRatio = '3/4';
+                                else p.style.aspectRatio = '1/1';
+                              }}
+                              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.1)" }}
+                            />
                           </div>
                         )}
                       </div>
