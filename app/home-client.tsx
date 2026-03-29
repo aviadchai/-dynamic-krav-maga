@@ -190,7 +190,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                   <div style={{ flex: "0 0 50%", transform: "skewX(-7deg)", borderRadius: 20, overflow: "hidden", boxShadow: "0 16px 40px rgba(0,0,0,0.5)", alignSelf: "stretch", minHeight: 160 }}>
                     <img
                       src={popup.image} alt={popup?.titleHe}
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.23)" }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.2)" }}
                     />
                   </div>
                 )}
@@ -366,7 +366,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                         </p>
                         {entry.image && (
                           <div style={{ transform: "skewX(-7deg)", borderRadius: 16, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.5)", maxWidth: 480, marginTop: "1rem" }}>
-                            <img src={entry.image} alt={entry.titleHe} style={{ width: "100%", height: 220, objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.23)" }} />
+                            <img src={entry.image} alt={entry.titleHe} style={{ width: "100%", height: 220, objectFit: "cover", display: "block", transform: "skewX(7deg) scale(1.2)" }} />
                           </div>
                         )}
                       </div>
