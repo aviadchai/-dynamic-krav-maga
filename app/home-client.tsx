@@ -439,11 +439,11 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             display: "flex", alignItems: "flex-start", justifyContent: "center",
             padding: "3vw",
             animation: allArticlesClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease",
-            overflowY: "auto",
           }}
         >
           <div
             onClick={e => e.stopPropagation()}
+            className="all-articles-panel"
             style={{
               background: "#131313",
               border: "1px solid rgba(255,255,255,0.09)",
@@ -452,6 +452,8 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               maxWidth: 1100,
               padding: "2.5rem",
               direction: "rtl",
+              overflowY: "auto",
+              maxHeight: "calc(100vh - 6vw)",
             }}
           >
             {/* Header */}

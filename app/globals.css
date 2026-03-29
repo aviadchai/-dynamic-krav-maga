@@ -45,6 +45,12 @@ html { scroll-behavior: smooth; }
 .popup-scroll::-webkit-scrollbar-track { background: transparent; }
 .popup-scroll::-webkit-scrollbar-thumb { background: rgba(234,255,0,0.25); border-radius: 4px; }
 .popup-scroll::-webkit-scrollbar-thumb:hover { background: rgba(234,255,0,0.5); }
+/* All articles panel scrollbar */
+.all-articles-panel { scrollbar-width: thin; scrollbar-color: rgba(80,80,80,0.4) transparent; }
+.all-articles-panel::-webkit-scrollbar { width: 5px; }
+.all-articles-panel::-webkit-scrollbar-track { background: transparent; }
+.all-articles-panel::-webkit-scrollbar-thumb { background: rgba(80,80,80,0.4); border-radius: 5px; }
+.all-articles-panel::-webkit-scrollbar-thumb:hover { background: rgba(100,100,100,0.5); }
 @keyframes loaderFill {
   from { width: 0%; }
   to   { width: 100%; }
