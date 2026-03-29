@@ -794,34 +794,42 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           </div>
           {(() => {
             const sorted = [...instructors].sort((a, b) => a.order - b.order)
-            const count = sorted.length
-            const cols = count === 1 ? 'minmax(0, 520px)' : `repeat(${Math.min(count, 4)}, 1fr)`
-            return (
-              <>
-                <div className="inst-grid" style={{ gridTemplateColumns: cols, justifyContent: count === 1 ? 'center' : undefined }}>
-                  {sorted.map((inst, idx) => (
-                    <div key={inst.id} className={`inst-card appear${idx === 0 ? ' inst-card-main' : ''}`} dir="ltr" style={{ transitionDelay: `${idx * 0.1}s` }}>
-                      <div className="inst-card-img">
-                        {inst.image
-                          ? <img className="site-img" src={inst.image} alt={inst.nameHe} onLoad={e => e.currentTarget.closest('.inst-card-img')?.classList.add('loaded')} />
-                          : <div className="inst-card-placeholder">👤</div>
-                        }
-                      </div>
-                      <div className="inst-card-body">
-                        <div className="inst-card-role">{t(inst.roleHe, inst.roleEn)}</div>
-                        <div className="inst-card-name">{t(inst.nameHe, inst.nameEn)}</div>
-                        <div className="inst-card-bar"></div>
-                        <p className="inst-card-bio">{t(inst.bioHe, inst.bioEn)}</p>
-                      </div>
-                    </div>
-                  ))}
+            const main = sorted[0]
+            const deputy = sorted[1]
+            const rest = sorted.slice(2, 5)
+            function ICard({ inst, variant }: { inst: typeof sorted[0], variant: 'main' | 'deputy' | 'sm' }) {
+              return (
+                <div className={`icard icard--${variant} appear`}>
+                  {inst.image
+                    ? <img src={inst.image} alt={t(inst.nameHe, inst.nameEn)} />
+                    : <div className="icard-placeholder">👤</div>
+                  }
+                  <div className="icard-overlay" />
+                  <div className="icard-info">
+                    {inst.roleHe && <div className="icard-role">{t(inst.roleHe, inst.roleEn)}</div>}
+                    <div className="icard-name">{t(inst.nameHe, inst.nameEn)}</div>
+                    {variant !== 'sm' && (
+                      <>
+                        <div className="icard-bar" />
+                        {inst.bioHe && <p className="icard-bio">{t(inst.bioHe, inst.bioEn)}</p>}
+                      </>
+                    )}
+                  </div>
                 </div>
-                {count > 1 && (
-                  <div className="scroll-dots">
-                    {sorted.map((_, i) => <span key={i} className="scroll-dot" />)}
+              )
+            }
+            return (
+              <div className="inst-layout">
+                <div className="inst-top-row">
+                  {main && <ICard inst={main} variant="main" />}
+                  {deputy && <ICard inst={deputy} variant="deputy" />}
+                </div>
+                {rest.length > 0 && (
+                  <div className="inst-bottom-row">
+                    {rest.map(inst => <ICard key={inst.id} inst={inst} variant="sm" />)}
                   </div>
                 )}
-              </>
+              </div>
             )
           })()}
         </section>
