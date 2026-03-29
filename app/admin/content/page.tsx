@@ -18,18 +18,21 @@ const inp: React.CSSProperties = {
   fontFamily: 'var(--font-heebo), sans-serif', fontSize: 14, outline: 'none',
 }
 
-function Section({ title, open, onToggle, children, locked }: {
-  title: string, open: boolean, onToggle: () => void, children: React.ReactNode, locked: boolean
+function Section({ title, open, onToggle, children, locked, action }: {
+  title: string, open: boolean, onToggle: () => void, children: React.ReactNode, locked: boolean, action?: React.ReactNode
 }) {
   return (
     <div style={{ background: '#141414', border: `1.5px solid ${open ? 'rgba(234,255,0,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, marginBottom: '1rem', overflow: 'hidden', transition: 'border-color .2s' }}>
-      <button
-        onClick={onToggle}
-        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.1rem 1.5rem', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif' }}
-      >
-        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: open ? '#EAFF00' : 'rgba(255,255,255,0.55)', textTransform: 'uppercase', transition: 'color .2s' }}>{title}</span>
-        <span style={{ color: open ? '#EAFF00' : 'rgba(255,255,255,0.3)', fontSize: 18, transition: 'transform .25s, color .2s', display: 'block', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>⌃</span>
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 1.5rem' }}>
+        <button
+          onClick={onToggle}
+          style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.1rem 0', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif' }}
+        >
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: open ? '#EAFF00' : 'rgba(255,255,255,0.55)', textTransform: 'uppercase', transition: 'color .2s' }}>{title}</span>
+          <span style={{ color: open ? '#EAFF00' : 'rgba(255,255,255,0.3)', fontSize: 18, transition: 'transform .25s, color .2s', display: 'block', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', marginLeft: 12 }}>⌃</span>
+        </button>
+        {open && action && <div style={{ marginRight: 16 }}>{action}</div>}
+      </div>
       {open && (
         <div style={{
           padding: '0 1.5rem 1.5rem',
@@ -267,8 +270,8 @@ export default function ContentPage() {
       )}
 
       {/* ── HERO ── */}
-      <Section title="Hero — סקשן ראשי" open={open.has('hero')} onToggle={() => toggle('hero')} locked={locked}>
-        <button type="button" disabled={translating === 'hero'} style={trBtnStyle(false, translating === 'hero')} onClick={async () => {
+      <Section title="Hero — סקשן ראשי" open={open.has('hero')} onToggle={() => toggle('hero')} locked={locked} action={
+        <button type="button" disabled={translating === 'hero'} style={trBtnStyle(true, translating === 'hero')} onClick={async () => {
           if (!isEditing) startEdit()
           const t = await tr('hero', { badgePillHe: content.badgePillHe||'', heroTitleHe: content.heroTitleHe, heroSubHe: content.heroSubHe||'', heroBtnPrimaryHe: content.heroBtnPrimaryHe, heroBtnSecondaryHe: content.heroBtnSecondaryHe, heroNum1LblHe: content.heroNum1LblHe, heroNum2LblHe: content.heroNum2LblHe, heroNum3LblHe: content.heroNum3LblHe })
           if (t.badgePillHe) set('badgePillEn', t.badgePillHe)
@@ -279,7 +282,8 @@ export default function ContentPage() {
           if (t.heroNum1LblHe) set('heroNum1LblEn', t.heroNum1LblHe)
           if (t.heroNum2LblHe) set('heroNum2LblEn', t.heroNum2LblHe)
           if (t.heroNum3LblHe) set('heroNum3LblEn', t.heroNum3LblHe)
-        }}>{translating === 'hero' ? '⏳ מתרגם...' : '✨ תרגם לאנגלית'}</button>
+        }}>{translating === 'hero' ? '⏳' : '✨ תרגם'}</button>
+      }>
         <div style={twoCol}>
           <F label='תג Hero — עברית'>
             <input style={inp} value={content.badgePillHe || ''} onChange={e => set('badgePillHe', e.target.value)} placeholder="מדריך מוסמך קרב מגע" />
@@ -336,8 +340,8 @@ export default function ContentPage() {
       </Section>
 
       {/* ── ABOUT ── */}
-      <Section title="עלינו — About" open={open.has('about')} onToggle={() => toggle('about')} locked={locked}>
-        <button type="button" disabled={translating === 'about'} style={trBtnStyle(false, translating === 'about')} onClick={async () => {
+      <Section title="עלינו — About" open={open.has('about')} onToggle={() => toggle('about')} locked={locked} action={
+        <button type="button" disabled={translating === 'about'} style={trBtnStyle(true, translating === 'about')} onClick={async () => {
           if (!isEditing) startEdit()
           const paraFields: Record<string, string> = {}
           content.aboutParaHe.forEach((p, i) => { paraFields[`para${i}`] = p })
@@ -347,7 +351,8 @@ export default function ContentPage() {
           if (t.aboutExcerptHe) set('aboutExcerptEn', t.aboutExcerptHe)
           const newParaEn = content.aboutParaHe.map((_, i) => t[`para${i}`] || content.aboutParaEn[i] || '')
           if (newParaEn.some(Boolean)) set('aboutParaEn', newParaEn)
-        }}>{translating === 'about' ? '⏳ מתרגם...' : '✨ תרגם לאנגלית'}</button>
+        }}>{translating === 'about' ? '⏳' : '✨ תרגם'}</button>
+      }>
         <div style={twoCol}>
           <F label="כותרת — עברית">
             <textarea style={{ ...inp, resize: 'vertical', minHeight: 80, lineHeight: 1.7 }} value={content.aboutTitleHe} onChange={e => set('aboutTitleHe', e.target.value)} placeholder={'לחימה\nשמגיעה\nמהשטח'} />
