@@ -139,22 +139,9 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             animation: popupClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease",
           }}
         >
-          <style>{`
-            @keyframes popupIn {
-              from { opacity: 0; transform: scale(0.97); }
-              to   { opacity: 1; transform: scale(1); }
-            }
-            @keyframes popupOut {
-              from { opacity: 1; transform: scale(1); }
-              to   { opacity: 0; transform: scale(0.97); }
-            }
-            .popup-scroll::-webkit-scrollbar { width: 4px; }
-            .popup-scroll::-webkit-scrollbar-track { background: transparent; }
-            .popup-scroll::-webkit-scrollbar-thumb { background: rgba(234,255,0,0.25); border-radius: 4px; }
-            .popup-scroll::-webkit-scrollbar-thumb:hover { background: rgba(234,255,0,0.5); }
-          `}</style>
           <div
             onClick={e => e.stopPropagation()}
+            className="article-popup-box"
             style={{
               background: "#131313",
               border: "1px solid rgba(255,255,255,0.09)",
@@ -184,7 +171,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             {/* Scrollable body */}
             <div className="popup-scroll" style={{ overflowY: "auto", maxHeight: "calc(100vh - 4rem)" }}>
               {/* Two-column: title+excerpt | image+meta */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", padding: "2.5rem 2rem 1.5rem", alignItems: "start" }}>
+              <div className="popup-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", padding: "2.5rem 2rem 1.5rem", alignItems: "start" }}>
                 {/* Right col (RTL first): category + title + excerpt + meta */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem", paddingTop: "0.5rem" }}>
                   {popup?.categoryHe && (
@@ -213,12 +200,10 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                       {popup.excerptHe}
                     </p>
                   )}
-                  {(popup?.date || popup?.author) && (
-                    <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap", paddingTop: "0.25rem" }}>
-                      {popup?.date && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup.date}</span>}
-                      {popup?.author && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5 }}>✍ {popup.author}</span>}
-                    </div>
-                  )}
+                  <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap", paddingTop: "0.25rem" }}>
+                    {popup?.date && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup.date}</span>}
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5 }}>✍ {popup?.author || 'מערכת קרב מגע דינמי'}</span>
+                  </div>
                 </div>
                 {/* Left col: image only */}
                 <div>
@@ -475,7 +460,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             {/* Body */}
             <div className="popup-scroll" style={{ overflowY: "auto", maxHeight: "calc(100vh - 4rem)" }}>
               {servicePopup?.image ? (
-                <img src={servicePopup.image} alt={servicePopup?.he} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+                <img src={servicePopup.image} alt={servicePopup?.he} style={{ width: "100%", maxHeight: 200, objectFit: "cover", display: "block" }} />
               ) : (
                 <div style={{
                   height: 120, background: "linear-gradient(135deg, #0E0E0E 0%, #181818 100%)",
@@ -740,6 +725,11 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                   </div>
                 ))}
               </div>
+              {count > 1 && (
+                <div className="scroll-dots">
+                  {sorted.map((_, i) => <span key={i} className="scroll-dot" />)}
+                </div>
+              )}
             )
           })()}
         </section>
@@ -790,6 +780,11 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             </div>
           ))}
         </div>
+        {(content?.testimonials?.length ?? 0) > 1 && (
+          <div className="scroll-dots">
+            {(content?.testimonials || []).map((_, i) => <span key={i} className="scroll-dot" />)}
+          </div>
+        )}
       </section>
 
       {/* REELS */}
@@ -941,29 +936,26 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                 <a
                   href={`https://instagram.com/${content.instagram.replace('@','')}`}
                   target="_blank" rel="noreferrer"
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 50, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
+                  style={{ padding: "10px 18px", borderRadius: 50, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-                  {content.instagram}
+                  Instagram
                 </a>
               )}
               {content?.facebook && (
                 <a
                   href={content.facebook.startsWith('http') ? content.facebook : `https://facebook.com/${content.facebook}`}
                   target="_blank" rel="noreferrer"
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 50, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
+                  style={{ padding: "10px 18px", borderRadius: 50, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-                  {content.facebook}
+                  Facebook
                 </a>
               )}
               {content?.whatsapp && (
                 <a
                   href={`https://wa.me/972${content.whatsapp.replace(/[-\s]/g,'').slice(1)}`}
                   target="_blank" rel="noreferrer"
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 50, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
+                  style={{ padding: "10px 18px", borderRadius: 50, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                   WhatsApp
                 </a>
               )}
