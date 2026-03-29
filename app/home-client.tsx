@@ -703,9 +703,9 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           {(() => {
             const sorted = [...instructors].sort((a, b) => a.order - b.order)
             const count = sorted.length
-            const cols = count === 1 ? '1fr' : count === 2 ? '1fr 1fr' : count === 3 ? '2fr 1fr 1fr' : 'repeat(2, 1fr)'
+            const cols = count === 1 ? 'minmax(0, 360px)' : count === 2 ? 'repeat(2, 1fr)' : count === 3 ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)'
             return (
-              <div className="inst-grid" style={{ gridTemplateColumns: cols }}>
+              <div className="inst-grid" style={{ gridTemplateColumns: cols, justifyContent: count === 1 ? 'center' : undefined }}>
                 {sorted.map((inst, idx) => (
                   <div key={inst.id} className={`inst-card appear${idx === 0 ? ' inst-card-main' : ''}`} dir="ltr" style={{ transitionDelay: `${idx * 0.1}s` }}>
                     <div className="inst-card-img">
