@@ -30,6 +30,7 @@ export default function InstructorsPage() {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [translating, setTranslating] = useState(false)
   const [dragId, setDragId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -74,6 +75,24 @@ export default function InstructorsPage() {
     setEditing(null)
     setForm(empty)
     load()
+  }
+
+  async function translateForm() {
+    if (!form.nameHe && !form.roleHe && !form.bioHe) return
+    setTranslating(true)
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { nameHe: form.nameHe, roleHe: form.roleHe, bioHe: form.bioHe } }),
+      })
+      const { translations } = await res.json()
+      setForm(f => ({
+        ...f,
+        nameEn: translations.nameHe || f.nameEn,
+        roleEn: translations.roleHe || f.roleEn,
+        bioEn: translations.bioHe || f.bioEn,
+      }))
+    } finally { setTranslating(false) }
   }
 
   async function handleImgUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -204,7 +223,13 @@ export default function InstructorsPage() {
             <F label="ביוגרפיה"><textarea style={{ ...inp, resize: 'vertical', minHeight: 100, lineHeight: 1.7 }} value={form.bioHe} onChange={e => set('bioHe', e.target.value)} placeholder="קצת עליי..." /></F>
           </div>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '1rem' }}>English</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>English</div>
+              <button type="button" onClick={translateForm} disabled={translating}
+                style={{ background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.25)', color: '#EAFF00', padding: '5px 14px', borderRadius: 50, cursor: translating ? 'wait' : 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 11, fontWeight: 700 }}>
+                {translating ? '⏳ מתרגם...' : '✨ תרגם'}
+              </button>
+            </div>
             <F label="Name"><input style={{ ...inp, direction: 'ltr' }} value={form.nameEn} onChange={e => set('nameEn', e.target.value)} placeholder="Instructor name" /></F>
             <F label="Role"><input style={{ ...inp, direction: 'ltr' }} value={form.roleEn} onChange={e => set('roleEn', e.target.value)} placeholder="Head Instructor" /></F>
             <F label="Bio"><textarea style={{ ...inp, resize: 'vertical', minHeight: 100, lineHeight: 1.7, direction: 'ltr' }} value={form.bioEn} onChange={e => set('bioEn', e.target.value)} placeholder="A bit about me..." /></F>

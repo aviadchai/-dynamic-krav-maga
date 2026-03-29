@@ -92,6 +92,19 @@ export default function ContentPage() {
   const [showHistory, setShowHistory] = useState(false)
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const savedRef = useRef<SiteContent | null>(null)
+  const [translating, setTranslating] = useState('')
+
+  async function tr(id: string, fields: Record<string, string>): Promise<Record<string, string>> {
+    setTranslating(id)
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields }),
+      })
+      const { translations } = await res.json()
+      return translations || {}
+    } finally { setTranslating('') }
+  }
 
   const isDirty = isEditing && content && savedRef.current &&
     JSON.stringify(content) !== JSON.stringify(savedRef.current)
@@ -181,6 +194,19 @@ export default function ContentPage() {
 
   const locked = !isEditing
 
+  function TrBtn({ onClick, loading, small }: { onClick: () => void; loading: boolean; small?: boolean }) {
+    return (
+      <button type="button" onClick={onClick} disabled={loading || locked}
+        style={{ background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.25)', color: '#EAFF00',
+          padding: small ? '5px 12px' : '7px 16px', borderRadius: 50, cursor: loading ? 'wait' : 'pointer',
+          fontFamily: 'var(--font-heebo), sans-serif', fontSize: small ? 11 : 12, fontWeight: 700,
+          marginBottom: small ? 0 : '1.25rem', opacity: locked ? 0 : 1, pointerEvents: locked ? 'none' : 'auto',
+        }}>
+        {loading ? '⏳ מתרגם...' : '✨ תרגם לאנגלית'}
+      </button>
+    )
+  }
+
   return (
     <div style={{ padding: '2.5rem', direction: 'rtl', maxWidth: 1000 }}>
 
@@ -247,6 +273,17 @@ export default function ContentPage() {
 
       {/* ── HERO ── */}
       <Section title="Hero — סקשן ראשי" open={open.has('hero')} onToggle={() => toggle('hero')} locked={locked}>
+        {isEditing && <TrBtn loading={translating === 'hero'} onClick={async () => {
+          const t = await tr('hero', { badgePillHe: content.badgePillHe||'', heroTitleHe: content.heroTitleHe, heroSubHe: content.heroSubHe||'', heroBtnPrimaryHe: content.heroBtnPrimaryHe, heroBtnSecondaryHe: content.heroBtnSecondaryHe, heroNum1LblHe: content.heroNum1LblHe, heroNum2LblHe: content.heroNum2LblHe, heroNum3LblHe: content.heroNum3LblHe })
+          if (t.badgePillHe) set('badgePillEn', t.badgePillHe)
+          if (t.heroTitleHe) set('heroTitleEn', t.heroTitleHe)
+          if (t.heroSubHe) set('heroSubEn', t.heroSubHe)
+          if (t.heroBtnPrimaryHe) set('heroBtnPrimaryEn', t.heroBtnPrimaryHe)
+          if (t.heroBtnSecondaryHe) set('heroBtnSecondaryEn', t.heroBtnSecondaryHe)
+          if (t.heroNum1LblHe) set('heroNum1LblEn', t.heroNum1LblHe)
+          if (t.heroNum2LblHe) set('heroNum2LblEn', t.heroNum2LblHe)
+          if (t.heroNum3LblHe) set('heroNum3LblEn', t.heroNum3LblHe)
+        }} />
         <div style={twoCol}>
           <F label='תג Hero — עברית'>
             <input style={inp} value={content.badgePillHe || ''} onChange={e => set('badgePillHe', e.target.value)} placeholder="מדריך מוסמך קרב מגע" />
@@ -304,6 +341,16 @@ export default function ContentPage() {
 
       {/* ── ABOUT ── */}
       <Section title="עלינו — About" open={open.has('about')} onToggle={() => toggle('about')} locked={locked}>
+        {isEditing && <TrBtn loading={translating === 'about'} onClick={async () => {
+          const paraFields: Record<string, string> = {}
+          content.aboutParaHe.forEach((p, i) => { paraFields[`para${i}`] = p })
+          const t = await tr('about', { aboutTitleHe: content.aboutTitleHe, aboutTagHe: content.aboutTagHe, aboutExcerptHe: content.aboutExcerptHe||'', ...paraFields })
+          if (t.aboutTitleHe) set('aboutTitleEn', t.aboutTitleHe)
+          if (t.aboutTagHe) set('aboutTagEn', t.aboutTagHe)
+          if (t.aboutExcerptHe) set('aboutExcerptEn', t.aboutExcerptHe)
+          const newParaEn = content.aboutParaHe.map((_, i) => t[`para${i}`] || content.aboutParaEn[i] || '')
+          if (newParaEn.some(Boolean)) set('aboutParaEn', newParaEn)
+        }} />
         <div style={twoCol}>
           <F label="כותרת — עברית">
             <textarea style={{ ...inp, resize: 'vertical', minHeight: 80, lineHeight: 1.7 }} value={content.aboutTitleHe} onChange={e => set('aboutTitleHe', e.target.value)} placeholder={'לחימה\nשמגיעה\nמהשטח'} />
@@ -360,7 +407,14 @@ export default function ContentPage() {
         {content.testimonials.map((tc, i) => (
           <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '1.25rem', marginBottom: '1rem', position: 'relative' }}>
             <button onClick={() => removeTestimonial(i)} style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.6)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>✕</button>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginBottom: '1rem', letterSpacing: 1 }}>המלצה {i + 1}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', letterSpacing: 1 }}>המלצה {i + 1}</div>
+              {isEditing && <TrBtn small loading={translating === `tc${i}`} onClick={async () => {
+                const t = await tr(`tc${i}`, { roleHe: tc.roleHe, textHe: tc.textHe })
+                setTestimonial(i, 'roleEn', t.roleHe || tc.roleEn)
+                setTestimonial(i, 'textEn', t.textHe || tc.textEn)
+              }} />}
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
               <F label="שם"><input style={inp} value={tc.name} onChange={e => setTestimonial(i, 'name', e.target.value)} placeholder="שם הממליץ" /></F>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>

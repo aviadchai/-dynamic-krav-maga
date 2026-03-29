@@ -26,7 +26,26 @@ export default function ServicesPage() {
   const [editing, setEditing] = useState<number | null>(null) // index, or -1 for new
   const [form, setForm] = useState<ServiceItem>(empty)
   const [uploading, setUploading] = useState(false)
+  const [translating, setTranslating] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  async function translateForm() {
+    if (!form.he && !form.dHe && !form.bodyHe) return
+    setTranslating(true)
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { he: form.he, dHe: form.dHe, bodyHe: form.bodyHe } }),
+      })
+      const { translations } = await res.json()
+      setForm(f => ({
+        ...f,
+        en: translations.he || f.en,
+        dEn: translations.dHe || f.dEn,
+        bodyEn: translations.bodyHe || f.bodyEn,
+      }))
+    } finally { setTranslating(false) }
+  }
 
   async function load() {
     const d = await fetch('/api/content').then(r => r.json())
@@ -150,7 +169,13 @@ export default function ServicesPage() {
               <F label="תוכן מפורט (פופאפ)"><textarea style={{ ...ta, minHeight: 160 }} value={form.bodyHe} onChange={e => setF('bodyHe', e.target.value)} /></F>
             </div>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '1rem' }}>English</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>English</div>
+                <button type="button" onClick={translateForm} disabled={translating}
+                  style={{ background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.25)', color: '#EAFF00', padding: '5px 14px', borderRadius: 50, cursor: translating ? 'wait' : 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 11, fontWeight: 700 }}>
+                  {translating ? '⏳ מתרגם...' : '✨ תרגם'}
+                </button>
+              </div>
               <F label="Number"><input style={inp} value={form.n} readOnly /></F>
               <F label="Service Name"><input style={{ ...inp, direction: 'ltr' }} value={form.en} onChange={e => setF('en', e.target.value)} placeholder="Private Lessons" /></F>
               <F label="Short Description"><textarea style={{ ...ta, direction: 'ltr' }} value={form.dEn} onChange={e => setF('dEn', e.target.value)} /></F>
