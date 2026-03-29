@@ -221,21 +221,24 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               {/* Body text */}
               {popup?.bodyHe && (
                 <div style={{ padding: "1.5rem 2rem 2rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <div style={{
-                    fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95,
-                    whiteSpace: "pre-wrap", textAlign: "right",
-                  }}>
-                    {popup.bodyHe}
-                  </div>
-                  {(popup as (Article & { bodyImage?: string }) | null)?.bodyImage && (
-                    <div style={{ marginTop: "2rem" }}>
-                      <img
-                        src={(popup as Article & { bodyImage?: string })!.bodyImage}
-                        alt=""
-                        style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 12, display: "block" }}
-                      />
-                    </div>
-                  )}
+                  {(() => {
+                    const bodyImg = (popup as Article & { bodyImage?: string })?.bodyImage
+                    const bodyStyle: React.CSSProperties = { fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95, whiteSpace: "pre-wrap", textAlign: "right" }
+                    if (!bodyImg) return <div style={bodyStyle}>{popup.bodyHe}</div>
+                    const lines = popup.bodyHe.split('\n')
+                    const mid = Math.ceil(lines.length / 2)
+                    const firstHalf = lines.slice(0, mid).join('\n')
+                    const secondHalf = lines.slice(mid).join('\n')
+                    return (
+                      <>
+                        <div style={bodyStyle}>{firstHalf}</div>
+                        <div style={{ margin: "2rem 0" }}>
+                          <img src={bodyImg} alt="" style={{ width: "100%", maxHeight: 400, objectFit: "cover", borderRadius: 12, display: "block" }} />
+                        </div>
+                        {secondHalf && <div style={bodyStyle}>{secondHalf}</div>}
+                      </>
+                    )
+                  })()}
 
                   {/* Share buttons */}
                   <div style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", gap: 10, alignItems: "center" }}>

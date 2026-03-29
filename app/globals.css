@@ -904,7 +904,10 @@ footer {
   .reel-item { flex: 0 0 95vw; scroll-snap-align: center; }
   .reel-item-wide { flex: 0 0 95vw; }
   .reel-wrap, .reel-fb-card { height: calc(95vw * 16 / 9); }
-  .reels-grid { gap: 0.75rem; padding: 0 2.5vw; }
+  .reels-grid {
+    gap: 0.75rem; padding: 0 2.5vw;
+    mask-image: none !important; -webkit-mask-image: none !important;
+  }
 
   /* Horizontal scroll — instructors */
   .inst-grid {
@@ -915,20 +918,20 @@ footer {
   .inst-grid::-webkit-scrollbar { display: none; }
   /* Vertical card layout on mobile */
   .inst-card {
-    flex: 0 0 72vw; flex-direction: column;
-    scroll-snap-align: center; min-height: auto;
+    flex: 0 0 72vw !important; flex-direction: column !important;
+    scroll-snap-align: center; min-height: auto !important; align-items: unset !important;
   }
-  .inst-card-main { flex: 0 0 82vw; min-height: auto; }
+  .inst-card-main { flex: 0 0 82vw !important; }
   .inst-card-img {
-    flex: 0 0 auto !important; height: 180px; width: 100%;
+    flex: 0 0 auto !important; height: 180px !important; width: 100% !important;
     transform: none !important; margin: 0 !important;
-    border-radius: var(--r) var(--r) 0 0;
+    border-radius: var(--r) var(--r) 0 0 !important;
   }
   .inst-card-img img { transform: scale(1.05) !important; }
   .inst-card:hover .inst-card-img img { transform: scale(1.1) !important; }
   .inst-card-main .inst-card-img { height: 210px !important; }
   .inst-card-main .inst-card-name { font-size: 1.25rem; }
-  .inst-card-body { padding: 1.25rem; }
+  .inst-card-body { padding: 1.25rem !important; }
 
   /* Show scroll dots on mobile */
   .scroll-dots { display: flex; }
@@ -942,6 +945,10 @@ footer {
   .popup-2col > div:last-child { order: -1; }
   .article-popup-box {
     width: calc(100vw - 1.5rem) !important;
+    max-height: calc(100dvh - 1.5rem) !important;
+    border-radius: 14px !important;
+  }
+  .article-popup-box .popup-scroll {
     max-height: calc(100dvh - 1.5rem) !important;
   }
 
