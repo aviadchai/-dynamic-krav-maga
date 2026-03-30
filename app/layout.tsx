@@ -16,18 +16,21 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.dynamic-km.com"),
   title: "Dynamic Krav Maga — מאור לוי",
   description: "קרב מגע דינמי עם מאור לוי — שיטה מעשית לכל גיל ורמה. שיעורים פרטיים, קבוצות וסדנאות.",
-  keywords: ["קרב מגע", "krav maga", "מאור לוי", "אימון הגנה עצמית", "שיעורי קרב מגע"],
+  keywords: ["קרב מגע", "krav maga", "מאור לוי", "אימון הגנה עצמית", "שיעורי קרב מגע", "dynamic krav maga", "הגנה עצמית"],
+  alternates: {
+    canonical: "https://www.dynamic-km.com",
+  },
   openGraph: {
     title: "Dynamic Krav Maga — מאור לוי",
     description: "קרב מגע דינמי עם מאור לוי — שיטה מעשית לכל גיל ורמה.",
     type: "website",
     locale: "he_IL",
-  },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/favicon.ico",
+    url: "https://www.dynamic-km.com",
+    siteName: "Dynamic Krav Maga",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Dynamic Krav Maga — מאור לוי" }],
   },
 };
 
@@ -36,8 +39,41 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsActivityLocation",
+    "name": "Dynamic Krav Maga",
+    "description": "קרב מגע דינמי עם מאור לוי — שיטה מעשית לכל גיל ורמה.",
+    "url": "https://www.dynamic-km.com",
+    "image": "https://www.dynamic-km.com/og-image.jpg",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "IL"
+    },
+    "founder": {
+      "@type": "Person",
+      "name": "מאור לוי"
+    },
+    "sameAs": [],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "שיעורי קרב מגע",
+      "itemListElement": [
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "שיעורים פרטיים" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "קבוצות אימון" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "סדנאות" } }
+      ]
+    }
+  }
+
   return (
     <html lang="he" className={`${heebo.variable} ${barlowCondensed.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
