@@ -1047,7 +1047,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                 </div>
                 <div className="ac-body">
                   <div className="ac-title-he">{a.titleHe}</div>
-                  {a.author && <div className="ac-date" style={{ marginTop: ".35rem" }}>{a.author}</div>}
+                  <div className="ac-date" style={{ marginTop: ".35rem" }}>נכתב ע"י: {a.author || 'מערכת קרב מגע דינמי'}</div>
                   <p className="ac-ex">{a.excerptHe}</p>
                   <div className="ac-more">קרא עוד →</div>
                 </div>
