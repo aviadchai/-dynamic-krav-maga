@@ -233,12 +233,10 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                       {popup.excerptHe}
                     </p>
                   )}
-                  {(popup?.date || popup?.author) && (
-                    <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap", paddingTop: "0.25rem" }}>
-                      {popup?.date && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup.date}</span>}
-                      {popup?.author && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5 }}>נכתב על ידי: {popup.author}</span>}
-                    </div>
-                  )}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3, paddingTop: "0.5rem" }}>
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5 }}>נכתב ע"י: {popup?.author || 'מערכת קרב מגע דינמי'}</span>
+                    {popup?.date && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", letterSpacing: 1 }}>{popup.date}</span>}
+                  </div>
                 </div>
                 {/* Left col: image only */}
                 <div>
@@ -1047,7 +1045,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                 </div>
                 <div className="ac-body">
                   <div className="ac-title-he">{a.titleHe}</div>
-                  <div className="ac-date" style={{ marginTop: ".35rem" }}>נכתב ע"י: {a.author || 'מערכת קרב מגע דינמי'}</div>
+                  <div className="ac-date" style={{ marginTop: ".1rem", marginBottom: ".1rem" }}>נכתב ע"י: {a.author || 'מערכת קרב מגע דינמי'}</div>
                   <p className="ac-ex">{a.excerptHe}</p>
                   <div className="ac-more">קרא עוד →</div>
                 </div>
