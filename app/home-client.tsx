@@ -651,11 +651,14 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                 <p style={{
                   fontSize: 15, color: "rgba(255,255,255,0.55)", lineHeight: 1.8,
                   marginBottom: "1.5rem", fontStyle: "italic",
-                  borderRight: `3px solid ${brandColor}`, paddingRight: "1rem",
+                  borderRight: lang === "he" ? `3px solid ${brandColor}` : "none",
+                  borderLeft: lang === "en" ? `3px solid ${brandColor}` : "none",
+                  paddingRight: lang === "he" ? "1rem" : 0,
+                  paddingLeft: lang === "en" ? "1rem" : 0,
                 }}>
                   {lang === "he" ? servicePopup?.dHe : servicePopup?.dEn}
                 </p>
-                <div style={{ fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95, whiteSpace: "pre-wrap", textAlign: "right" }}>
+                <div style={{ fontSize: 15, color: "rgba(255,255,255,0.72)", lineHeight: 1.95, whiteSpace: "pre-wrap", textAlign: lang === "he" ? "right" : "left" }}>
                   {lang === "he" ? servicePopup?.bodyHe : servicePopup?.bodyEn}
                 </div>
                 <a href="#contact" onClick={closeServicePopup} style={{
@@ -954,7 +957,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               <p className="tc-text he-only">{tc.textHe}</p>
               <p className="tc-text en-only">{tc.textEn}</p>
               <div className="tc-sep"></div>
-              <div className="tc-name">{tc.name}</div>
+              <div className="tc-name">{lang === "he" ? tc.name : (tc.nameEn || tc.name)}</div>
               <div className="tc-role he-only">{tc.roleHe}</div>
               <div className="tc-role en-only">{tc.roleEn}</div>
             </div>

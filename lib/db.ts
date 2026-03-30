@@ -52,6 +52,7 @@ export type Reel = {
 
 export type Testimonial = {
   name: string
+  nameEn?: string
   roleHe: string
   roleEn: string
   textHe: string

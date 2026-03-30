@@ -108,6 +108,8 @@ body {
 .lang-he p, .lang-he li, .lang-he div { text-align: right; }
 .lang-en { direction: ltr; text-align: left; }
 .lang-en p, .lang-en li, .lang-en div { text-align: left; }
+.lang-en .icard-bar { align-self: flex-start; }
+.lang-en .btn-ghost-lime { align-self: flex-start; }
 /* Center-only elements stay center in both languages */
 .lang-he .ticker-inner,
 .lang-he .hero-btns,

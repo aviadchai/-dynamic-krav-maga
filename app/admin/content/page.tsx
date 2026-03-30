@@ -150,7 +150,7 @@ export default function ContentPage() {
   }
 
   function addTestimonial() {
-    setContent(c => c ? { ...c, testimonials: [...c.testimonials, { name: '', roleHe: '', roleEn: '', textHe: '', textEn: '' }] } : c)
+    setContent(c => c ? { ...c, testimonials: [...c.testimonials, { name: '', nameEn: '', roleHe: '', roleEn: '', textHe: '', textEn: '' }] } : c)
   }
 
   function removeTestimonial(i: number) {
@@ -419,7 +419,8 @@ export default function ContentPage() {
               }}>{translating === `tc${i}` ? '⏳' : '✨ תרגם'}</button>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-              <F label="שם"><input style={inp} value={tc.name} onChange={e => setTestimonial(i, 'name', e.target.value)} placeholder="שם הממליץ" /></F>
+              <F label="שם — עברית"><input style={inp} value={tc.name} onChange={e => setTestimonial(i, 'name', e.target.value)} placeholder="שם הממליץ בעברית" /></F>
+              <F label="Name — English"><input style={{ ...inp, direction: 'ltr' }} value={tc.nameEn || ''} onChange={e => setTestimonial(i, 'nameEn', e.target.value)} placeholder="Reviewer name in English" /></F>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <F label="תפקיד עברית"><input style={inp} value={tc.roleHe} onChange={e => setTestimonial(i, 'roleHe', e.target.value)} /></F>
                 <F label="Role English"><input style={{ ...inp, direction: 'ltr' }} value={tc.roleEn} onChange={e => setTestimonial(i, 'roleEn', e.target.value)} /></F>
