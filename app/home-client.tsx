@@ -1056,7 +1056,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           </div>
           {articles.length > 3 && (
             <div style={{ textAlign: "center", marginTop: "2rem" }}>
-              <button onClick={openAllArticles} className="btn-ghost btn-ghost-lime">
+              <button onClick={openAllArticles} className="btn-fill">
                 <span>כל המאמרים ({articles.length})</span>
               </button>
             </div>
