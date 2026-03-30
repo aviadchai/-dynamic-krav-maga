@@ -21,7 +21,7 @@ const inp: React.CSSProperties = {
 
 const empty: Omit<Instructor, 'id'> = {
   nameHe: '', nameEn: '', roleHe: '', roleEn: '',
-  bioHe: '', bioEn: '', popupBioHe: '', popupBioEn: '', image: '', order: 1, isMain: false,
+  bioHe: '', bioEn: '', popupBioHe: '', popupBioEn: '', image: '', order: 1,
 }
 
 export default function InstructorsPage() {
@@ -31,9 +31,10 @@ export default function InstructorsPage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [translating, setTranslating] = useState(false)
-  const [dragId, setDragId] = useState<string | null>(null)
+  const dragIdRef = useRef<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const formRef = useRef<HTMLDivElement>(null)
 
   async function load() {
     const data = await fetch('/api/instructors').then(r => r.json())
@@ -45,23 +46,17 @@ export default function InstructorsPage() {
   function startNew() {
     setEditing(null)
     setForm(empty)
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
   function startEdit(inst: Instructor) {
     setEditing(inst)
-    setForm({ nameHe: inst.nameHe, nameEn: inst.nameEn, roleHe: inst.roleHe, roleEn: inst.roleEn, bioHe: inst.bioHe, bioEn: inst.bioEn, popupBioHe: inst.popupBioHe || '', popupBioEn: inst.popupBioEn || '', image: inst.image, order: inst.order, isMain: inst.isMain || false })
+    setForm({ nameHe: inst.nameHe, nameEn: inst.nameEn, roleHe: inst.roleHe, roleEn: inst.roleEn, bioHe: inst.bioHe, bioEn: inst.bioEn, popupBioHe: inst.popupBioHe || '', popupBioEn: inst.popupBioEn || '', image: inst.image, order: inst.order })
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
   function set(key: string, value: string | number | boolean) {
     setForm(f => ({ ...f, [key]: value }))
-  }
-
-  async function setMain(id: string) {
-    const updated = instructors.map(i => ({ ...i, isMain: i.id === id }))
-    setInstructors(updated)
-    await Promise.all(updated.map(i =>
-      fetch(`/api/instructors/${i.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...i }) })
-    ))
   }
 
   async function save() {
@@ -119,13 +114,14 @@ export default function InstructorsPage() {
     load()
   }
 
-  function onDragStart(id: string) { setDragId(id) }
+  function onDragStart(id: string) { dragIdRef.current = id }
   function onDragOver(e: React.DragEvent, id: string) { e.preventDefault(); setDragOverId(id) }
-  function onDragEnd() { setDragId(null); setDragOverId(null) }
+  function onDragEnd() { dragIdRef.current = null; setDragOverId(null) }
 
   async function onDrop(e: React.DragEvent, targetId: string) {
     e.preventDefault()
-    if (!dragId || dragId === targetId) { setDragId(null); setDragOverId(null); return }
+    const dragId = dragIdRef.current
+    if (!dragId || dragId === targetId) { dragIdRef.current = null; setDragOverId(null); return }
     const sorted = [...instructors].sort((a, b) => a.order - b.order)
     const fromIdx = sorted.findIndex(i => i.id === dragId)
     const toIdx = sorted.findIndex(i => i.id === targetId)
@@ -134,7 +130,7 @@ export default function InstructorsPage() {
     reordered.splice(toIdx, 0, moved)
     const updated = reordered.map((inst, idx) => ({ ...inst, order: idx + 1 }))
     setInstructors(updated)
-    setDragId(null); setDragOverId(null)
+    dragIdRef.current = null; setDragOverId(null)
     await Promise.all(updated.map(inst =>
       fetch(`/api/instructors/${inst.id}`, {
         method: 'PUT',
@@ -147,27 +143,27 @@ export default function InstructorsPage() {
   const sorted = [...instructors].sort((a, b) => a.order - b.order)
 
   return (
-    <div style={{ padding: '2.5rem', direction: 'rtl' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2.5rem)', direction: 'rtl', maxWidth: 900, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>מאמנים</h1>
+          <h1 style={{ fontSize: 'clamp(1.3rem, 5vw, 1.8rem)', fontWeight: 900, color: '#fff' }}>מאמנים</h1>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, marginTop: 4 }}>גרור כדי לסדר מחדש</p>
         </div>
         <button onClick={startNew} style={{
           background: '#EAFF00', color: '#0A0A0A', border: 'none',
           padding: '11px 24px', borderRadius: 50,
           fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 13, cursor: 'pointer',
+          flexShrink: 0,
         }}>
           + מאמן חדש
         </button>
       </div>
 
-      {/* Instructor cards — draggable */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        {sorted.map((inst) => (
+      {/* Instructor list — draggable rows */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '2rem' }}>
+        {sorted.map((inst, idx) => (
           <div
             key={inst.id}
-            className="inst-admin-card"
             draggable
             onDragStart={() => onDragStart(inst.id)}
             onDragOver={e => onDragOver(e, inst.id)}
@@ -176,52 +172,54 @@ export default function InstructorsPage() {
             style={{
               background: '#141414',
               border: `1.5px solid ${dragOverId === inst.id ? 'rgba(234,255,0,0.4)' : 'rgba(255,255,255,0.07)'}`,
-              borderRadius: 14, padding: '1.5rem',
-              opacity: dragId === inst.id ? 0.45 : 1,
-              cursor: 'grab', transition: 'border-color .15s, opacity .15s',
+              borderRadius: 12,
+              padding: '0.75rem 1rem',
+              display: 'flex', alignItems: 'center', gap: '0.75rem',
+              cursor: 'grab',
+              transition: 'border-color .15s, opacity .15s',
+              opacity: dragIdRef.current === inst.id ? 0.45 : 1,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-              {/* Drag handle */}
-              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 16, flexShrink: 0, letterSpacing: 2, userSelect: 'none' }}>⠿</div>
-              <div style={{
-                width: 52, height: 52, borderRadius: '50%',
-                background: '#1C1C1C',
-                backgroundImage: inst.image ? `url(${inst.image})` : 'none',
-                backgroundSize: 'cover', backgroundPosition: 'center',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 22, flexShrink: 0,
-              }}>
-                {!inst.image && '👤'}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 800, color: '#fff', fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inst.nameHe}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{inst.roleHe}</div>
-              </div>
-              <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
-                <button
-                  onClick={() => setMain(inst.id)}
-                  title="הגדר כמאמן ראשי"
-                  style={{ background: inst.isMain ? 'rgba(234,255,0,0.15)' : 'rgba(255,255,255,0.05)', border: inst.isMain ? '1.5px solid rgba(234,255,0,0.4)' : '1.5px solid rgba(255,255,255,0.1)', color: inst.isMain ? '#EAFF00' : 'rgba(255,255,255,0.3)', width: 32, height: 32, borderRadius: 8, cursor: 'pointer', fontSize: 15 }}>
-                  ★
-                </button>
-                <button onClick={() => startEdit(inst)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.7)', padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12 }}>עריכה</button>
-                <button onClick={() => del(inst.id)} style={{ background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.7)', padding: '6px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 12 }}>✕</button>
-              </div>
+            {/* Order number */}
+            <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, fontWeight: 700, width: 20, textAlign: 'center', flexShrink: 0 }}>
+              {idx + 1}
             </div>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6, margin: 0 }}>
-              {inst.bioHe}
-            </p>
+            {/* Drag handle */}
+            <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 18, flexShrink: 0, letterSpacing: 2, userSelect: 'none', touchAction: 'none' }}>⠿</div>
+            {/* Photo */}
+            <div style={{
+              width: 48, height: 48, borderRadius: '50%',
+              background: '#1C1C1C',
+              backgroundImage: inst.image ? `url(${inst.image})` : 'none',
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 20, flexShrink: 0, border: '1.5px solid rgba(255,255,255,0.07)',
+            }}>
+              {!inst.image && '👤'}
+            </div>
+            {/* Info */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 800, color: '#fff', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inst.nameHe}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inst.roleHe}</div>
+            </div>
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              <button onClick={() => startEdit(inst)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: 'rgba(255,255,255,0.7)', padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12, whiteSpace: 'nowrap' }}>עריכה</button>
+              <button onClick={() => del(inst.id)} style={{ background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.7)', padding: '6px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13 }}>✕</button>
+            </div>
           </div>
         ))}
+        {sorted.length === 0 && (
+          <div style={{ color: 'rgba(255,255,255,0.2)', textAlign: 'center', padding: '2rem', fontSize: 14 }}>אין מאמנים עדיין</div>
+        )}
       </div>
 
       {/* Form */}
-      <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem' }}>
+      <div ref={formRef} style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 'clamp(1rem, 4vw, 1.5rem)' }}>
         <h2 style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: '1.5rem' }}>
-          {editing ? 'עריכת מאמן' : 'הוספת מאמן חדש'}
+          {editing ? `עריכה: ${editing.nameHe}` : 'הוספת מאמן חדש'}
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1rem' }}>עברית</div>
             <F label="שם"><input style={inp} value={form.nameHe} onChange={e => set('nameHe', e.target.value)} placeholder="שם המאמן" /></F>
@@ -242,20 +240,20 @@ export default function InstructorsPage() {
           </div>
         </div>
         <F label="תמונה">
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             {form.image && <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#1C1C1C', backgroundImage: `url(${form.image})`, backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0, border: '1.5px solid rgba(255,255,255,0.08)' }} />}
             <input ref={fileRef} type="file" accept="image/*" onChange={handleImgUpload} style={{ display: 'none' }} />
             <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{ background: 'rgba(234,255,0,0.08)', border: '1.5px solid rgba(234,255,0,0.2)', color: '#EAFF00', padding: '8px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12, fontWeight: 700, flexShrink: 0, whiteSpace: 'nowrap' }}>
               {uploading ? 'מעלה...' : '⬆ העלה'}
             </button>
-            <input style={{ ...inp, flex: 1, fontSize: 12 }} value={form.image} onChange={e => set('image', e.target.value)} placeholder="או URL..." dir="ltr" />
+            <input style={{ ...inp, flex: 1, minWidth: 120, fontSize: 12 }} value={form.image} onChange={e => set('image', e.target.value)} placeholder="או URL..." dir="ltr" />
           </div>
         </F>
 
-        {/* Popup bio — shown as full bio in popup */}
+        {/* Popup bio */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.25rem', marginTop: '0.5rem', marginBottom: '1rem' }}>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: '1rem' }}>ביוגרפיה מורחבת — מוצגת בפופאפ "הצג ביוגרפיה" (ריק = ישתמש בביוגרפיה הרגילה)</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: '1rem' }}>ביוגרפיה מורחבת — מוצגת בפופאפ &quot;הצג ביוגרפיה&quot; (ריק = ישתמש בביוגרפיה הרגילה)</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
             <F label="ביוגרפיה מורחבת — עברית">
               <textarea style={{ ...inp, resize: 'vertical', minHeight: 120, lineHeight: 1.7 }} value={form.popupBioHe || ''} onChange={e => set('popupBioHe', e.target.value)} placeholder="טקסט מורחב שיופיע בחלונית..." />
             </F>
@@ -265,7 +263,7 @@ export default function InstructorsPage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem', flexWrap: 'wrap' }}>
           {editing && (
             <button onClick={() => { setEditing(null); setForm(empty) }} style={{
               border: '1.5px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', background: 'none',
