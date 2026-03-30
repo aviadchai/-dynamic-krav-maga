@@ -123,8 +123,6 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
     const aRect = active.getBoundingClientRect();
     indicator.style.left = `${aRect.left - ulRect.left}px`;
     indicator.style.width = `${aRect.width}px`;
-    indicator.style.height = `${aRect.height}px`;
-    indicator.style.top = `${aRect.top - ulRect.top}px`;
     indicator.style.opacity = '1';
   }, [activeSection]);
 

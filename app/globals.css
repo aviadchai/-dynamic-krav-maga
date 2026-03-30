@@ -158,17 +158,18 @@ nav.site-nav {
   padding: 8px 18px;
   transition: color .3s;
 }
-.nav-center-wrap { position: relative; }
+.nav-center-wrap { position: relative; display: flex; align-items: center; }
 .nav-indicator {
   position: absolute;
-  top: 0; left: 0;
-  height: 100%;
+  top: 2px; bottom: 2px; left: 0;
   background: rgba(255,255,255,0.13);
-  border-radius: 8px;
-  transform: skewX(-12deg);
+  border-radius: 7px;
+  transform: skewX(-12deg) translateZ(0);
+  backface-visibility: hidden;
   pointer-events: none;
   opacity: 0;
-  transition: left .35s cubic-bezier(0.4,0,0.2,1), width .35s cubic-bezier(0.4,0,0.2,1), opacity .2s;
+  will-change: left, width;
+  transition: left .3s cubic-bezier(0.4,0,0.2,1), width .3s cubic-bezier(0.4,0,0.2,1), opacity .25s;
   z-index: 0;
 }
 .nav-center a:hover { color: var(--white); }
