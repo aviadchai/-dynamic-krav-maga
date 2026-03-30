@@ -438,10 +438,19 @@ export default function ContentPage() {
       <Section title="צור קשר — Contact" open={open.has('contact')} onToggle={() => toggle('contact')} locked={locked} action={
         <button type="button" disabled={translating === 'contact'} style={trBtnStyle(true, translating === 'contact')} onClick={async () => {
           if (!isEditing) startEdit()
-          const t = await tr('contact', { contactSubHe: content.contactSubHe || '' })
-          if (t.contactSubHe) set('contactSubHe', t.contactSubHe)
+          const t = await tr('contact', { contactTitleHe: content.contactTitleHe || '', contactSubHe: content.contactSubHe || '' })
+          if (t.contactTitleHe) set('contactTitleEn', t.contactTitleHe)
+          if (t.contactSubHe) set('contactSubEn', t.contactSubHe)
         }}>{translating === 'contact' ? '⏳' : '✨ תרגם'}</button>
       }>
+        <div style={twoCol}>
+          <F label="כותרת — עברית">
+            <input style={inp} value={content.contactTitleHe || ''} onChange={e => set('contactTitleHe', e.target.value)} placeholder="צור קשר" />
+          </F>
+          <F label="Title — English">
+            <input style={{ ...inp, direction: 'ltr' }} value={content.contactTitleEn || ''} onChange={e => set('contactTitleEn', e.target.value)} placeholder="GET IN TOUCH" dir="ltr" />
+          </F>
+        </div>
         <div style={twoCol}>
           <F label="טקסט תיאור — עברית">
             <textarea style={{ ...inp, resize: 'vertical', minHeight: 70 }} value={content.contactSubHe || ''} onChange={e => set('contactSubHe', e.target.value)} placeholder="שאלה? רוצים לקבוע שיעור ראשון? פשוט כתבו." />

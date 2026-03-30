@@ -120,6 +120,8 @@ export type SiteContent = {
   instagram: string
   facebook: string
   whatsapp: string
+  contactTitleHe: string
+  contactTitleEn: string
   contactSubHe: string
   contactSubEn: string
   // Services
@@ -205,6 +207,8 @@ const defaultContent: SiteContent = {
   instagram: '',
   facebook: '',
   whatsapp: '',
+  contactTitleHe: 'צור\nקשר',
+  contactTitleEn: 'GET IN\nTOUCH',
   contactSubHe: 'שאלה? רוצים לקבוע שיעור ראשון? פשוט כתבו.',
   contactSubEn: 'Questions? Want to book a first class? Just write.',
   brandColor: '#EAFF00',

@@ -850,19 +850,17 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             <div className="inst-top-row">
               {instMain && (
                 <div className="icard icard--main">
-                  {instMain.image ? <img src={instMain.image} alt={t(instMain.nameHe, instMain.nameEn)} /> : <div className="icard-placeholder">👤</div>}
-                  <div className="icard-overlay" />
-                  <div className="icard-info">
+                  <div className="icard-img-wrap">
+                    {instMain.image ? <img src={instMain.image} alt={t(instMain.nameHe, instMain.nameEn)} /> : <div className="icard-placeholder">👤</div>}
+                  </div>
+                  <div className="icard-body">
                     {instMain.roleHe && <div className="icard-role">{t(instMain.roleHe, instMain.roleEn)}</div>}
                     <div className="icard-name">{t(instMain.nameHe, instMain.nameEn)}</div>
                     <div className="icard-bar" />
                     {instMain.bioHe && <p className="icard-bio">{t(instMain.bioHe, instMain.bioEn)}</p>}
                     {(instMain.popupBioHe || instMain.bioHe) && (
-                      <button onClick={() => openInstBio(instMain)} style={{ marginTop: "1rem", background: "rgba(255,255,255,0.1)", border: "1.5px solid rgba(255,255,255,0.2)", color: "#fff", padding: "9px 20px", borderRadius: 50, cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-heebo), sans-serif", backdropFilter: "blur(4px)", transition: "all .2s" }}
-                        onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.18)"; }}
-                        onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.1)"; }}
-                      >
-                        {lang === "he" ? "הצג ביוגרפיה" : "Full Bio"}
+                      <button onClick={() => openInstBio(instMain)} className="btn-ghost btn-ghost-lime" style={{ marginTop: "1rem", alignSelf: "flex-start" }}>
+                        <span>{lang === "he" ? "הצג ביוגרפיה" : "Full Bio"}</span>
                       </button>
                     )}
                   </div>
@@ -870,9 +868,10 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               )}
               {instDeputy && (
                 <div className="icard icard--deputy">
-                  {instDeputy.image ? <img src={instDeputy.image} alt={t(instDeputy.nameHe, instDeputy.nameEn)} /> : <div className="icard-placeholder">👤</div>}
-                  <div className="icard-overlay" />
-                  <div className="icard-info">
+                  <div className="icard-img-wrap">
+                    {instDeputy.image ? <img src={instDeputy.image} alt={t(instDeputy.nameHe, instDeputy.nameEn)} /> : <div className="icard-placeholder">👤</div>}
+                  </div>
+                  <div className="icard-body">
                     {instDeputy.roleHe && <div className="icard-role">{t(instDeputy.roleHe, instDeputy.roleEn)}</div>}
                     <div className="icard-name">{t(instDeputy.nameHe, instDeputy.nameEn)}</div>
                     <div className="icard-bar" />
@@ -885,9 +884,10 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               <div className="inst-bottom-row">
                 {instRest.map(inst => (
                   <div key={inst.id} className="icard icard--sm">
-                    {inst.image ? <img src={inst.image} alt={t(inst.nameHe, inst.nameEn)} /> : <div className="icard-placeholder">👤</div>}
-                    <div className="icard-overlay" />
-                    <div className="icard-info">
+                    <div className="icard-img-wrap">
+                      {inst.image ? <img src={inst.image} alt={t(inst.nameHe, inst.nameEn)} /> : <div className="icard-placeholder">👤</div>}
+                    </div>
+                    <div className="icard-body">
                       {inst.roleHe && <div className="icard-role">{t(inst.roleHe, inst.roleEn)}</div>}
                       <div className="icard-name">{t(inst.nameHe, inst.nameEn)}</div>
                     </div>
@@ -1037,11 +1037,6 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
               <div className="sec-tag">ידע וכלים</div>
               <div className="sec-h-he">מאמרים ותוכן</div>
             </div>
-            {articles.length > 3 && (
-              <button onClick={openAllArticles} style={{ background: "var(--lime)", color: "#0A0A0A", border: "none", padding: "11px 26px", borderRadius: 50, cursor: "pointer", fontFamily: "var(--font-heebo), sans-serif", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
-                כל המאמרים ({articles.length})
-              </button>
-            )}
           </div>
           <div className="agrid">
             {articles.slice(0, 3).map((a, i) => (
@@ -1061,11 +1056,8 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           </div>
           {articles.length > 3 && (
             <div style={{ textAlign: "center", marginTop: "2rem" }}>
-              <button onClick={openAllArticles} style={{ background: "none", border: "1.5px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.6)", padding: "12px 32px", borderRadius: 50, cursor: "pointer", fontFamily: "var(--font-heebo), sans-serif", fontWeight: 700, fontSize: 13, transition: "border-color .2s, color .2s" }}
-                onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.4)"; (e.currentTarget as HTMLButtonElement).style.color = "#fff"; }}
-                onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.15)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.6)"; }}
-              >
-                עוד מאמרים ←
+              <button onClick={openAllArticles} className="btn-ghost btn-ghost-lime">
+                <span>כל המאמרים ({articles.length})</span>
               </button>
             </div>
           )}
@@ -1082,15 +1074,15 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           <div className="fr"><input type="tel" placeholder="טלפון / Phone" /></div>
           <div className="fr"><input type="email" placeholder="אימייל / Email" /></div>
           <div className="fr"><textarea placeholder="הודעה / Message..."></textarea></div>
-          <button className="f-sub he-only">שלח הודעה</button>
-          <button className="f-sub en-only">Send Message</button>
+          <button className="f-sub he-only"><span>שלח הודעה</span></button>
+          <button className="f-sub en-only"><span>Send Message</span></button>
         </div>
         {/* Info — right column */}
         <div className="c-info">
           <div className="sec-tag he-only">בואו נדבר</div>
           <div className="sec-tag en-only">Let&#39;s Talk</div>
-          <div className="he-only"><div className="sec-h-he">צור<br />קשר</div></div>
-          <div className="en-only"><div className="sec-h">GET IN<br />TOUCH</div></div>
+          <div className="he-only"><div className="sec-h-he">{(content?.contactTitleHe || 'צור\nקשר').split('\n').map((line, i, arr) => <span key={i}>{line}{i < arr.length - 1 && <br />}</span>)}</div></div>
+          <div className="en-only"><div className="sec-h">{(content?.contactTitleEn || 'GET IN\nTOUCH').split('\n').map((line, i, arr) => <span key={i}>{line}{i < arr.length - 1 && <br />}</span>)}</div></div>
           <div className="accent-bar"></div>
           {(content?.contactSubHe || content?.contactSubEn) && (
             <p className="c-info-sub">{t(content?.contactSubHe || '', content?.contactSubEn || '')}</p>
