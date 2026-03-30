@@ -63,6 +63,23 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   function openAbout() { setAboutOpen(true); }
   function closeAbout() { setAboutClosing(true); setTimeout(() => { setAboutOpen(false); setAboutClosing(false); }, 200); }
   const reelsRef = useRef<HTMLDivElement>(null);
+  const navUlRef = useRef<HTMLUListElement>(null);
+  const navIndicatorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ul = navUlRef.current;
+    const indicator = navIndicatorRef.current;
+    if (!ul || !indicator) return;
+    const active = ul.querySelector('a.nav-active') as HTMLAnchorElement | null;
+    if (!active) { indicator.style.opacity = '0'; return; }
+    const ulRect = ul.getBoundingClientRect();
+    const aRect = active.getBoundingClientRect();
+    indicator.style.left = `${aRect.left - ulRect.left}px`;
+    indicator.style.width = `${aRect.width}px`;
+    indicator.style.height = `${aRect.height}px`;
+    indicator.style.top = `${aRect.top - ulRect.top}px`;
+    indicator.style.opacity = '1';
+  }, [activeSection]);
 
   function openPopup(article: Article) {
     setPopup(article);
@@ -736,13 +753,16 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             <span className="he-only">צור קשר</span>
             <span className="en-only">Contact</span>
           </a>
-          <ul className="nav-center">
-            <li><a href="#articles" className={activeSection === 'articles' ? 'nav-active' : ''}><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>
-            <li><a href="#reels" className={activeSection === 'reels' ? 'nav-active' : ''}><span className="he-only">רילס</span><span className="en-only">Reels</span></a></li>
-            <li><a href="#testimonials" className={activeSection === 'testimonials' ? 'nav-active' : ''}><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
-            <li><a href="#services" className={activeSection === 'services' ? 'nav-active' : ''}><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
-            <li><a href="#about" className={activeSection === 'about' || activeSection === 'instructors' ? 'nav-active' : ''}><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
-          </ul>
+          <div className="nav-center-wrap">
+            <div className="nav-indicator" ref={navIndicatorRef} />
+            <ul className="nav-center" ref={navUlRef}>
+              <li><a href="#articles" className={activeSection === 'articles' ? 'nav-active' : ''}><span className="he-only">מאמרים</span><span className="en-only">Articles</span></a></li>
+              <li><a href="#reels" className={activeSection === 'reels' ? 'nav-active' : ''}><span className="he-only">רילס</span><span className="en-only">Reels</span></a></li>
+              <li><a href="#testimonials" className={activeSection === 'testimonials' ? 'nav-active' : ''}><span className="he-only">המלצות</span><span className="en-only">Reviews</span></a></li>
+              <li><a href="#services" className={activeSection === 'services' ? 'nav-active' : ''}><span className="he-only">שירותים</span><span className="en-only">Services</span></a></li>
+              <li><a href="#about" className={activeSection === 'about' || activeSection === 'instructors' ? 'nav-active' : ''}><span className="he-only">עלינו</span><span className="en-only">About</span></a></li>
+            </ul>
+          </div>
           <div className="nav-logo">
             <img src={logoDark} alt="Dynamic Krav Maga" />
           </div>

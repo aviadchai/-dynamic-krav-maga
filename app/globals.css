@@ -87,7 +87,7 @@ body {
   background: var(--black);
   color: var(--white);
   font-family: var(--font-heebo), sans-serif;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* ── LANG ── */
@@ -158,21 +158,21 @@ nav.site-nav {
   padding: 8px 18px;
   transition: color .3s;
 }
-.nav-center a::before {
-  content: '';
+.nav-center-wrap { position: relative; }
+.nav-indicator {
   position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.14);
+  top: 0; left: 0;
+  height: 100%;
+  background: rgba(255,255,255,0.13);
   border-radius: 8px;
   transform: skewX(-12deg);
-  z-index: -1;
   pointer-events: none;
   opacity: 0;
-  transition: opacity .3s ease;
+  transition: left .35s cubic-bezier(0.4,0,0.2,1), width .35s cubic-bezier(0.4,0,0.2,1), opacity .2s;
+  z-index: 0;
 }
 .nav-center a:hover { color: var(--white); }
 .nav-center a.nav-active { color: rgba(255,255,255,0.75); }
-.nav-center a.nav-active::before { opacity: 1; }
 .lang-sw {
   display: flex; align-items: center;
   background: rgba(255,255,255,0.06);
@@ -899,11 +899,9 @@ footer {
     grid-template-columns: 1fr auto;
     padding: 0 1rem;
     height: 60px;
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 999;
+    position: sticky;
+    top: 0;
   }
-  .hero { margin-top: 60px; }
   .hamburger { display: flex; }
   .nav-center { display: none; }
   .cta-nav { display: none; }
@@ -945,16 +943,26 @@ footer {
   .tgrid::-webkit-scrollbar { display: none; }
   .tc { flex: 0 0 80vw; scroll-snap-align: start; }
 
-  /* Reels on mobile — content width */
+  /* Reels on mobile — full content width, overlaid arrows */
   .reels-section { padding: 3rem 1.25rem 1rem; }
   .reels-section .sec-head { padding: 0; }
-  .reel-item { flex: 0 0 88vw; scroll-snap-align: center; }
-  .reel-item-wide { flex: 0 0 88vw; }
-  .reel-wrap, .reel-fb-card { height: calc(88vw * 16 / 9); }
+  .reels-outer { position: relative; }
+  .reel-item { flex: 0 0 calc(100vw - 2.5rem); scroll-snap-align: center; }
+  .reel-item-wide { flex: 0 0 calc(100vw - 2.5rem); }
+  .reel-wrap, .reel-fb-card { height: calc((100vw - 2.5rem) * 16 / 9); }
   .reels-grid {
     gap: 0.75rem; padding: 0;
     mask-image: none !important; -webkit-mask-image: none !important;
   }
+  .reel-nav-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(10,10,10,0.45) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .reel-nav-prev { right: 8px; left: auto; margin: 0; }
+  .reel-nav-next { left: 8px; right: auto; margin: 0; }
 
   /* Instructors — mobile vertical stack */
   .inst-layout { gap: 1rem; }
