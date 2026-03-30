@@ -66,21 +66,6 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   const navUlRef = useRef<HTMLUListElement>(null);
   const navIndicatorRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ul = navUlRef.current;
-    const indicator = navIndicatorRef.current;
-    if (!ul || !indicator) return;
-    const active = ul.querySelector('a.nav-active') as HTMLAnchorElement | null;
-    if (!active) { indicator.style.opacity = '0'; return; }
-    const ulRect = ul.getBoundingClientRect();
-    const aRect = active.getBoundingClientRect();
-    indicator.style.left = `${aRect.left - ulRect.left}px`;
-    indicator.style.width = `${aRect.width}px`;
-    indicator.style.height = `${aRect.height}px`;
-    indicator.style.top = `${aRect.top - ulRect.top}px`;
-    indicator.style.opacity = '1';
-  }, [activeSection]);
-
   function openPopup(article: Article) {
     setPopup(article);
   }
@@ -127,6 +112,21 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
     ids.forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el); });
     return () => obs.disconnect();
   }, []);
+
+  useEffect(() => {
+    const ul = navUlRef.current;
+    const indicator = navIndicatorRef.current;
+    if (!ul || !indicator) return;
+    const active = ul.querySelector('a.nav-active') as HTMLAnchorElement | null;
+    if (!active) { indicator.style.opacity = '0'; return; }
+    const ulRect = ul.getBoundingClientRect();
+    const aRect = active.getBoundingClientRect();
+    indicator.style.left = `${aRect.left - ulRect.left}px`;
+    indicator.style.width = `${aRect.width}px`;
+    indicator.style.height = `${aRect.height}px`;
+    indicator.style.top = `${aRect.top - ulRect.top}px`;
+    indicator.style.opacity = '1';
+  }, [activeSection]);
 
   function switchLang(next: Lang) {
     if (next === lang) return;
