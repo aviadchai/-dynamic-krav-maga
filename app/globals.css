@@ -145,7 +145,7 @@ nav.site-nav { animation: heroIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
 }
 .announce-track {
   display: flex; white-space: nowrap;
-  animation: tickerScroll 22s linear infinite;
+  animation: tickerScroll 30s linear infinite;
 }
 .announce-item {
   display: inline-flex; align-items: center; gap: 1.5rem;

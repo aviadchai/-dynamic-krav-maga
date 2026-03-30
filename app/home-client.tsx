@@ -771,23 +771,28 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       </nav>
 
       {/* ANNOUNCEMENT TICKER */}
-      {(content?.announcementItems?.filter(it => (lang === 'he' ? it.textHe : it.textEn)).length ?? 0) > 0 && (
-        <div className="announce-ticker">
-          <div className="announce-track">
-            {[...Array(4)].flatMap((_, rep) =>
-              (content?.announcementItems || [])
-                .filter(it => (lang === 'he' ? it.textHe : it.textEn))
-                .map((it, j) => {
+      {(() => {
+        const tickerItems = (content?.announcementItems || []).filter(it => (lang === 'he' ? it.textHe : it.textEn))
+        if (tickerItems.length === 0) return null
+        // Repeat enough times so the first half of the track (which animates to -50%)
+        // is always wider than any screen — prevents blank gaps
+        const reps = 12
+        return (
+          <div className="announce-ticker">
+            <div className="announce-track">
+              {[...Array(reps)].flatMap((_, rep) =>
+                tickerItems.map((it, j) => {
                   const text = lang === 'he' ? it.textHe : it.textEn
                   const inner = <><span className="announce-dot" />{text}</>
                   return it.link
                     ? <a key={`${rep}-${j}`} className="announce-item" href={it.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', cursor: 'pointer' }}>{inner}</a>
                     : <span key={`${rep}-${j}`} className="announce-item">{inner}</span>
                 })
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* HERO */}
       <div className="hero" id="home">
