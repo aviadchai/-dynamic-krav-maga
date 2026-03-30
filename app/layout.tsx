@@ -17,7 +17,18 @@ const barlowCondensed = Barlow_Condensed({
 
 export const metadata: Metadata = {
   title: "Dynamic Krav Maga — מאור לוי",
-  description: "קרב מגע דינמי עם מאור לוי — שיטה מעשית לכל גיל ורמה.",
+  description: "קרב מגע דינמי עם מאור לוי — שיטה מעשית לכל גיל ורמה. שיעורים פרטיים, קבוצות וסדנאות.",
+  keywords: ["קרב מגע", "krav maga", "מאור לוי", "אימון הגנה עצמית", "שיעורי קרב מגע"],
+  openGraph: {
+    title: "Dynamic Krav Maga — מאור לוי",
+    description: "קרב מגע דינמי עם מאור לוי — שיטה מעשית לכל גיל ורמה.",
+    type: "website",
+    locale: "he_IL",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
