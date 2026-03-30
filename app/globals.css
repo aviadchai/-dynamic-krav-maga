@@ -164,9 +164,10 @@ nav.site-nav {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.14);
   border-radius: 8px;
   transform: skewX(-12deg);
+  z-index: -1;
   pointer-events: none;
 }
 .lang-sw {
