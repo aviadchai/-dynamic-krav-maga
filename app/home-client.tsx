@@ -770,6 +770,20 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
         </div>
       </nav>
 
+      {/* ANNOUNCEMENT TICKER */}
+      {(lang === 'he' ? content?.announcementHe : content?.announcementEn) && (
+        <div className="announce-ticker">
+          <div className="announce-track">
+            {[...Array(6)].map((_, i) => (
+              <span key={i} className="announce-item">
+                <span className="announce-dot" />
+                {lang === 'he' ? content?.announcementHe : content?.announcementEn}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* HERO */}
       <div className="hero" id="home">
         <div className="hero-left">

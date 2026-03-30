@@ -3,16 +3,40 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { Article, Instructor } from '@/lib/db'
 
+const inp: React.CSSProperties = {
+  width: '100%', background: 'rgba(255,255,255,0.04)',
+  border: '1.5px solid rgba(255,255,255,0.1)',
+  color: '#fff', padding: '10px 14px', borderRadius: 10,
+  fontFamily: 'var(--font-heebo), sans-serif', fontSize: 13, outline: 'none',
+}
+
 export default function AdminDashboard() {
   const [articles, setArticles] = useState<Article[]>([])
   const [instructors, setInstructors] = useState<Instructor[]>([])
   const [reelsCount, setReelsCount] = useState(0)
+  const [announceHe, setAnnounceHe] = useState('')
+  const [announceEn, setAnnounceEn] = useState('')
+  const [announceSaving, setAnnounceSaving] = useState(false)
 
   useEffect(() => {
     fetch('/api/articles').then(r => r.json()).then(setArticles)
     fetch('/api/instructors').then(r => r.json()).then(setInstructors)
-    fetch('/api/content').then(r => r.json()).then((d: { reels?: unknown[] }) => setReelsCount(d.reels?.length ?? 0))
+    fetch('/api/content').then(r => r.json()).then((d: { reels?: unknown[], announcementHe?: string, announcementEn?: string }) => {
+      setReelsCount(d.reels?.length ?? 0)
+      setAnnounceHe(d.announcementHe || '')
+      setAnnounceEn(d.announcementEn || '')
+    })
   }, [])
+
+  async function saveAnnouncement() {
+    setAnnounceSaving(true)
+    await fetch('/api/content', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ announcementHe: announceHe, announcementEn: announceEn }),
+    })
+    setAnnounceSaving(false)
+  }
 
   const published = articles.filter(a => a.published).length
   const drafts = articles.filter(a => !a.published).length
@@ -80,6 +104,40 @@ export default function AdminDashboard() {
             {a.label}
           </Link>
         ))}
+      </div>
+
+      {/* Announcement ticker */}
+      <div style={{ marginBottom: '2.5rem' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.25)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: '1rem' }}>
+          טיקר הודעות — מוצג בראש האתר כשיש טקסט
+        </div>
+        <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#EAFF00', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>עברית</label>
+              <input style={inp} value={announceHe} onChange={e => setAnnounceHe(e.target.value)} placeholder="הודעה שתופיע בטיקר... (ריק = טיקר לא יוצג)" />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>English</label>
+              <input style={{ ...inp, direction: 'ltr' }} value={announceEn} onChange={e => setAnnounceEn(e.target.value)} placeholder="Message shown in ticker... (empty = hidden)" />
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)' }}>
+              {announceHe ? `פעיל: "${announceHe.slice(0, 40)}${announceHe.length > 40 ? '...' : ''}"` : 'כרגע לא מוצג'}
+            </span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(announceHe || announceEn) && (
+                <button onClick={() => { setAnnounceHe(''); setAnnounceEn(''); }} style={{ border: '1.5px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', background: 'none', padding: '8px 16px', borderRadius: 50, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontSize: 12 }}>
+                  נקה הודעה
+                </button>
+              )}
+              <button onClick={saveAnnouncement} disabled={announceSaving} style={{ background: '#EAFF00', color: '#0A0A0A', border: 'none', padding: '8px 20px', borderRadius: 50, cursor: 'pointer', fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 800, fontSize: 12, opacity: announceSaving ? 0.7 : 1 }}>
+                {announceSaving ? 'שומר...' : 'שמור'}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Recent articles */}

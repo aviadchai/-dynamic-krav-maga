@@ -31,6 +31,11 @@ html { scroll-behavior: smooth; }
   from { opacity: 0; transform: translateY(28px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 @keyframes popupIn {
   from { opacity: 0; transform: scale(0.97); }
   to   { opacity: 1; transform: scale(1); }
@@ -129,6 +134,29 @@ nav.site-nav { animation: heroIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
 .hero-sub  { animation: heroIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.42s both; }
 .hero-btns { animation: heroIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.55s both; }
 .hero-nums { animation: heroIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.68s both; }
+
+/* ── ANNOUNCEMENT TICKER ── */
+.announce-ticker {
+  position: sticky; top: 68px; z-index: 998;
+  background: rgba(234,255,0,0.07);
+  border-bottom: 1px solid rgba(234,255,0,0.18);
+  height: 38px; overflow: hidden;
+  display: flex; align-items: center;
+}
+.announce-track {
+  display: flex; white-space: nowrap;
+  animation: tickerScroll 22s linear infinite;
+}
+.announce-item {
+  display: inline-flex; align-items: center; gap: 1.5rem;
+  padding: 0 2rem;
+  font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+  color: var(--lime);
+}
+.announce-dot {
+  width: 5px; height: 5px; background: var(--lime);
+  border-radius: 50%; flex-shrink: 0; opacity: 0.6;
+}
 
 /* ── NAV ── toggle left | links+logo right */
 nav.site-nav {
