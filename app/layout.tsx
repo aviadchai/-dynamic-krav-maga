@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.dynamic-km.com",
   },
+  verification: {
+    google: "fpLsUyhZOiGj-hGJxSv-wvANORg8UM9dLPkQ1IKRA4I",
+  },
   openGraph: {
     title: "Dynamic Krav Maga — מאור לוי",
     description: "קרב מגע דינמי עם מאור לוי — שיטה מעשית לכל גיל ורמה.",
