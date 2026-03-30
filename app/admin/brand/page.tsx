@@ -111,10 +111,18 @@ export default function BrandPage() {
   const logoLightSrc = content.brandLogoLight || logoDark
 
   return (
-    <div style={{ padding: '2.5rem', direction: 'rtl' }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2.5rem)', direction: 'rtl', maxWidth: 900, margin: '0 auto' }}>
+      <style>{`
+        @media (max-width: 700px) {
+          .brand-dirty-bar { left: 0 !important; }
+          .brand-fab { bottom: 80px !important; left: 1rem !important; }
+          .brand-2col { grid-template-columns: 1fr !important; }
+          .brand-3col { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important; }
+        }
+      `}</style>
 
       {/* Floating action button */}
-      <div style={{ position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 1000, display: 'flex', gap: 8, flexDirection: 'column', alignItems: 'flex-end' }}>
+      <div className="brand-fab" style={{ position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 1000, display: 'flex', gap: 8, flexDirection: 'column', alignItems: 'flex-end' }}>
         {isEditing && isDirty && (
           <button onClick={cancelEdit} style={{ background: 'rgba(30,30,30,0.95)', border: '1.5px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', padding: '10px 18px', borderRadius: 50, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-heebo), sans-serif', backdropFilter: 'blur(8px)', whiteSpace: 'nowrap' }}>ביטול</button>
         )}
@@ -141,7 +149,7 @@ export default function BrandPage() {
       </div>
 
       {isDirty && (
-        <div style={{ position: 'fixed', top: 0, left: 240, right: 0, zIndex: 500, background: 'rgba(234,255,0,0.1)', borderBottom: '1.5px solid rgba(234,255,0,0.3)', padding: '10px 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backdropFilter: 'blur(8px)' }}>
+        <div className="brand-dirty-bar" style={{ position: 'fixed', top: 0, left: 240, right: 0, zIndex: 500, background: 'rgba(234,255,0,0.1)', borderBottom: '1.5px solid rgba(234,255,0,0.3)', padding: '10px 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backdropFilter: 'blur(8px)' }}>
           <span style={{ fontSize: 13, color: '#EAFF00', fontWeight: 700 }}>⚠ יש שינויים שלא נשמרו</span>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={cancelEdit} style={{ background: 'none', border: '1.5px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', padding: '6px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>בטל שינויים</button>
@@ -175,7 +183,7 @@ export default function BrandPage() {
       <div style={{ pointerEvents: isEditing ? 'auto' : 'none', opacity: isEditing ? 1 : 0.65, transition: 'opacity .2s' }}>
       <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
         <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1.25rem' }}>לוגו</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div className="brand-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
           {/* Dark bg logo */}
           <div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 10, letterSpacing: 1 }}>גרסה לרקע כהה</div>
@@ -210,7 +218,7 @@ export default function BrandPage() {
       {/* Colors */}
       <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
         <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1.25rem' }}>צבעי מותג</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.25rem' }}>
+        <div className="brand-3col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.25rem' }}>
           {([
             { key: 'brandColor', label: 'צבע ראשי', def: '#EAFF00' },
             { key: 'brandColorSecondary', label: 'צבע משני', def: '#EAFF00' },

@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <style>{`
         .admin-wrap { display: flex; min-height: 100vh; font-family: var(--font-heebo), sans-serif; background: #0A0A0A; direction: rtl; }
         .admin-sidebar { width: 240px; background: #0D0D0D; border-left: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; position: fixed; top: 0; right: 0; bottom: 0; z-index: 200; }
-        .admin-main { flex: 1; margin-right: 240px; background: #111; min-height: 100vh; }
+        .admin-main { flex: 1; margin-right: 240px; background: #111; min-height: 100vh; overflow-x: hidden; min-width: 0; }
         .admin-bottom-nav { display: none; }
         @media (max-width: 700px) {
           .admin-sidebar { display: none; }

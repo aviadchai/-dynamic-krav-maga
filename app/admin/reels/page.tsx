@@ -128,7 +128,7 @@ export default function ReelsPage() {
   const platColor = PLATFORMS.find(p => p.id === newPlatform)?.color || '#fff'
 
   return (
-    <div style={{ padding: '2.5rem', direction: 'rtl', maxWidth: 900 }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2.5rem)', direction: 'rtl', maxWidth: 900, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>רילסים</h1>
         <button onClick={save} disabled={saving} style={{
@@ -174,9 +174,9 @@ export default function ReelsPage() {
 
         {/* Preview */}
         {preview && (
-          <div style={{ marginBottom: '1rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+          <div style={{ marginBottom: '1rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             {isFbPost(newPlatform, newUrl) ? (
-              <div style={{ flex: '0 0 260px', borderRadius: 10, border: '1.5px solid #1877F233', background: '#1877F211', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ flex: '1 1 260px', maxWidth: 260, borderRadius: 10, border: '1.5px solid #1877F233', background: '#1877F211', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#1877F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
@@ -189,7 +189,7 @@ export default function ReelsPage() {
                 </div>
               </div>
             ) : (
-              <div style={{ flex: '0 0 180px', borderRadius: 10, overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.08)', background: '#0A0A0A', aspectRatio: getAspectRatio(newPlatform, newUrl), maxHeight: 320 }}>
+              <div style={{ flex: '1 1 180px', maxWidth: 180, borderRadius: 10, overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.08)', background: '#0A0A0A', aspectRatio: getAspectRatio(newPlatform, newUrl), maxHeight: 320 }}>
                 <iframe src={preview} style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} allowFullScreen scrolling="no" />
               </div>
             )}

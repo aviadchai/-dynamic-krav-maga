@@ -151,7 +151,7 @@ export default function AboutAdminPage() {
   const sorted = [...entries].sort((a, b) => a.order - b.order)
 
   return (
-    <div style={{ padding: '2.5rem', direction: 'rtl' }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2.5rem)', direction: 'rtl', maxWidth: 900, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
           <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>טיימליין — אודותינו</h1>
@@ -249,7 +249,7 @@ export default function AboutAdminPage() {
           <input style={{ ...inp, maxWidth: 140 }} value={form.year} onChange={e => set('year', e.target.value)} placeholder="2010" dir="ltr" />
         </F>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem' }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1rem' }}>עברית</div>
             <F label="כותרת"><input style={inp} value={form.titleHe} onChange={e => set('titleHe', e.target.value)} placeholder="כותרת האירוע" /></F>

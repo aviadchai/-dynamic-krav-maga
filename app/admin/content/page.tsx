@@ -47,7 +47,7 @@ function Section({ title, open, onToggle, children, locked, action }: {
   )
 }
 
-const twoCol: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }
+const twoCol: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }
 
 function UploadInput({ value, onChange }: { value: string, onChange: (v: string) => void }) {
   const [uploading, setUploading] = useState(false)
@@ -206,10 +206,19 @@ export default function ContentPage() {
   })
 
   return (
-    <div style={{ padding: '2.5rem', direction: 'rtl', maxWidth: 1000 }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2.5rem)', direction: 'rtl', maxWidth: 1000 }}>
+      <style>{`
+        @media (max-width: 700px) {
+          .content-dirty-bar { left: 0 !important; }
+          .content-fab { bottom: 80px !important; left: 1rem !important; }
+          .content-4col { grid-template-columns: repeat(2, 1fr) !important; }
+          .content-3col { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important; }
+          .content-section-pad { padding-left: 1rem !important; padding-right: 1rem !important; }
+        }
+      `}</style>
 
       {/* Floating action button — always accessible */}
-      <div style={{ position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 1000, display: 'flex', gap: 8, flexDirection: 'column', alignItems: 'flex-end' }}>
+      <div className="content-fab" style={{ position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 1000, display: 'flex', gap: 8, flexDirection: 'column', alignItems: 'flex-end' }}>
         {isEditing && isDirty && (
           <button onClick={cancelEdit} style={{ background: 'rgba(30,30,30,0.95)', border: '1.5px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', padding: '10px 18px', borderRadius: 50, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-heebo), sans-serif', backdropFilter: 'blur(8px)', whiteSpace: 'nowrap' }}>ביטול</button>
         )}
@@ -224,7 +233,7 @@ export default function ContentPage() {
 
       {/* Unsaved changes bar */}
       {isDirty && (
-        <div style={{
+        <div className="content-dirty-bar" style={{
           position: 'fixed', top: 0, left: 240, right: 0, zIndex: 500,
           background: 'rgba(234,255,0,0.1)', borderBottom: '1.5px solid rgba(234,255,0,0.3)',
           padding: '10px 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -312,7 +321,7 @@ export default function ContentPage() {
             <textarea style={{ ...inp, resize: 'vertical', minHeight: 70, lineHeight: 1.7, direction: 'ltr' }} value={content.heroSubEn} onChange={e => set('heroSubEn', e.target.value)} />
           </F>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1rem' }}>
+        <div className="content-4col" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           <F label="כפתור ראשי — עברית"><input style={inp} value={content.heroBtnPrimaryHe} onChange={e => set('heroBtnPrimaryHe', e.target.value)} /></F>
           <F label="Primary Btn — English"><input style={{ ...inp, direction: 'ltr' }} value={content.heroBtnPrimaryEn} onChange={e => set('heroBtnPrimaryEn', e.target.value)} /></F>
           <F label="כפתור משני — עברית"><input style={inp} value={content.heroBtnSecondaryHe} onChange={e => set('heroBtnSecondaryHe', e.target.value)} /></F>
@@ -323,7 +332,7 @@ export default function ContentPage() {
         </F>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.25rem', marginTop: '.25rem' }}>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: '1rem' }}>STATS</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+          <div className="content-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
             {[
               { val: content.heroNum1Val, lblHe: content.heroNum1LblHe, lblEn: content.heroNum1LblEn, kVal: 'heroNum1Val' as keyof SiteContent, kHe: 'heroNum1LblHe' as keyof SiteContent, kEn: 'heroNum1LblEn' as keyof SiteContent },
               { val: content.heroNum2Val, lblHe: content.heroNum2LblHe, lblEn: content.heroNum2LblEn, kVal: 'heroNum2Val' as keyof SiteContent, kHe: 'heroNum2LblHe' as keyof SiteContent, kEn: 'heroNum2LblEn' as keyof SiteContent },
@@ -418,13 +427,11 @@ export default function ContentPage() {
                 setTestimonial(i, 'textEn', t.textHe || tc.textEn)
               }}>{translating === `tc${i}` ? '⏳' : '✨ תרגם'}</button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
               <F label="שם — עברית"><input style={inp} value={tc.name} onChange={e => setTestimonial(i, 'name', e.target.value)} placeholder="שם הממליץ בעברית" /></F>
               <F label="Name — English"><input style={{ ...inp, direction: 'ltr' }} value={tc.nameEn || ''} onChange={e => setTestimonial(i, 'nameEn', e.target.value)} placeholder="Reviewer name in English" /></F>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <F label="תפקיד עברית"><input style={inp} value={tc.roleHe} onChange={e => setTestimonial(i, 'roleHe', e.target.value)} /></F>
-                <F label="Role English"><input style={{ ...inp, direction: 'ltr' }} value={tc.roleEn} onChange={e => setTestimonial(i, 'roleEn', e.target.value)} /></F>
-              </div>
+              <F label="תפקיד עברית"><input style={inp} value={tc.roleHe} onChange={e => setTestimonial(i, 'roleHe', e.target.value)} /></F>
+              <F label="Role English"><input style={{ ...inp, direction: 'ltr' }} value={tc.roleEn} onChange={e => setTestimonial(i, 'roleEn', e.target.value)} /></F>
             </div>
             <div style={twoCol}>
               <F label="טקסט — עברית"><textarea style={{ ...inp, resize: 'vertical', minHeight: 80 }} value={tc.textHe} onChange={e => setTestimonial(i, 'textHe', e.target.value)} /></F>
@@ -462,7 +469,7 @@ export default function ContentPage() {
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.25rem', marginTop: '.25rem' }}>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: '1rem' }}>פרטי קשר</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <F label="טלפון"><input style={inp} value={content.phone || ''} onChange={e => set('phone', e.target.value)} placeholder="054-0000000" dir="ltr" /></F>
             <F label="WhatsApp"><input style={inp} value={content.whatsapp || ''} onChange={e => set('whatsapp', e.target.value)} placeholder="054-0000000" dir="ltr" /></F>
             <F label="Email"><input style={inp} value={content.email || ''} onChange={e => set('email', e.target.value)} placeholder="mail@example.com" dir="ltr" /></F>

@@ -137,9 +137,9 @@ nav.site-nav { animation: heroIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
 
 /* ── ANNOUNCEMENT TICKER ── */
 .announce-ticker {
-  position: sticky; top: 68px; z-index: 998;
-  background: rgba(234,255,0,0.07);
-  border-bottom: 1px solid rgba(234,255,0,0.18);
+  background: #0A0A0A;
+  border-bottom: 1px solid rgba(234,255,0,0.12);
+  border-top: 1px solid rgba(234,255,0,0.08);
   height: 38px; overflow: hidden;
   display: flex; align-items: center;
 }
@@ -961,7 +961,7 @@ footer {
   .services, .testimonials, .articles, .inst-section { padding: 3rem 1.25rem; }
   .reels-section { padding: 3rem 0 1rem; }
   .reels-section .sec-head { padding: 0 1.25rem; margin-bottom: 1.5rem; }
-  .srv-grid, .agrid { grid-template-columns: 1fr; gap: 1rem; }
+  .srv-grid, .agrid { grid-template-columns: 1fr !important; gap: 1rem; }
   .sec-head { margin-bottom: 2rem; }
   .art-head { flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
 

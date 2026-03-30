@@ -110,7 +110,7 @@ export default function ServicesPage() {
   }
 
   return (
-    <div style={{ padding: '2.5rem', direction: 'rtl', maxWidth: 900 }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2.5rem)', direction: 'rtl', maxWidth: 900, margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>שירותים</h1>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -160,7 +160,7 @@ export default function ServicesPage() {
             {editing === -1 ? 'שירות חדש' : `עריכת: ${form.he}`}
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem', marginBottom: '1.5rem' }}>
             <div>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#EAFF00', textTransform: 'uppercase', marginBottom: '1rem' }}>עברית</div>
               <F label="מספר (01, 02...)"><input style={inp} value={form.n} onChange={e => setF('n', e.target.value)} placeholder="01" /></F>
