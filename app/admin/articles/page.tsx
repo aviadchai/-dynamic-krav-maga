@@ -39,7 +39,7 @@ export default function ArticlesPage() {
         .art-row-info { flex: 1; min-width: 0; }
         .art-row-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
         .art-row-badge { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 50px; white-space: nowrap; flex-shrink: 0; }
-        .art-row-thumb { width: 60px; height: 42px; border-radius: 7px; flex-shrink: 0; background-size: cover; background-position: center; border: 1px solid rgba(255,255,255,0.06); }
+        .art-row-thumb { width: 60px; height: 42px; border-radius: 7px; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.06); }
         @media (max-width: 540px) {
           .art-row { flex-wrap: wrap; gap: 0.5rem; padding: 10px 12px; }
           .art-row-thumb { width: 44px; height: 32px; }
@@ -73,7 +73,12 @@ export default function ArticlesPage() {
         <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, overflow: 'hidden' }}>
           {articles.map((a) => (
             <div key={a.id} className="art-row">
-              <div className="art-row-thumb" style={{ backgroundImage: a.image ? `url(${a.image})` : 'none', background: a.image ? undefined : '#1C1C1C' }} />
+              <div className="art-row-thumb" style={{
+                backgroundImage: a.image ? `url(${a.image})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundColor: '#1C1C1C',
+              }} />
 
               <div className="art-row-info">
                 <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
