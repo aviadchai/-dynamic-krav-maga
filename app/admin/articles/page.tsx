@@ -31,8 +31,16 @@ export default function ArticlesPage() {
   }
 
   return (
-    <div style={{ padding: '2.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div style={{ padding: 'clamp(1rem, 4vw, 2.5rem)', maxWidth: 900, margin: '0 auto' }}>
+      <style>{`
+        @media (max-width: 600px) {
+          .art-row-badge { display: none !important; }
+          .art-row-publish { display: none !important; }
+          .art-row-thumb { width: 44px !important; height: 32px !important; }
+          .art-row { gap: 0.6rem !important; padding: 10px 12px !important; }
+        }
+      `}</style>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', marginBottom: 4 }}>מאמרים</h1>
           <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>{articles.length} מאמרים</p>
@@ -61,13 +69,13 @@ export default function ArticlesPage() {
       ) : (
         <div style={{ background: '#141414', border: '1.5px solid rgba(255,255,255,0.07)', borderRadius: 14, overflow: 'hidden' }}>
           {articles.map((a, i) => (
-            <div key={a.id} style={{
+            <div key={a.id} className="art-row" style={{
               display: 'flex', alignItems: 'center', gap: '1rem',
               padding: '12px 20px',
               borderBottom: i < articles.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
             }}>
               {/* Thumbnail */}
-              <div style={{
+              <div className="art-row-thumb" style={{
                 width: 64, height: 44, borderRadius: 8, flexShrink: 0,
                 background: '#1C1C1C', backgroundImage: a.image ? `url(${a.image})` : 'none',
                 backgroundSize: 'cover', backgroundPosition: 'center',
@@ -85,7 +93,7 @@ export default function ArticlesPage() {
               </div>
 
               {/* Status badge */}
-              <span style={{
+              <span className="art-row-badge" style={{
                 fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase',
                 padding: '3px 10px', borderRadius: 50, whiteSpace: 'nowrap',
                 background: a.published ? 'rgba(234,255,0,0.1)' : 'rgba(255,255,255,0.05)',
@@ -97,6 +105,7 @@ export default function ArticlesPage() {
               {/* Actions */}
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                 <button
+                  className="art-row-publish"
                   onClick={() => togglePublish(a)}
                   title={a.published ? 'הסר פרסום' : 'פרסם'}
                   style={{

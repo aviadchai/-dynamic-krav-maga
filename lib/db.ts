@@ -129,9 +129,8 @@ export type SiteContent = {
   services: ServiceItem[]
   // About timeline
   aboutTimeline: TimelineEntry[]
-  // Announcement ticker
-  announcementHe?: string
-  announcementEn?: string
+  // Announcement ticker items
+  announcementItems?: { textHe: string; textEn: string; link?: string }[]
   // Brand
   brandColor: string
   brandColorSecondary: string

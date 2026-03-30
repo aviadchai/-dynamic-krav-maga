@@ -771,15 +771,20 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       </nav>
 
       {/* ANNOUNCEMENT TICKER */}
-      {(lang === 'he' ? content?.announcementHe : content?.announcementEn) && (
+      {(content?.announcementItems?.filter(it => (lang === 'he' ? it.textHe : it.textEn)).length ?? 0) > 0 && (
         <div className="announce-ticker">
           <div className="announce-track">
-            {[...Array(6)].map((_, i) => (
-              <span key={i} className="announce-item">
-                <span className="announce-dot" />
-                {lang === 'he' ? content?.announcementHe : content?.announcementEn}
-              </span>
-            ))}
+            {[...Array(4)].flatMap((_, rep) =>
+              (content?.announcementItems || [])
+                .filter(it => (lang === 'he' ? it.textHe : it.textEn))
+                .map((it, j) => {
+                  const text = lang === 'he' ? it.textHe : it.textEn
+                  const inner = <><span className="announce-dot" />{text}</>
+                  return it.link
+                    ? <a key={`${rep}-${j}`} className="announce-item" href={it.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', cursor: 'pointer' }}>{inner}</a>
+                    : <span key={`${rep}-${j}`} className="announce-item">{inner}</span>
+                })
+            )}
           </div>
         </div>
       )}
@@ -940,21 +945,31 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
           <div className="he-only"><div className="sec-h-he">השירותים שלנו</div></div>
           <div className="en-only"><div className="sec-h">OUR SERVICES</div></div>
         </div>
-        <div className="srv-grid">
-          {(content?.services || []).map((s, i) => (
-            <div key={s.n} className="srv appear" style={{ transitionDelay: `${i * 0.12}s` }}>
-              <div className="srv-n">{s.n}</div>
-              <div className="srv-sq"></div>
-              <div className="he-only"><div className="srv-name-he">{s.he}</div></div>
-              <div className="en-only"><div className="srv-name">{s.en}</div></div>
-              <p className="srv-desc he-only">{s.dHe}</p>
-              <p className="srv-desc en-only">{s.dEn}</p>
-              <div className="srv-link" onClick={() => setServicePopup(s)}>
-                <span><span className="he-only">פרטים נוספים</span><span className="en-only">Learn More</span> →</span>
-              </div>
+        {(() => {
+          const svcs = content?.services || []
+          const cnt = svcs.length
+          const cols = cnt <= 4 ? `repeat(${Math.max(cnt, 1)}, 1fr)` : 'repeat(6, 1fr)'
+          return (
+            <div className="srv-grid" style={{ gridTemplateColumns: cols }}>
+              {svcs.map((s, i) => {
+                const span = cnt === 5 ? (i < 2 ? 3 : 2) : 1
+                return (
+                  <div key={s.n} className="srv appear" style={{ transitionDelay: `${i * 0.12}s`, gridColumn: span > 1 ? `span ${span}` : undefined }}>
+                    <div className="srv-n">{s.n}</div>
+                    <div className="srv-sq"></div>
+                    <div className="he-only"><div className="srv-name-he">{s.he}</div></div>
+                    <div className="en-only"><div className="srv-name">{s.en}</div></div>
+                    <p className="srv-desc he-only">{s.dHe}</p>
+                    <p className="srv-desc en-only">{s.dEn}</p>
+                    <div className="srv-link" onClick={() => setServicePopup(s)}>
+                      <span><span className="he-only">פרטים נוספים</span><span className="en-only">Learn More</span> →</span>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-          ))}
-        </div>
+          )
+        })()}
       </section>
 
       {/* TESTIMONIALS */}

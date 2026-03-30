@@ -426,7 +426,7 @@ nav.site-nav {
 /* ── SERVICES ── */
 .services { background: var(--black); padding: 7rem 3rem; }
 .sec-head { text-align: center; margin-bottom: 3.5rem; }
-.srv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.srv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; } /* columns overridden dynamically by JSX */
 .srv {
   background: #D8D5D0;
   border: none;
