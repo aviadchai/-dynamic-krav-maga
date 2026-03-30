@@ -468,7 +468,6 @@ nav.site-nav {
   flex: 1; min-width: 0;
   padding: 1.75rem 2rem;
   display: flex; flex-direction: column; justify-content: center;
-  direction: rtl;
   transform: skewX(5deg);
 }
 .icard-role {
