@@ -102,13 +102,12 @@ body {
   opacity: 0;
 }
 
-/* text alignment per language — Hebrew: everything right */
+/* text alignment per language */
 .lang-he { direction: rtl; text-align: right; }
 .lang-he .sec-head { text-align: right; }
 .lang-he p, .lang-he li, .lang-he div { text-align: right; }
-/* English: left-aligned blocks */
-.lang-en .sec-head { text-align: left; }
-.lang-en .about-body, .lang-en .hero-left { text-align: left; }
+.lang-en { direction: ltr; text-align: left; }
+.lang-en p, .lang-en li, .lang-en div { text-align: left; }
 /* Center-only elements stay center in both languages */
 .lang-he .ticker-inner,
 .lang-he .hero-btns,
