@@ -1157,11 +1157,6 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       {/* FOOTER */}
       <footer>
         <img className="fl" src={logoDark} alt="Dynamic Krav Maga" />
-        <div style={{ display: "flex", gap: "10px" }}>
-          <a className="soc-btn" href="#">IG</a>
-          <a className="soc-btn" href="#">FB</a>
-          <a className="soc-btn" href="#">WA</a>
-        </div>
         <div className="fcopy">© 2025 Dynamic Krav Maga — Maor Levi</div>
       </footer>
     </div>
