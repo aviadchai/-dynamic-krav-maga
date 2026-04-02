@@ -301,12 +301,13 @@ export const db = {
       return instructor as Instructor
     },
     update: async (id: string, data: Partial<Instructor>): Promise<Instructor | null> => {
-      const { data: instructor } = await supabaseAdmin
+      const { data: instructor, error } = await supabaseAdmin
         .from('instructors')
         .update(data)
         .eq('id', id)
         .select()
         .single()
+      if (error) console.error('[db.instructors.update] error:', error)
       return instructor as Instructor | null
     },
     delete: async (id: string): Promise<boolean> => {

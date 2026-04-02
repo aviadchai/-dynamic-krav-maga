@@ -9,8 +9,10 @@ export async function PUT(
 ) {
   const { id } = await params
   const data = await request.json()
+  console.log('[PUT /api/instructors/:id] id=', id, 'data=', JSON.stringify(data))
   const instructor = await db.instructors.update(id, data)
-  if (!instructor) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  console.log('[PUT /api/instructors/:id] result=', JSON.stringify(instructor))
+  if (!instructor) return NextResponse.json({ error: 'Not found or save failed' }, { status: 404 })
   return NextResponse.json(instructor)
 }
 
