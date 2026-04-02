@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const VALID_ROLES = ['admin', 'editor']
-const ADMIN_ONLY = ['/admin/content', '/admin/brand', '/admin/articles']
+const ADMIN_ONLY = ['/admin/content', '/admin/brand']
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
