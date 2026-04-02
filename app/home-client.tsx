@@ -1193,6 +1193,12 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       <footer>
         <img className="fl" src={logoDark} alt="Dynamic Krav Maga" />
         <div className="fcopy">© 2025 Dynamic Krav Maga — Maor Levi</div>
+        <div className="fcopy" style={{ marginTop: 6, fontSize: 11, opacity: 0.45 }}>
+          אתר זה נבנה ועוצב ע&quot;י{' '}
+          <a href="https://aviadchai.com" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
+            Aviadchai.com
+          </a>
+        </div>
       </footer>
     </div>
     </>
