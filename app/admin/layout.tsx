@@ -164,7 +164,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Main content */}
-        <main className="admin-main">{children}</main>
+        <main className="admin-main">
+          {/* Top bar — always visible */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10, padding: '12px 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#0D0D0D', direction: 'rtl' }}>
+            <a href="/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(234,255,0,0.1)', border: '1.5px solid rgba(234,255,0,0.3)', color: '#EAFF00', padding: '8px 18px', borderRadius: 50, textDecoration: 'none', fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-heebo), sans-serif' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+              מעבר לאתר
+            </a>
+            <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', padding: '8px 18px', borderRadius: 50, cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-heebo), sans-serif' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              יציאה מהמערכת
+            </button>
+          </div>
+          {children}
+        </main>
 
         {/* Mobile bottom nav */}
         <nav className="admin-bottom-nav">
