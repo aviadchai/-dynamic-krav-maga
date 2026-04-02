@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useRef, useState } from 'react'
-import type { SiteContent, Testimonial } from '@/lib/db'
+import type { SiteContent } from '@/lib/db'
 
 const F = ({ label, children }: { label: string, children: React.ReactNode }) => (
   <div style={{ marginBottom: '1.25rem' }}>
@@ -140,23 +140,6 @@ export default function ContentPage() {
     setContent(c => c ? { ...c, [key]: value } : c)
   }
 
-  function setTestimonial(i: number, key: keyof Testimonial, value: string) {
-    setContent(c => {
-      if (!c) return c
-      const arr = [...c.testimonials]
-      arr[i] = { ...arr[i], [key]: value }
-      return { ...c, testimonials: arr }
-    })
-  }
-
-  function addTestimonial() {
-    setContent(c => c ? { ...c, testimonials: [...c.testimonials, { name: '', nameEn: '', roleHe: '', roleEn: '', textHe: '', textEn: '' }] } : c)
-  }
-
-  function removeTestimonial(i: number) {
-    setContent(c => c ? { ...c, testimonials: c.testimonials.filter((_, idx) => idx !== i) } : c)
-  }
-
   function startEdit() {
     setIsEditing(true)
   }
@@ -174,7 +157,7 @@ export default function ContentPage() {
     pushHistory(content)
     const { reels: _r, brandColor: _bc, brandColorSecondary: _bcs, brandColorText: _bct,
       brandBg: _bb, brandLogoUrl: _blu, brandLogoLight: _bll,
-      badgePillHe: _bph, badgePillEn: _bpe, ...contentFields } = content
+      badgePillHe: _bph, badgePillEn: _bpe, testimonials: _t, ...contentFields } = content
     await fetch('/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(contentFields) })
     savedRef.current = content
     setIsEditing(false)
@@ -249,7 +232,7 @@ export default function ContentPage() {
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>תוכן האתר</h1>
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>מבנה כללי</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {/* History button */}
           <button onClick={openHistory} style={{ background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', padding: '9px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>
@@ -411,35 +394,6 @@ export default function ContentPage() {
             <button onClick={() => set('aboutParaEn', [...content.aboutParaEn, ''])} style={{ background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.4)', padding: '8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-heebo), sans-serif' }}>+ Add paragraph</button>
           </div>
         </div>
-      </Section>
-
-      {/* ── TESTIMONIALS ── */}
-      <Section title="המלצות — Testimonials" open={open.has('testimonials')} onToggle={() => toggle('testimonials')} locked={locked}>
-        {content.testimonials.map((tc, i) => (
-          <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '1.25rem', marginBottom: '1rem', position: 'relative' }}>
-            <button onClick={() => removeTestimonial(i)} style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,50,50,0.08)', border: 'none', color: 'rgba(255,80,80,0.6)', width: 28, height: 28, borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>✕</button>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', letterSpacing: 1 }}>המלצה {i + 1}</div>
-              <button type="button" disabled={translating === `tc${i}`} style={trBtnStyle(true, translating === `tc${i}`)} onClick={async () => {
-                if (!isEditing) startEdit()
-                const t = await tr(`tc${i}`, { roleHe: tc.roleHe, textHe: tc.textHe })
-                setTestimonial(i, 'roleEn', t.roleHe || tc.roleEn)
-                setTestimonial(i, 'textEn', t.textHe || tc.textEn)
-              }}>{translating === `tc${i}` ? '⏳' : '✨ תרגם'}</button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-              <F label="שם — עברית"><input style={inp} value={tc.name} onChange={e => setTestimonial(i, 'name', e.target.value)} placeholder="שם הממליץ בעברית" /></F>
-              <F label="Name — English"><input style={{ ...inp, direction: 'ltr' }} value={tc.nameEn || ''} onChange={e => setTestimonial(i, 'nameEn', e.target.value)} placeholder="Reviewer name in English" /></F>
-              <F label="תפקיד עברית"><input style={inp} value={tc.roleHe} onChange={e => setTestimonial(i, 'roleHe', e.target.value)} /></F>
-              <F label="Role English"><input style={{ ...inp, direction: 'ltr' }} value={tc.roleEn} onChange={e => setTestimonial(i, 'roleEn', e.target.value)} /></F>
-            </div>
-            <div style={twoCol}>
-              <F label="טקסט — עברית"><textarea style={{ ...inp, resize: 'vertical', minHeight: 80 }} value={tc.textHe} onChange={e => setTestimonial(i, 'textHe', e.target.value)} /></F>
-              <F label="Text — English"><textarea style={{ ...inp, resize: 'vertical', minHeight: 80, direction: 'ltr' }} value={tc.textEn} onChange={e => setTestimonial(i, 'textEn', e.target.value)} /></F>
-            </div>
-          </div>
-        ))}
-        <button onClick={addTestimonial} style={{ background: 'rgba(234,255,0,0.06)', border: '1.5px dashed rgba(234,255,0,0.2)', color: '#EAFF00', padding: '10px 20px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-heebo), sans-serif', fontWeight: 700 }}>+ הוסף המלצה</button>
       </Section>
 
       {/* ── CONTACT ── */}

@@ -1,15 +1,28 @@
 import { createClient } from '@supabase/supabase-js'
 
+const noStoreOptions = {
+  global: {
+    fetch: (url: RequestInfo | URL, options?: RequestInit) =>
+      fetch(url, { ...options, cache: 'no-store' }),
+  },
+}
+
+// Public client (read-only, respects RLS)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    global: {
-      fetch: (url: RequestInfo | URL, options?: RequestInit) =>
-        fetch(url, { ...options, cache: 'no-store' }),
-    },
-  }
+  noStoreOptions
 )
+
+// Server-side admin client (bypasses RLS for write operations)
+// Requires SUPABASE_SERVICE_ROLE_KEY env var — get it from Supabase dashboard → Project Settings → API
+const supabaseAdmin = process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      noStoreOptions
+    )
+  : supabase
 
 export type Article = {
   id: string
@@ -242,7 +255,7 @@ export const db = {
       return data as Article | undefined
     },
     create: async (data: Omit<Article, 'id'>): Promise<Article> => {
-      const { data: article } = await supabase
+      const { data: article } = await supabaseAdmin
         .from('articles')
         .insert(data)
         .select()
@@ -250,7 +263,7 @@ export const db = {
       return article as Article
     },
     update: async (id: string, data: Partial<Article>): Promise<Article | null> => {
-      const { data: article } = await supabase
+      const { data: article } = await supabaseAdmin
         .from('articles')
         .update(data)
         .eq('id', id)
@@ -259,7 +272,7 @@ export const db = {
       return article as Article | null
     },
     delete: async (id: string): Promise<boolean> => {
-      const { error } = await supabase.from('articles').delete().eq('id', id)
+      const { error } = await supabaseAdmin.from('articles').delete().eq('id', id)
       return !error
     },
   },
@@ -280,7 +293,7 @@ export const db = {
       return data as Instructor | undefined
     },
     create: async (data: Omit<Instructor, 'id'>): Promise<Instructor> => {
-      const { data: instructor } = await supabase
+      const { data: instructor } = await supabaseAdmin
         .from('instructors')
         .insert(data)
         .select()
@@ -288,7 +301,7 @@ export const db = {
       return instructor as Instructor
     },
     update: async (id: string, data: Partial<Instructor>): Promise<Instructor | null> => {
-      const { data: instructor } = await supabase
+      const { data: instructor } = await supabaseAdmin
         .from('instructors')
         .update(data)
         .eq('id', id)
@@ -297,7 +310,7 @@ export const db = {
       return instructor as Instructor | null
     },
     delete: async (id: string): Promise<boolean> => {
-      const { error } = await supabase.from('instructors').delete().eq('id', id)
+      const { error } = await supabaseAdmin.from('instructors').delete().eq('id', id)
       return !error
     },
   },
@@ -319,7 +332,7 @@ export const db = {
         .single()
       const stored = (existing as { content_data?: Partial<SiteContent> } | null)?.content_data || {}
       const merged: SiteContent = { ...defaultContent, ...stored, ...newData }
-      await supabase
+      await supabaseAdmin
         .from('site_content')
         .upsert({ id: 1, content_data: merged })
       return merged

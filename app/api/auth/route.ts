@@ -20,18 +20,29 @@ export async function POST(request: Request) {
   }
 
   const { username, password } = await request.json()
+
   const adminUser = process.env.ADMIN_USERNAME || 'admin'
   const adminPass = process.env.ADMIN_PASSWORD || 'admin123'
+  const editorUser = process.env.EDITOR_USERNAME || ''
+  const editorPass = process.env.EDITOR_PASSWORD || ''
 
-  if (username !== adminUser || password !== adminPass) {
+  let role: string | null = null
+
+  if (username === adminUser && password === adminPass) {
+    role = 'admin'
+  } else if (editorUser && username === editorUser && password === editorPass) {
+    role = 'editor'
+  }
+
+  if (!role) {
     return NextResponse.json({ error: 'שם משתמש או סיסמה שגויים' }, { status: 401 })
   }
 
   // Clear rate limit on success
   attempts.delete(ip)
 
-  const res = NextResponse.json({ ok: true })
-  res.cookies.set('admin_session', 'ok', {
+  const res = NextResponse.json({ ok: true, role })
+  res.cookies.set('admin_session', role, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
