@@ -38,6 +38,17 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
   const allCategories = ["הכל", ...Array.from(new Set(articles.map(a => a.categoryHe).filter(Boolean)))];
   const filteredArticles = activeCategory === "הכל" ? articles : articles.filter(a => a.categoryHe === activeCategory);
 
+  const [reelsCanScroll, setReelsCanScroll] = useState(false);
+  useEffect(() => {
+    function checkReels() {
+      const el = reelsRef.current
+      if (el) setReelsCanScroll(el.scrollWidth > el.clientWidth + 4)
+    }
+    checkReels()
+    window.addEventListener('resize', checkReels)
+    return () => window.removeEventListener('resize', checkReels)
+  }, [content?.reels])
+
   const [instBioPopup, setInstBioPopup] = useState<typeof instructors[0] | null>(null);
   const [instBioClosing, setInstBioClosing] = useState(false);
   function openInstBio(inst: typeof instructors[0]) { setInstBioPopup(inst); }
@@ -1021,12 +1032,14 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             <div className="en-only"><div className="sec-h">OUR REELS</div></div>
           </div>
           <div className="reels-outer">
-            <button
-              className="reel-nav-btn reel-nav-prev"
-              onClick={() => { reelsRef.current?.scrollBy({ left: 340, behavior: 'smooth' }) }}
-              aria-label="Previous"
-            >‹</button>
-            <div className="reels-grid" ref={reelsRef}>
+            {reelsCanScroll && (
+              <button
+                className="reel-nav-btn reel-nav-prev"
+                onClick={() => { reelsRef.current?.scrollBy({ left: 340, behavior: 'smooth' }) }}
+                aria-label="Previous"
+              >‹</button>
+            )}
+            <div className="reels-grid" ref={reelsRef} style={!reelsCanScroll ? { justifyContent: 'center', maskImage: 'none', WebkitMaskImage: 'none' } : undefined}>
               {[...content!.reels].reverse().map(reel => {
                 const isFbPost = reel.platform === 'facebook' && !reel.url.includes('/videos/') && !reel.url.includes('fb.watch')
                 const embedUrl = (() => {
@@ -1080,11 +1093,13 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                 )
               })}
             </div>
-            <button
-              className="reel-nav-btn reel-nav-next"
-              onClick={() => { reelsRef.current?.scrollBy({ left: -340, behavior: 'smooth' }) }}
-              aria-label="Next"
-            >›</button>
+            {reelsCanScroll && (
+              <button
+                className="reel-nav-btn reel-nav-next"
+                onClick={() => { reelsRef.current?.scrollBy({ left: -340, behavior: 'smooth' }) }}
+                aria-label="Next"
+              >›</button>
+            )}
           </div>
         </section>
       )}
