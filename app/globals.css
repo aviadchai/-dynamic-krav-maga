@@ -548,8 +548,7 @@ nav.site-nav {
 .icard--sm { min-height: 200px; }
 .icard--sm .icard-img-wrap { width: 42%; }
 .icard--sm .icard-name { font-size: 1rem; }
-.icard--sm .icard-bar { display: none; }
-.icard--sm .icard-bio { display: none; }
+.icard--sm .icard-bar { display: block; }
 .icard--sm .icard-body { padding: 1.25rem 1.5rem; }
 
 
