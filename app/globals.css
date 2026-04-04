@@ -428,24 +428,24 @@ nav.site-nav {
 .sec-head { text-align: center; margin-bottom: 3.5rem; }
 .srv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; } /* columns overridden dynamically by JSX */
 .srv {
-  background: #D8D5D0;
-  border: none;
+  background: #141414;
+  border: 1.5px solid rgba(255,255,255,0.07);
   border-radius: var(--r);
   padding: 2.5rem 2rem;
   position: relative; overflow: hidden;
-  transition: transform .3s, box-shadow .3s; cursor: pointer;
+  transition: transform .3s, box-shadow .3s, border-color .3s; cursor: pointer;
 }
-.srv:hover { transform: translateY(-6px); box-shadow: 0 22px 60px rgba(0,0,0,0.18); }
+.srv:hover { transform: translateY(-6px); box-shadow: 0 22px 60px rgba(0,0,0,0.4); border-color: rgba(234,255,0,0.25); }
 .srv-n {
   font-family: var(--font-barlow), sans-serif;
   font-size: 6rem; font-weight: 900;
-  color: rgba(0,0,0,0.07);
+  color: rgba(255,255,255,0.04);
   position: absolute; top: -10px; right: 16px; line-height: 1;
   user-select: none; pointer-events: none;
 }
 .srv-sq {
   width: 48px; height: 10px;
-  background: rgba(0,0,0,0.18);
+  background: var(--lime);
   border-radius: 10px;
   transform: skewX(-14deg);
   margin-bottom: 1.5rem;
@@ -454,27 +454,27 @@ nav.site-nav {
 .srv-link {
   display: inline-flex; align-items: center; gap: 6px;
   background: transparent;
-  border: 1.5px solid rgba(0,0,0,0.22); color: rgba(0,0,0,0.65);
+  border: 1.5px solid rgba(234,255,0,0.3); color: var(--lime);
   font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
   margin-top: 1.5rem; padding: 11px 24px; border-radius: 10px;
   transform: skewX(-12deg); cursor: pointer; transition: all .2s;
   text-decoration: none;
 }
 .srv-link span { display: inline-block; transform: skewX(12deg); }
-.srv-link:hover { border-color: rgba(0,0,0,0.8); color: var(--black); background: rgba(0,0,0,0.06); }
+.srv-link:hover { border-color: var(--lime); background: rgba(234,255,0,0.08); }
 .srv-name {
   font-family: var(--font-barlow), sans-serif;
   font-weight: 900; font-size: 1.9rem; text-transform: uppercase; letter-spacing: .5px;
-  color: var(--black);
+  color: #fff;
   margin-bottom: .6rem;
 }
 .srv-name-he {
   font-family: var(--font-heebo), sans-serif;
   font-weight: 900; font-size: 1.6rem; letter-spacing: -0.5px;
-  color: var(--black);
+  color: #fff;
   margin-bottom: .6rem;
 }
-.srv-desc { font-size: .83rem; color: rgba(0,0,0,0.55); line-height: 1.7; }
+.srv-desc { font-size: .83rem; color: rgba(255,255,255,0.5); line-height: 1.7; }
 
 /* ── INSTRUCTORS ── */
 .inst-section { background: var(--black); padding: 6rem 3rem; }
