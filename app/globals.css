@@ -481,7 +481,7 @@ nav.site-nav {
 
 /* Horizontal card layout */
 .inst-layout { display: flex; flex-direction: column; gap: 1.25rem; }
-.inst-top-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; align-items: stretch; }
+.inst-top-row { display: grid; grid-template-columns: 3fr 2fr; gap: 1.25rem; align-items: stretch; }
 .inst-bottom-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
 
 /* Horizontal card base */
