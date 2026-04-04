@@ -558,15 +558,15 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       {/* INSTRUCTOR BIO POPUP */}
       {(instBioPopup || instBioClosing) && (
         <div onClick={closeInstBio} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(8,8,8,0.85)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "3vw", animation: instBioClosing ? "popupOut 0.2s ease forwards" : "popupIn 0.22s ease" }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: "#131313", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 18, width: "100%", maxWidth: 700, overflow: "hidden", direction: "rtl" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#131313", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 18, width: "100%", maxWidth: 700, maxHeight: "calc(100vh - 4rem)", display: "flex", flexDirection: "column", direction: "rtl", overflow: "hidden" }}>
             {instBioPopup?.image && (
-              <div style={{ width: "100%", height: 320, overflow: "hidden", position: "relative" }}>
+              <div style={{ width: "100%", height: 320, flexShrink: 0, overflow: "hidden", position: "relative" }}>
                 <img src={instBioPopup.image} alt={t(instBioPopup.nameHe, instBioPopup.nameEn)} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }} />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #131313 0%, transparent 50%)" }} />
                 <button onClick={closeInstBio} style={{ position: "absolute", top: 16, left: 16, background: "rgba(0,0,0,0.5)", border: "none", color: "rgba(255,255,255,0.7)", width: 36, height: 36, borderRadius: "50%", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
             )}
-            <div style={{ padding: "1.75rem 2rem 2rem" }}>
+            <div style={{ padding: "1.75rem 2rem 2rem", overflowY: "auto" }}>
               {!instBioPopup?.image && (
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
                   <button onClick={closeInstBio} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: "rgba(255,255,255,0.5)", width: 36, height: 36, borderRadius: "50%", cursor: "pointer", fontSize: 16 }}>✕</button>
