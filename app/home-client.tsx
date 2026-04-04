@@ -933,6 +933,13 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                     <div className="icard-body">
                       {inst.roleHe && <div className="icard-role">{t(inst.roleHe, inst.roleEn)}</div>}
                       <div className="icard-name">{t(inst.nameHe, inst.nameEn)}</div>
+                      <div className="icard-bar" />
+                      {inst.bioHe && <p className="icard-bio">{t(inst.bioHe, inst.bioEn)}</p>}
+                      {(inst.popupBioHe || inst.bioHe) && (
+                        <button onClick={() => openInstBio(inst)} className="btn-ghost btn-ghost-lime" style={{ marginTop: "1rem", alignSelf: "flex-start" }}>
+                          <span>{lang === "he" ? "הצג ביוגרפיה" : "Full Bio"}</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
