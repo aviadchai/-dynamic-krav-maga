@@ -23,12 +23,16 @@ export async function POST(request: Request) {
 
   const adminUser = process.env.ADMIN_USERNAME || 'admin'
   const adminPass = process.env.ADMIN_PASSWORD || 'admin123'
+  const adminUser2 = process.env.ADMIN_USERNAME_2 || ''
+  const adminPass2 = process.env.ADMIN_PASSWORD_2 || ''
   const editorUser = process.env.EDITOR_USERNAME || ''
   const editorPass = process.env.EDITOR_PASSWORD || ''
 
   let role: string | null = null
 
   if (username === adminUser && password === adminPass) {
+    role = 'admin'
+  } else if (adminUser2 && username === adminUser2 && password === adminPass2) {
     role = 'admin'
   } else if (editorUser && username === editorUser && password === editorPass) {
     role = 'editor'
