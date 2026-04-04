@@ -566,7 +566,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                 <button onClick={closeInstBio} style={{ position: "absolute", top: 16, left: 16, background: "rgba(0,0,0,0.5)", border: "none", color: "rgba(255,255,255,0.7)", width: 36, height: 36, borderRadius: "50%", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
             )}
-            <div style={{ padding: "1.75rem 2rem 2rem", overflowY: "auto" }}>
+            <div className="inst-bio-scroll" style={{ padding: "1.75rem 2rem 2rem", overflowY: "auto" }}>
               {!instBioPopup?.image && (
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
                   <button onClick={closeInstBio} style={{ background: "rgba(255,255,255,0.06)", border: "none", color: "rgba(255,255,255,0.5)", width: 36, height: 36, borderRadius: "50%", cursor: "pointer", fontSize: 16 }}>✕</button>
