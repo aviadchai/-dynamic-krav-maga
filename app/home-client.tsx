@@ -22,7 +22,7 @@ function SeniorCard({ inst, lang }: { inst: Instructor; lang: "he" | "en" }) {
   function onLeave() {
     const el = ref.current;
     if (!el) return;
-    el.style.transition = "transform .45s cubic-bezier(0.23, 1, 0.32, 1)";
+    el.style.transition = "transform .7s cubic-bezier(0.23, 1, 0.32, 1)";
     el.style.transform = "perspective(700px) rotateY(-12deg)";
   }
 
