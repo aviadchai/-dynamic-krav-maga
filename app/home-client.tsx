@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { Article, Instructor, SiteContent, Testimonial, Reel, TimelineEntry } from "@/lib/db";
+import type { Article, Instructor, Senior, SiteContent, Testimonial, Reel, TimelineEntry } from "@/lib/db";
 
-function SeniorCard({ inst, lang }: { inst: Instructor; lang: "he" | "en" }) {
+function SeniorCard({ senior, lang }: { senior: Senior; lang: "he" | "en" }) {
   const ref = useRef<HTMLDivElement>(null);
   const t = (he: string, en: string) => lang === "he" ? he : en;
 
@@ -26,20 +26,20 @@ function SeniorCard({ inst, lang }: { inst: Instructor; lang: "he" | "en" }) {
     el.style.transform = "perspective(700px) rotateY(-12deg)";
   }
 
-  const bio = lang === "he" ? inst.bioHe : inst.bioEn;
+  const bio = lang === "he" ? senior.shortBioHe : senior.shortBioEn;
 
   return (
     <div ref={ref} className="snr-card" onMouseMove={onMove} onMouseLeave={onLeave}>
       <div className="snr-img-wrap">
-        {inst.image
-          ? <img src={inst.image} alt={t(inst.nameHe, inst.nameEn)} />
+        {senior.image
+          ? <img src={senior.image} alt={t(senior.nameHe, senior.nameEn)} />
           : <div className="snr-placeholder">👤</div>
         }
         <div className="snr-img-fade" />
       </div>
       <div className="snr-body">
-        {inst.roleHe && <div className="snr-role">{t(inst.roleHe, inst.roleEn)}</div>}
-        <div className="snr-name">{t(inst.nameHe, inst.nameEn)}</div>
+        {senior.roleHe && <div className="snr-role">{t(senior.roleHe, senior.roleEn)}</div>}
+        <div className="snr-name">{t(senior.nameHe, senior.nameEn)}</div>
         {bio && <p className="snr-bio">{bio}</p>}
       </div>
     </div>
@@ -52,13 +52,15 @@ type Props = {
   initialContent: SiteContent;
   initialArticles: Article[];
   initialInstructors: Instructor[];
+  initialSeniors: Senior[];
 };
 
-export default function HomeClient({ initialContent, initialArticles, initialInstructors }: Props) {
+export default function HomeClient({ initialContent, initialArticles, initialInstructors, initialSeniors }: Props) {
   const [lang, setLang] = useState<Lang>("he");
   const [fading, setFading] = useState(false);
   const [articles] = useState<Article[]>(initialArticles);
   const [instructors] = useState<Instructor[]>(initialInstructors);
+  const [seniors] = useState<Senior[]>(initialSeniors);
   const [content] = useState<SiteContent>(initialContent);
   const [popup, setPopup] = useState<Article | null>(null);
   const [popupClosing, setPopupClosing] = useState(false);
@@ -999,7 +1001,7 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
       )}
 
       {/* SENIORS */}
-      {sortedInstructors.length > 0 && (
+      {seniors.length > 0 && (
         <section className="snr-section" id="seniors">
           <div className="sec-head">
             <div className="sec-tag he-only">המאמנים הבחירים</div>
@@ -1008,8 +1010,8 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
             <div className="en-only"><div className="sec-h">THE SENIORS</div></div>
           </div>
           <div className="snr-grid">
-            {sortedInstructors.slice(0, 6).map(inst => (
-              <SeniorCard key={inst.id} inst={inst} lang={lang} />
+            {seniors.map(s => (
+              <SeniorCard key={s.id} senior={s} lang={lang} />
             ))}
           </div>
         </section>

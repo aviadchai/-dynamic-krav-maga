@@ -56,6 +56,18 @@ export type Instructor = {
   isMain?: boolean
 }
 
+export type Senior = {
+  id: string
+  nameHe: string
+  nameEn: string
+  roleHe: string
+  roleEn: string
+  shortBioHe: string
+  shortBioEn: string
+  image: string
+  order: number
+}
+
 export type Reel = {
   id: string
   url: string
@@ -312,6 +324,36 @@ export const db = {
     },
     delete: async (id: string): Promise<boolean> => {
       const { error } = await supabaseAdmin.from('instructors').delete().eq('id', id)
+      return !error
+    },
+  },
+  seniors: {
+    list: async (): Promise<Senior[]> => {
+      const { data } = await supabase
+        .from('seniors')
+        .select('*')
+        .order('order')
+      return (data || []) as Senior[]
+    },
+    create: async (data: Omit<Senior, 'id'>): Promise<Senior> => {
+      const { data: senior } = await supabaseAdmin
+        .from('seniors')
+        .insert(data)
+        .select()
+        .single()
+      return senior as Senior
+    },
+    update: async (id: string, data: Partial<Senior>): Promise<Senior | null> => {
+      const { data: senior } = await supabaseAdmin
+        .from('seniors')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single()
+      return senior as Senior | null
+    },
+    delete: async (id: string): Promise<boolean> => {
+      const { error } = await supabaseAdmin.from('seniors').delete().eq('id', id)
       return !error
     },
   },

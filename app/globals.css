@@ -569,7 +569,7 @@ nav.site-nav {
   perspective-origin: 50% 40%;
 }
 .snr-card {
-  width: 235px;
+  width: 240px;
   border-radius: var(--r);
   background: var(--mid);
   overflow: hidden;
@@ -582,7 +582,7 @@ nav.site-nav {
 .snr-img-wrap {
   position: relative;
   width: 100%;
-  height: 175px;
+  height: 210px;
   overflow: hidden;
 }
 .snr-img-wrap img {
@@ -593,7 +593,7 @@ nav.site-nav {
 .snr-img-fade {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 75%;
+  height: 70%;
   background: linear-gradient(to bottom, transparent 0%, var(--mid) 100%);
   pointer-events: none;
 }
@@ -604,20 +604,23 @@ nav.site-nav {
 }
 .snr-body {
   position: relative; z-index: 1;
-  margin-top: -52px;
+  margin-top: -40px;
   padding: 0 1.25rem 1.25rem;
-  display: flex; flex-direction: column; gap: .2rem;
+  display: flex; flex-direction: column; gap: .15rem;
 }
 .snr-role {
   font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
-  color: var(--lime); margin-bottom: .1rem;
+  color: var(--lime); margin-bottom: .05rem;
 }
 .snr-name {
   font-family: var(--font-heebo), sans-serif;
   font-weight: 900; color: #fff; font-size: 1.05rem; line-height: 1.15;
-  margin-bottom: .25rem;
+  margin-bottom: .3rem;
 }
-.snr-bio { font-size: .76rem; color: rgba(255,255,255,0.5); line-height: 1.58; }
+.snr-bio {
+  font-size: .76rem; color: rgba(255,255,255,0.5); line-height: 1.58;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
 
 /* ── TESTIMONIALS ── */
 .testimonials { background: var(--mid); padding: 5rem 3rem; }
@@ -1037,9 +1040,9 @@ footer {
     scroll-snap-align: center;
     transform: perspective(700px) rotateY(0deg) !important;
     transition: box-shadow .3s !important;
-    width: 200px;
+    width: 210px;
   }
-  .snr-img-wrap { height: 160px; }
+  .snr-img-wrap { height: 190px; }
   .reels-section { padding: 3rem 0 1rem; }
   .reels-section .sec-head { padding: 0 1.25rem; margin-bottom: 1.5rem; }
   .srv-grid, .agrid { grid-template-columns: 1fr !important; gap: 1rem; }

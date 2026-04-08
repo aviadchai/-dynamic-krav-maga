@@ -4,10 +4,11 @@ import HomeClient from './home-client'
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const [content, allArticles, instructors] = await Promise.all([
+  const [content, allArticles, instructors, seniors] = await Promise.all([
     db.content.get(),
     db.articles.list(),
     db.instructors.list(),
+    db.seniors.list(),
   ])
   const articles = allArticles.filter(a => a.published)
   return (
@@ -15,6 +16,7 @@ export default async function Home() {
       initialContent={content}
       initialArticles={articles}
       initialInstructors={instructors}
+      initialSeniors={seniors}
     />
   )
 }
