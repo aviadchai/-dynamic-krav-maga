@@ -3,6 +3,49 @@
 import { useState, useEffect, useRef } from "react";
 import type { Article, Instructor, SiteContent, Testimonial, Reel, TimelineEntry } from "@/lib/db";
 
+function SeniorCard({ inst, lang }: { inst: Instructor; lang: "he" | "en" }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const t = (he: string, en: string) => lang === "he" ? he : en;
+
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    const el = ref.current;
+    if (!el) return;
+    el.style.transition = "none";
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    const rotX = (y - 0.5) * -22;
+    const rotY = (x - 0.5) * 30;
+    el.style.transform = `perspective(700px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.05)`;
+  }
+
+  function onLeave() {
+    const el = ref.current;
+    if (!el) return;
+    el.style.transition = "transform .45s cubic-bezier(0.23, 1, 0.32, 1)";
+    el.style.transform = "perspective(700px) rotateY(-12deg)";
+  }
+
+  const bio = lang === "he" ? inst.bioHe : inst.bioEn;
+
+  return (
+    <div ref={ref} className="snr-card" onMouseMove={onMove} onMouseLeave={onLeave}>
+      <div className="snr-img-wrap">
+        {inst.image
+          ? <img src={inst.image} alt={t(inst.nameHe, inst.nameEn)} />
+          : <div className="snr-placeholder">👤</div>
+        }
+        <div className="snr-img-fade" />
+      </div>
+      <div className="snr-body">
+        {inst.roleHe && <div className="snr-role">{t(inst.roleHe, inst.roleEn)}</div>}
+        <div className="snr-name">{t(inst.nameHe, inst.nameEn)}</div>
+        {bio && <p className="snr-bio">{bio}</p>}
+      </div>
+    </div>
+  );
+}
+
 type Lang = "he" | "en";
 
 type Props = {
@@ -951,6 +994,23 @@ export default function HomeClient({ initialContent, initialArticles, initialIns
                 ))}
               </div>
             )}
+          </div>
+        </section>
+      )}
+
+      {/* SENIORS */}
+      {sortedInstructors.length > 0 && (
+        <section className="snr-section" id="seniors">
+          <div className="sec-head">
+            <div className="sec-tag he-only">המאמנים הבחירים</div>
+            <div className="sec-tag en-only">Elite Instructors</div>
+            <div className="he-only"><div className="sec-h-he">הבכירים</div></div>
+            <div className="en-only"><div className="sec-h">THE SENIORS</div></div>
+          </div>
+          <div className="snr-grid">
+            {sortedInstructors.slice(0, 6).map(inst => (
+              <SeniorCard key={inst.id} inst={inst} lang={lang} />
+            ))}
           </div>
         </section>
       )}
