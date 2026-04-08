@@ -29,6 +29,7 @@ export default function SeniorsPage() {
   const [editing, setEditing] = useState<Senior | null>(null)
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [translating, setTranslating] = useState(false)
   const dragIdRef = useRef<string | null>(null)
@@ -61,23 +62,24 @@ export default function SeniorsPage() {
 
   async function save() {
     setSaving(true)
-    if (editing) {
-      await fetch(`/api/seniors/${editing.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-    } else {
-      await fetch('/api/seniors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
+    setSaveError(null)
+    try {
+      const res = editing
+        ? await fetch(`/api/seniors/${editing.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+        : await fetch('/api/seniors', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+      if (!res.ok) {
+        const text = await res.text()
+        setSaveError(`שגיאה ${res.status}: ${text}`)
+        return
+      }
+      setEditing(null)
+      setForm(empty)
+      load()
+    } catch (e) {
+      setSaveError(String(e))
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
-    setEditing(null)
-    setForm(empty)
-    load()
   }
 
   async function translateForm() {
@@ -238,6 +240,11 @@ export default function SeniorsPage() {
           </div>
         </F>
 
+        {saveError && (
+          <div style={{ background: 'rgba(255,50,50,0.1)', border: '1.5px solid rgba(255,80,80,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: '1rem', fontSize: 13, color: 'rgba(255,120,120,0.9)', direction: 'ltr', wordBreak: 'break-all' }}>
+            {saveError}
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '0.5rem', flexWrap: 'wrap' }}>
           {editing && (
             <button onClick={() => { setEditing(null); setForm(empty) }} style={{
