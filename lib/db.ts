@@ -335,21 +335,23 @@ export const db = {
         .order('order')
       return (data || []) as Senior[]
     },
-    create: async (data: Omit<Senior, 'id'>): Promise<Senior> => {
-      const { data: senior } = await supabaseAdmin
+    create: async (data: Omit<Senior, 'id'>): Promise<{ data: Senior | null; error: string | null }> => {
+      const { data: senior, error } = await supabaseAdmin
         .from('seniors')
         .insert(data)
         .select()
         .single()
-      return senior as Senior
+      if (error) console.error('[db.seniors.create] error:', error)
+      return { data: senior as Senior | null, error: error?.message || null }
     },
     update: async (id: string, data: Partial<Senior>): Promise<Senior | null> => {
-      const { data: senior } = await supabaseAdmin
+      const { data: senior, error } = await supabaseAdmin
         .from('seniors')
         .update(data)
         .eq('id', id)
         .select()
         .single()
+      if (error) console.error('[db.seniors.update] error:', error)
       return senior as Senior | null
     },
     delete: async (id: string): Promise<boolean> => {

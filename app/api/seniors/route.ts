@@ -11,6 +11,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const data = await request.json()
-  const senior = await db.seniors.create(data)
+  const { data: senior, error } = await db.seniors.create(data)
+  if (error || !senior) return NextResponse.json({ error: error || 'Insert failed' }, { status: 500 })
   return NextResponse.json(senior, { status: 201 })
 }
