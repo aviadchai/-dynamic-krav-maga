@@ -1,54 +1,91 @@
 "use client"
-import { useState, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { AuthShell, PasswordField } from '../_auth-ui'
+
+const MIN = 10
 
 function ResetForm() {
-  const token = useSearchParams().get('token') || ''
+  const params = useSearchParams()
+  const [token] = useState(() => params.get('token') || '')
   const [password, setPassword] = useState('')
   const [repeat, setRepeat] = useState('')
-  const [visible, setVisible] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [done, setDone] = useState(false)
+  const [username, setUsername] = useState<string | null>(null)
+
+  // Remove the one-time token from the address bar and browser history right away.
+  useEffect(() => {
+    if (params.get('token')) window.history.replaceState(null, '', '/admin/reset-password')
+  }, [params])
+
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (password !== repeat) { setError('הסיסמאות אינן זהות'); return }
-    setBusy(true); setError('')
+    setError('')
+    if (password.length < MIN) { setError(`הסיסמה חייבת להכיל לפחות ${MIN} תווים.`); return }
+    if (password !== repeat) { setError('הסיסמאות אינן זהות.'); return }
+    setBusy(true)
     try {
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, password }),
       })
-      const data = await res.json()
-      if (!res.ok) setError(data.error || 'לא ניתן לעדכן את הסיסמה')
-      else setDone(true)
-    } catch { setError('אירעה שגיאת תקשורת') }
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) setError(data.error || 'לא ניתן לעדכן את הסיסמה.')
+      else setUsername(data.username || '')
+    } catch { setError('אירעה שגיאת תקשורת. נסה שוב.') }
     setBusy(false)
   }
-  return <main dir="rtl" style={{ minHeight: '100vh', background: '#0A0A0A', color: 'white', display: 'grid', placeItems: 'center', padding: 20, fontFamily: 'var(--font-heebo),sans-serif' }}>
-    <section style={{ background: '#141414', border: '1px solid #333', padding: 32, borderRadius: 16, width: '100%', maxWidth: 420 }}>
-      <div style={{ color: '#EAFF00', fontWeight: 800 }}>Dynamic Krav Maga</div>
-      <h1>בחירת סיסמה חדשה</h1>
-      {done ? <><p role="status">הסיסמה עודכנה בהצלחה.</p><Link href="/admin/login" style={{ color: '#EAFF00' }}>מעבר להתחברות</Link></> :
-        <form onSubmit={submit}>
-          <p style={{ color: '#aaa' }}>הסיסמה חייבת להכיל לפחות 10 תווים.</p>
-          <label htmlFor="new-password">סיסמה חדשה</label>
-          <input id="new-password" name="new-password" type={visible ? 'text' : 'password'} autoComplete="new-password" required minLength={10} maxLength={128} value={password} onChange={e => setPassword(e.target.value)}
-            style={{ display: 'block', width: '100%', boxSizing: 'border-box', background: '#222', border: '1px solid #555', color: '#fff', borderRadius: 8, padding: 13, margin: '8px 0 16px' }} />
-          <label htmlFor="confirm-password">אישור סיסמה</label>
-          <input id="confirm-password" name="confirm-password" type={visible ? 'text' : 'password'} autoComplete="new-password" required minLength={10} maxLength={128} value={repeat} onChange={e => setRepeat(e.target.value)}
-            style={{ display: 'block', width: '100%', boxSizing: 'border-box', background: '#222', border: '1px solid #555', color: '#fff', borderRadius: 8, padding: 13, margin: '8px 0 10px' }} />
-          <label style={{ display: 'block', marginBottom: 20 }}><input type="checkbox" checked={visible} onChange={e => setVisible(e.target.checked)} /> הצג סיסמה</label>
-          <button disabled={busy || !token} type="submit" style={{ background: '#EAFF00', width: '100%', padding: 14, border: 0, borderRadius: 30, fontWeight: 800 }}>
-            {busy ? 'שומר...' : 'שמור סיסמה חדשה'}
-          </button>
-          {!token && <p role="alert">חסר קישור שחזור תקין.</p>}
-          {error && <p role="alert" style={{ color: '#ff7878' }}>{error}</p>}
-        </form>}
-      <Link href="/admin/login" style={{ display: 'block', marginTop: 24, color: '#ddd' }}>חזרה להתחברות</Link>
-    </section>
-  </main>
+
+  if (username !== null) {
+    return (
+      <AuthShell title="הסיסמה עודכנה">
+        <p className="auth-ok" role="status">
+          הסיסמה החדשה נשמרה ואפשר להתחבר איתה כבר עכשיו.
+          {username && <><br />שם המשתמש: <strong dir="ltr">{username}</strong></>}
+        </p>
+        <Link href="/admin/login" className="auth-btn" style={{ display: 'block', textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}>
+          מעבר להתחברות
+        </Link>
+      </AuthShell>
+    )
+  }
+
+  if (!token) {
+    return (
+      <AuthShell title="קישור לא תקין">
+        <p className="auth-error" role="alert">חסר קישור שחזור תקין. בקש קישור חדש.</p>
+        <div className="auth-footer">
+          <Link href="/admin/forgot-password" className="auth-link">שליחת קישור חדש</Link>
+          <Link href="/admin/login" className="auth-link muted">חזרה להתחברות</Link>
+        </div>
+      </AuthShell>
+    )
+  }
+
+  return (
+    <AuthShell title="בחירת סיסמה חדשה" subtitle={`לפחות ${MIN} תווים. מומלץ לשמור אותה במנהל הסיסמאות.`}>
+      <form onSubmit={submit} autoComplete="on">
+        <PasswordField id="new-password" name="new-password" label="סיסמה חדשה" value={password}
+          onChange={setPassword} autoComplete="new-password" minLength={MIN} autoFocus />
+        <PasswordField id="confirm-password" name="confirm-password" label="אישור סיסמה" value={repeat}
+          onChange={setRepeat} autoComplete="new-password" minLength={MIN} />
+        {error && <p className="auth-error" role="alert">{error}</p>}
+        <button disabled={busy} type="submit" className="auth-btn">
+          {busy ? 'שומר...' : 'שמור סיסמה חדשה'}
+        </button>
+      </form>
+      <div className="auth-footer">
+        <Link href="/admin/forgot-password" className="auth-link muted">הקישור לא עובד? שליחת קישור חדש</Link>
+      </div>
+    </AuthShell>
+  )
 }
+
 export default function ResetPasswordPage() {
-  return <Suspense fallback={<div>טוען...</div>}><ResetForm /></Suspense>
+  return (
+    <Suspense fallback={<main style={{ minHeight: '100vh', background: '#0A0A0A' }} />}>
+      <ResetForm />
+    </Suspense>
+  )
 }
