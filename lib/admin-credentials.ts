@@ -1,10 +1,26 @@
 import 'server-only'
 import { createClient } from '@supabase/supabase-js'
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
 import type { AdminRole } from './admin-session'
 
-const adminName = () => process.env.ADMIN_USERNAME || 'admin'
+const adminName = () => (process.env.ADMIN_USERNAME || 'admin').trim()
 export const recoveryAddress = () => (process.env.ADMIN_RECOVERY_EMAIL || '').trim().toLowerCase()
+
+export const MIN_PASSWORD_LENGTH = 10
+
+// Well-known weak values. An account configured with one of these is refused, so a
+// forgotten default (the old code fell back to "admin123") can never grant access.
+const WEAK_PASSWORDS = new Set([
+  'admin', 'admin1', 'admin12', 'admin123', 'admin1234', 'admin12345', 'administrator',
+  'password', 'password1', 'password123', 'passw0rd', '123456', '1234567', '12345678',
+  '123456789', '1234567890', 'qwerty', 'qwerty123', '111111', '000000', 'changeme', 'letmein',
+])
+
+export function isWeakPassword(password: string, username = '') {
+  const p = password.toLowerCase()
+  return password.length < MIN_PASSWORD_LENGTH || WEAK_PASSWORDS.has(p) ||
+    (!!username && p.includes(username.toLowerCase())) || /^(.)\1+$/.test(password)
+}
 
 export function credentialsDb() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -26,6 +42,31 @@ function matchesPassword(password: string, stored: string) {
   return timingSafeEqual(scryptSync(password, salt, expected.length), expected)
 }
 
+// Constant-time comparison for credentials kept in environment variables.
+function sameSecret(a: string, b: string) {
+  const ha = createHash('sha256').update(a).digest()
+  const hb = createHash('sha256').update(b).digest()
+  return timingSafeEqual(ha, hb)
+}
+
+type EnvAccount = { username: string; password: string; role: AdminRole }
+
+function envAccounts(): EnvAccount[] {
+  const list: EnvAccount[] = [
+    { username: adminName(), password: process.env.ADMIN_PASSWORD || '', role: 'admin' },
+    { username: (process.env.ADMIN_USERNAME_2 || '').trim(), password: process.env.ADMIN_PASSWORD_2 || '', role: 'admin' },
+    { username: (process.env.EDITOR_USERNAME || '').trim(), password: process.env.EDITOR_PASSWORD || '', role: 'editor' },
+  ]
+  return list.filter(a => {
+    if (!a.username || !a.password) return false
+    if (isWeakPassword(a.password, a.username)) {
+      console.error(`[admin-auth] Refusing login for "${a.username}": its configured password is too weak.`)
+      return false
+    }
+    return true
+  })
+}
+
 export async function verifyAdminLogin(username: string, password: string): Promise<AdminRole | null> {
   const db = credentialsDb()
   if (db) {
@@ -34,10 +75,14 @@ export async function verifyAdminLogin(username: string, password: string): Prom
     if (error) return null
     if (data) return matchesPassword(password, data.password_hash) && (data.role === 'admin' || data.role === 'editor') ? data.role : null
   }
-  if (username === adminName() && process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD) return 'admin'
-  if (process.env.ADMIN_USERNAME_2 && process.env.ADMIN_PASSWORD_2 && username === process.env.ADMIN_USERNAME_2 && password === process.env.ADMIN_PASSWORD_2) return 'admin'
-  if (process.env.EDITOR_USERNAME && process.env.EDITOR_PASSWORD && username === process.env.EDITOR_USERNAME && password === process.env.EDITOR_PASSWORD) return 'editor'
-  return null
+  let role: AdminRole | null = null
+  // Check every account so the response time does not reveal which username exists.
+  for (const account of envAccounts()) {
+    const userOk = sameSecret(username, account.username)
+    const passOk = sameSecret(password, account.password)
+    if (userOk && passOk && !role) role = account.role
+  }
+  return role
 }
 
 export async function updatePrimaryAdminPassword(password: string): Promise<boolean> {
@@ -45,6 +90,7 @@ export async function updatePrimaryAdminPassword(password: string): Promise<bool
   if (!db || !recoveryAddress()) return false
   const { error } = await db.from('admin_accounts').upsert({
     username: adminName(), email: recoveryAddress(), role: 'admin', password_hash: createPasswordHash(password),
+    password_changed_at: new Date().toISOString(),
   }, { onConflict: 'username' })
   return !error
 }
