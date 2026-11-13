@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'File type not allowed' }, { status: 400 })
   }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const ext = ({ 'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' } as Record<string, string>)[file.type]
   const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
   const bytes = await file.arrayBuffer()
