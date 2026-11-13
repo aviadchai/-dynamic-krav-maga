@@ -12,7 +12,7 @@ const S = (d: string) => (
 )
 
 // Pages accessible only to admin role
-const ADMIN_ONLY_HREFS = ['/admin/content', '/admin/brand', '/admin/articles']
+const ADMIN_ONLY_HREFS = ['/admin/content', '/admin/brand']
 
 const NAV_SECTIONS = [
   {
