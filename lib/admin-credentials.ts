@@ -60,8 +60,11 @@ function envAccounts(): EnvAccount[] {
   return list.filter(a => {
     if (!a.username || !a.password) return false
     if (isWeakPassword(a.password, a.username)) {
-      console.error(`[admin-auth] Refusing login for "${a.username}": its configured password is too weak.`)
-      return false
+      // Refuse only once password recovery works, so an admin can never be locked out
+      // without a way back in. Until then, log a warning so it gets fixed.
+      const recoveryReady = !!credentialsDb() && !!recoveryAddress() && !!process.env.RESEND_API_KEY
+      console.error(`[admin-auth] The configured password for "${a.username}" is too weak.` + (recoveryReady ? ' Login refused.' : ''))
+      if (recoveryReady) return false
     }
     return true
   })
