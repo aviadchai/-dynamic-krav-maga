@@ -2,8 +2,12 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { readAdminSession } from './lib/admin-session'
 
-const ADMIN_ONLY = ['/admin/content', '/admin/brand', '/admin/articles']
+// Pages only the admin role may open. Editors keep About, Instructors, Seniors,
+// Services, Testimonials, Reels and Articles (matching the admin navigation).
+const ADMIN_ONLY = ['/admin/content', '/admin/brand']
 const PUBLIC_ADMIN = ['/admin/login', '/admin/forgot-password', '/admin/reset-password']
+const AUTH_ENDPOINTS = ['/api/auth', '/api/auth/recovery', '/api/auth/reset-password']
+const MUTATING = ['POST', 'PUT', 'DELETE', 'PATCH']
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -11,15 +15,17 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith('/admin') && !PUBLIC_ADMIN.includes(pathname)) {
     if (!role) return NextResponse.redirect(new URL('/admin/login', request.url))
-    if (role !== 'admin' && ADMIN_ONLY.some(p => pathname.startsWith(p)))
+    if (role !== 'admin' && ADMIN_ONLY.some(p => pathname === p || pathname.startsWith(p + '/')))
       return NextResponse.redirect(new URL('/admin', request.url))
   }
 
-  if (pathname.startsWith('/api/') && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
-    const isAuthEndpoint = pathname === '/api/auth' || pathname === '/api/auth/recovery' || pathname === '/api/auth/reset-password'
-    if (!isAuthEndpoint && !role) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    if (!isAuthEndpoint && role === 'editor' && ['/api/content', '/api/articles'].some(p => pathname.startsWith(p)))
+  if (pathname.startsWith('/api/') && MUTATING.includes(request.method)) {
+    // CSRF defense in depth: browsers always send Origin on cross-site POSTs.
+    const origin = request.headers.get('origin')
+    if (origin && origin !== request.nextUrl.origin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    if (!AUTH_ENDPOINTS.includes(pathname) && !role) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   return NextResponse.next()
