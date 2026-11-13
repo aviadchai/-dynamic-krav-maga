@@ -1,40 +1,28 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { readAdminSession } from './lib/admin-session'
 
-const VALID_ROLES = ['admin', 'editor']
-const ADMIN_ONLY = ['/admin/content', '/admin/brand']
+const ADMIN_ONLY = ['/admin/content', '/admin/brand', '/admin/articles']
+const PUBLIC_ADMIN = ['/admin/login', '/admin/forgot-password', '/admin/reset-password']
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const session = request.cookies.get('admin_session')?.value
-  const isValidSession = session && VALID_ROLES.includes(session)
+  const role = await readAdminSession(request.cookies.get('admin_session')?.value)
 
-  // Protect admin pages (except login)
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
-    if (!isValidSession) {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
-    }
-
-    // Only admin can access certain pages
-    if (session !== 'admin' && ADMIN_ONLY.some(p => pathname.startsWith(p))) {
+  if (pathname.startsWith('/admin') && !PUBLIC_ADMIN.includes(pathname)) {
+    if (!role) return NextResponse.redirect(new URL('/admin/login', request.url))
+    if (role !== 'admin' && ADMIN_ONLY.some(p => pathname.startsWith(p)))
       return NextResponse.redirect(new URL('/admin', request.url))
-    }
   }
 
-  // Protect write API endpoints (except auth)
-  if (
-    pathname.startsWith('/api/') &&
-    pathname !== '/api/auth' &&
-    ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)
-  ) {
-    if (!isValidSession) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  if (pathname.startsWith('/api/') && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+    const isAuthEndpoint = pathname === '/api/auth' || pathname === '/api/auth/recovery' || pathname === '/api/auth/reset-password'
+    if (!isAuthEndpoint && !role) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!isAuthEndpoint && role === 'editor' && ['/api/content', '/api/articles'].some(p => pathname.startsWith(p)))
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   return NextResponse.next()
 }
 
-export const config = {
-  matcher: ['/admin/:path*', '/api/:path*'],
-}
+export const config = { matcher: ['/admin/:path*', '/api/:path*'] }
