@@ -2,9 +2,9 @@
 export type AdminRole = 'admin' | 'editor'
 
 function secret() {
-  // Existing ADMIN_PASSWORD keeps current sites operational. Prefer a unique SESSION_SECRET.
-  const value = process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD
-  if (!value) throw new Error('Session signing secret is not configured')
+  // This must be independent from user passwords to prevent offline guessing.
+  const value = process.env.SESSION_SECRET
+  if (!value || value.length < 32) throw new Error('A strong SESSION_SECRET must be configured')
   return value
 }
 
@@ -17,7 +17,7 @@ async function sign(value: string): Promise<string> {
 }
 
 export async function createAdminSession(role: AdminRole): Promise<string> {
-  const payload = btoa(JSON.stringify({ role, exp: Date.now() + 7 * 86400_000 }))
+  const payload = btoa(JSON.stringify({ role, exp: Date.now() + 86400_000 }))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
   return payload + '.' + await sign(payload)
 }
