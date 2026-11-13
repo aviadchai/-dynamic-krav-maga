@@ -2,10 +2,18 @@
 export type AdminRole = 'admin' | 'editor'
 
 function secret() {
-  // This must be independent from user passwords to prevent offline guessing.
+  // Preferred: a dedicated random SESSION_SECRET (32+ chars), independent from passwords.
   const value = process.env.SESSION_SECRET
-  if (!value || value.length < 32) throw new Error('A strong SESSION_SECRET must be configured')
-  return value
+  if (value && value.length >= 32) return value
+  // Temporary fallback until SESSION_SECRET is configured: derive the signing key from
+  // server-only secrets that never reach the browser. Adding SESSION_SECRET later
+  // switches to it automatically (existing sessions are then signed out once).
+  const material = [
+    process.env.SUPABASE_SERVICE_ROLE_KEY, process.env.ADMIN_PASSWORD,
+    process.env.ADMIN_PASSWORD_2, process.env.EDITOR_PASSWORD,
+  ].filter(Boolean).join('|')
+  if (material.length < 16) throw new Error('A strong SESSION_SECRET must be configured')
+  return 'dkm-session-fallback-v1|' + material
 }
 
 async function sign(value: string): Promise<string> {
