@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     })
   }, [])
 
-  if (pathname === '/admin/login') return <>{children}</>
+  if (['/admin/login', '/admin/forgot-password', '/admin/reset-password'].includes(pathname)) return <>{children}</>
 
   async function logout() {
     await fetch('/api/auth', { method: 'DELETE' })
