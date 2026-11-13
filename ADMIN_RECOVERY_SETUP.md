@@ -16,4 +16,13 @@ This feature is ready in the `feature/secure-admin-recovery-2026` branch and is 
 
 **Design notes:** The user-provided recovery email is only used for the configured primary admin account. Existing Vercel credentials still work until the first successful recovery, after which that username's stored Supabase hash takes precedence. Old sessions issued before a reset remain valid until their 24-hour expiry; rotate SESSION_SECRET to invalidate them immediately if necessary. If mail/DB configuration is missing the recovery API returns a clear 503 rather than pretending a message was sent.
 
+**Changes in the review pass (Nov 2026):**
+- Reset links are consumed atomically (no double use under concurrent requests) and removed from the address bar on open.
+- Weak passwords are refused: on reset, and for any `ADMIN_PASSWORD`/`ADMIN_PASSWORD_2`/`EDITOR_PASSWORD` set in Vercel (under 10 characters, common values such as `admin123`, or containing the username). Set strong values **before** deploying, or that account will not be able to log in (use recovery for the primary admin).
+- Env credentials are compared in constant time.
+- Editors keep access to About, Instructors, Seniors, Services, Testimonials, Reels and Articles. `/admin/content` and `/admin/brand` stay admin-only, and `PUT /api/content` from an editor may only change `aboutTimeline`, `services`, `testimonials`, `reels`.
+- Cross-site POST/PUT/DELETE requests to `/api/*` are rejected by Origin check.
+- Upload file extension is derived from the MIME type, not the user-supplied filename.
+- Re-run `supabase/admin-auth.sql` (idempotent): it adds `password_changed_at` and revokes anon/authenticated access.
+
 **Security:** Do not enable this flow with weak default passwords. Never expose a service-role key to client-side code. The DB and Resend setup requires the project owner's explicit access.
