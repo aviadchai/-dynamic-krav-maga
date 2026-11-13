@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const fieldStyle: React.CSSProperties = {
   width: '100%', background: 'rgba(255,255,255,0.04)',
@@ -124,6 +125,10 @@ export default function LoginPage() {
             {loading ? 'נכנס...' : 'כניסה'}
           </button>
         </form>
+        <div style={{ textAlign: 'center', marginTop: 20 }}>
+          <Link href="/admin/forgot-password" style={{ color: '#EAFF00', fontSize: 13, textDecoration: 'underline' }}>שכחת שם משתמש או סיסמה?</Link>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 12 }}>ניתן לשמור את פרטי הכניסה באמצעות מנהל הסיסמאות של הדפדפן.</p>
+        </div>
       </div>
     </div>
   )
