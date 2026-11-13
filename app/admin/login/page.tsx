@@ -54,34 +54,43 @@ export default function LoginPage() {
           <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff' }}>פאנל ניהול</h1>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
+        <form onSubmit={handleSubmit} autoComplete="on" method="post">
+          <label htmlFor="admin-username" style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
             שם משתמש
           </label>
           <input
+            id="admin-username"
+            name="username"
             type="text"
             value={username}
             onChange={e => setUsername(e.target.value)}
             style={fieldStyle}
             autoFocus
             autoComplete="username"
+            required
           />
 
-          <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
+          <label htmlFor="admin-password" style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
             סיסמה
           </label>
           <div style={{ position: 'relative' }}>
             <input
+              id="admin-password"
+              name="password"
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
               style={{ ...fieldStyle, paddingLeft: 44 }}
               autoComplete="current-password"
+              required
             />
             <button
               type="button"
               onClick={() => setShowPassword(v => !v)}
-              style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', padding: 0, display: 'flex' }}
+              aria-label={showPassword ? 'הסתר סיסמה' : 'הצג סיסמה'}
+              aria-pressed={showPassword}
+              title={showPassword ? 'הסתר סיסמה' : 'הצג סיסמה'}
+              style={{ position: 'absolute', left: 14, top: 17, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', padding: 0, display: 'flex' }}
             >
               {showPassword ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
