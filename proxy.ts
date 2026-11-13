@@ -1,40 +1,34 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { readAdminSession } from './lib/admin-session'
 
-const VALID_ROLES = ['admin', 'editor']
+// Pages only the admin role may open. Editors keep About, Instructors, Seniors,
+// Services, Testimonials, Reels and Articles (matching the admin navigation).
 const ADMIN_ONLY = ['/admin/content', '/admin/brand']
+const PUBLIC_ADMIN = ['/admin/login', '/admin/forgot-password', '/admin/reset-password']
+const AUTH_ENDPOINTS = ['/api/auth', '/api/auth/recovery', '/api/auth/reset-password']
+const MUTATING = ['POST', 'PUT', 'DELETE', 'PATCH']
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const session = request.cookies.get('admin_session')?.value
-  const isValidSession = session && VALID_ROLES.includes(session)
+  const role = await readAdminSession(request.cookies.get('admin_session')?.value)
 
-  // Protect admin pages (except login)
-  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
-    if (!isValidSession) {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
-    }
-
-    // Only admin can access certain pages
-    if (session !== 'admin' && ADMIN_ONLY.some(p => pathname.startsWith(p))) {
+  if (pathname.startsWith('/admin') && !PUBLIC_ADMIN.includes(pathname)) {
+    if (!role) return NextResponse.redirect(new URL('/admin/login', request.url))
+    if (role !== 'admin' && ADMIN_ONLY.some(p => pathname === p || pathname.startsWith(p + '/')))
       return NextResponse.redirect(new URL('/admin', request.url))
-    }
   }
 
-  // Protect write API endpoints (except auth)
-  if (
-    pathname.startsWith('/api/') &&
-    pathname !== '/api/auth' &&
-    ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)
-  ) {
-    if (!isValidSession) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (pathname.startsWith('/api/') && MUTATING.includes(request.method)) {
+    // CSRF defense in depth: browsers always send Origin on cross-site POSTs.
+    const origin = request.headers.get('origin')
+    if (origin && origin !== request.nextUrl.origin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
+    if (!AUTH_ENDPOINTS.includes(pathname) && !role) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   return NextResponse.next()
 }
 
-export const config = {
-  matcher: ['/admin/:path*', '/api/:path*'],
-}
+export const config = { matcher: ['/admin/:path*', '/api/:path*'] }

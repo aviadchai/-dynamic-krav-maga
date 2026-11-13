@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
+import { verifyAdminLogin } from '@/lib/admin-credentials'
+import { createAdminSession } from '@/lib/admin-session'
 
-// Simple in-memory rate limiter: max 10 attempts per IP per 15 minutes
+// Defense in depth. Persistent cross-instance rate limiting for recovery is stored in Supabase.
 const attempts = new Map<string, { count: number; resetAt: number }>()
 const WINDOW_MS = 15 * 60 * 1000
 const MAX_ATTEMPTS = 10
@@ -9,55 +11,39 @@ export async function POST(request: Request) {
   const ip = (request.headers.get('x-forwarded-for') ?? 'unknown').split(',')[0].trim()
   const now = Date.now()
   const record = attempts.get(ip)
-
   if (record && now < record.resetAt) {
-    if (record.count >= MAX_ATTEMPTS) {
-      return NextResponse.json({ error: 'יותר מדי ניסיונות כניסה. נסה שוב בעוד 15 דקות.' }, { status: 429 })
-    }
+    if (record.count >= MAX_ATTEMPTS) return NextResponse.json({ error: 'יותר מדי ניסיונות כניסה. נסה שוב בעוד 15 דקות.' }, { status: 429 })
     record.count++
   } else {
     attempts.set(ip, { count: 1, resetAt: now + WINDOW_MS })
   }
 
-  const { username, password } = await request.json()
-
-  const adminUser = process.env.ADMIN_USERNAME || 'admin'
-  const adminPass = process.env.ADMIN_PASSWORD || 'admin123'
-  const adminUser2 = process.env.ADMIN_USERNAME_2 || ''
-  const adminPass2 = process.env.ADMIN_PASSWORD_2 || ''
-  const editorUser = process.env.EDITOR_USERNAME || ''
-  const editorPass = process.env.EDITOR_PASSWORD || ''
-
-  let role: string | null = null
-
-  if (username === adminUser && password === adminPass) {
-    role = 'admin'
-  } else if (adminUser2 && username === adminUser2 && password === adminPass2) {
-    role = 'admin'
-  } else if (editorUser && username === editorUser && password === editorPass) {
-    role = 'editor'
-  }
-
-  if (!role) {
+  let username: string, password: string
+  try {
+    const data = await request.json()
+    username = String(data.username || '').trim()
+    password = String(data.password || '')
+  } catch { return NextResponse.json({ error: 'בקשה לא תקינה' }, { status: 400 }) }
+  if (!username || !password || username.length > 128 || password.length > 256)
     return NextResponse.json({ error: 'שם משתמש או סיסמה שגויים' }, { status: 401 })
-  }
 
-  // Clear rate limit on success
+  const role = await verifyAdminLogin(username, password)
+  if (!role) return NextResponse.json({ error: 'שם משתמש או סיסמה שגויים' }, { status: 401 })
   attempts.delete(ip)
+  let signed: string
+  try { signed = await createAdminSession(role) }
+  catch { return NextResponse.json({ error: 'הכניסה אינה זמינה כרגע' }, { status: 503 }) }
 
-  const res = NextResponse.json({ ok: true, role })
-  res.cookies.set('admin_session', role, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 7,
-    path: '/',
+  const response = NextResponse.json({ ok: true, role })
+  response.cookies.set('admin_session', signed, {
+    httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax',
+    maxAge: 60 * 60 * 24, path: '/',
   })
-  return res
+  return response
 }
 
 export async function DELETE() {
-  const res = NextResponse.json({ ok: true })
-  res.cookies.delete('admin_session')
-  return res
+  const response = NextResponse.json({ ok: true })
+  response.cookies.delete('admin_session')
+  return response
 }

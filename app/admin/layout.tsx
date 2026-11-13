@@ -12,7 +12,7 @@ const S = (d: string) => (
 )
 
 // Pages accessible only to admin role
-const ADMIN_ONLY_HREFS = ['/admin/content', '/admin/brand', '/admin/articles']
+const ADMIN_ONLY_HREFS = ['/admin/content', '/admin/brand']
 
 const NAV_SECTIONS = [
   {
@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     })
   }, [])
 
-  if (pathname === '/admin/login') return <>{children}</>
+  if (['/admin/login', '/admin/forgot-password', '/admin/reset-password'].includes(pathname)) return <>{children}</>
 
   async function logout() {
     await fetch('/api/auth', { method: 'DELETE' })

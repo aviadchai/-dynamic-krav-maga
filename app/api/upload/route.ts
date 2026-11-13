@@ -3,9 +3,12 @@ import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
+// Server-side key so the storage bucket does not have to accept anonymous writes.
+// Falls back to the anon key only until SUPABASE_SERVICE_ROLE_KEY is configured.
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  { auth: { persistSession: false, autoRefreshToken: false } }
 )
 
 export async function POST(request: Request) {
@@ -26,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'File type not allowed' }, { status: 400 })
   }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const ext = ({ 'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' } as Record<string, string>)[file.type]
   const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
   const bytes = await file.arrayBuffer()
